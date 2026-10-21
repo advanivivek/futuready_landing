@@ -15,7 +15,7 @@ const server = createServer((req, res) => {
   const path = new URL(req.url, 'http://x').pathname;
   if (path === '/api') {
     if (req.method === 'POST') { let b = ''; req.on('data', (c) => { b += c; }); req.on('end', () => { got.push(JSON.parse(b)); res.writeHead(200, { 'content-type': 'application/json', 'access-control-allow-origin': '*' }); res.end(JSON.stringify({ ok: true, total: 128 + got.length })); }); return; }
-    res.writeHead(200, { 'content-type': 'application/json', 'access-control-allow-origin': '*' }); res.end(JSON.stringify({ total: 128 + got.length, bySession: { 'ahmedabad-2026-10-27': 128 + got.length } })); return;
+    res.writeHead(200, { 'content-type': 'application/json', 'access-control-allow-origin': '*' }); res.end(JSON.stringify({ total: 128 + got.length, bySession: { 'mitpune-2026-10-27': 128 + got.length } })); return;
   }
   const f = join(HERE, path === '/' ? 'index.html' : path);
   if (!existsSync(f)) { res.writeHead(404); res.end(); return; }

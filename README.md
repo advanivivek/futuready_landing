@@ -58,7 +58,7 @@ A `POST` to `registerUrl` with a JSON body (sent as `text/plain` so no extra COR
 
 ```json
 {
-  "session": "ahmedabad-2026-10-27",
+  "session": "mitpune-2026-10-27",
   "name": "Riya Sharma",
   "email": "riya@example.com",
   "phone": "9876543210",
@@ -74,11 +74,12 @@ A `POST` to `registerUrl` with a JSON body (sent as `text/plain` so no extra COR
 ```
 
 Reply with `{ "ok": true }`, or `{ "ok": false, "error": "..." }`.
-`countUrl` should answer a `GET` with `{ "total": 123, "bySession": { "ahmedabad-2026-10-27": 80 } }`.
-The page adds up every open session and refreshes the headcount every minute.
+`countUrl` should answer a `GET` with `{ "total": 123, "bySession": { "mitpune-2026-10-27": 80 } }`.
+The page refreshes the headcount every minute.
 
-Students can also pick "Bring Futuready to my college" (session `bring-to-my-college`).
-That is demand from campuses not yet on the list.
+Students can also pick a city that is coming soon (session `soon-ahmedabad`, `soon-mumbai` and so on),
+or "Bring Futuready to my college" (session `bring-to-my-college`).
+That is demand from cities and campuses not yet on the list.
 
 ## A headcount today, before any of that (2 minutes)
 
@@ -102,15 +103,19 @@ In the settings block, add another entry to `sessions`:
 `college` is the venue. Leave it empty (`college: ''`) and the page says "Venue to be announced".
 When the venue is confirmed, put it there.
 
-Every open session gets a card under "Upcoming cities".
-Ahmedabad, Mumbai, Jaipur and Delhi have their own line drawing. Other cities get a campus drawing.
-
 Sessions disappear by themselves after `closes`. The first open one is shown as "Next session".
-When several fall on the same day, the card shows them together ("Ahmedabad, Mumbai, Jaipur and Delhi").
+
+## Upcoming cities
+
+Every open session gets a card with its date and venue.
+Cities with no date yet go in `comingSoon`, for example `['Ahmedabad', 'Mumbai', 'Jaipur', 'Delhi']`.
+Each gets a "Coming soon" card, and students can pre-register for it to hear first.
+When a city gets a date, move it from `comingSoon` into `sessions`.
+
+Pune, Ahmedabad, Mumbai, Jaipur and Delhi have their own line drawing. Other cities get a campus drawing.
 
 ## Before going live, please confirm
 
 - That the series is at zero cost for students (the page says so).
-- The venue for each city on 27 October (the `college` field).
 - The speaker photo: set `speakerPhoto` to a square image URL, or keep the initials.
 - That the session timings match what the college confirmed.

@@ -32,17 +32,22 @@ window.FUTUREADY = {
   eventUrl: '',
   // The sessions people can pre-register for. The first open one is shown as "Next session".
   // Each open one also gets a card under "Upcoming cities".
-  // college is the venue. Leave it empty and the card says "Venue to be announced".
+  // college is the venue. Leave it empty and the page says "Venue to be announced".
   sessions: [
-    { id: 'ahmedabad-2026-10-27', city: 'Ahmedabad', college: '', date: 'Tuesday, 27 October 2026', shortDate: 'Tue, 27 Oct 2026',
-      time: '10:30 AM to 12:30 PM', start: '2026-10-27T10:30:00+05:30', closes: '2026-10-26T23:59:00+05:30' },
-    { id: 'mumbai-2026-10-27', city: 'Mumbai', college: '', date: 'Tuesday, 27 October 2026', shortDate: 'Tue, 27 Oct 2026',
-      time: '10:30 AM to 12:30 PM', start: '2026-10-27T10:30:00+05:30', closes: '2026-10-26T23:59:00+05:30' },
-    { id: 'jaipur-2026-10-27', city: 'Jaipur', college: '', date: 'Tuesday, 27 October 2026', shortDate: 'Tue, 27 Oct 2026',
-      time: '10:30 AM to 12:30 PM', start: '2026-10-27T10:30:00+05:30', closes: '2026-10-26T23:59:00+05:30' },
-    { id: 'delhi-2026-10-27', city: 'Delhi', college: '', date: 'Tuesday, 27 October 2026', shortDate: 'Tue, 27 Oct 2026',
-      time: '10:30 AM to 12:30 PM', start: '2026-10-27T10:30:00+05:30', closes: '2026-10-26T23:59:00+05:30' },
+    {
+      id: 'mitpune-2026-10-27',
+      college: 'MIT Pune',
+      city: 'Pune',
+      date: 'Tuesday, 27 October 2026',
+      shortDate: 'Tue, 27 Oct 2026',
+      time: '10:30 AM to 12:30 PM',
+      start: '2026-10-27T10:30:00+05:30',
+      closes: '2026-10-26T23:59:00+05:30',
+    },
   ],
+  // Cities coming next, with no date yet. Each gets a "Coming soon" card under "Upcoming cities",
+  // and students can pre-register for one to hear first.
+  comingSoon: ['Ahmedabad', 'Mumbai', 'Jaipur', 'Delhi'],
   support: 'support@hack2skill.com',
   speakerPhoto: '', // optional: a square photo URL for the speaker card
 };
@@ -534,7 +539,7 @@ footer a:hover{color:#fff}
         <h3>Futuready Builders Lab</h3>
         <p class="ep-t">Episode 01: Builder Basecamp</p>
         <div class="rows">
-          <div class="row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><div><div class="label" data-next-label>Next sessions</div><b data-next-where>Ahmedabad, Mumbai, Jaipur and Delhi</b><b data-next-when style="font-weight:500;color:var(--grey)">Tue, 27 Oct 2026, 10:30 AM to 12:30 PM</b></div></div>
+          <div class="row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><div><div class="label">Next session</div><b data-next-where>MIT Pune</b><b data-next-when style="font-weight:500;color:var(--grey)">Tue, 27 Oct 2026, 10:30 AM to 12:30 PM</b></div></div>
           <div class="row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/></svg><div><div class="label">Pre-registration closes in</div><div class="count" data-countdown>0d:0h:0m</div></div></div>
         </div>
         <div class="heads" data-heads><b data-count>0</b><span>students have pre-registered</span></div>
@@ -547,7 +552,7 @@ footer a:hover{color:#fff}
 </main>
 
 <!-- mobile: the register button is always one thumb away -->
-<div class="mbar"><div><b data-next-short>4 cities</b><span data-next-date>Tue, 27 Oct 2026</span> · At zero cost</div><button class="btn" type="button" data-open>Pre-register</button></div>
+<div class="mbar"><div><b data-next-where>MIT Pune</b><span data-next-date>Tue, 27 Oct 2026</span> · At zero cost</div><button class="btn" type="button" data-open>Pre-register</button></div>
 
 <!-- ============ the pre-registration form ============ -->
 <div class="modal" role="dialog" aria-modal="true" aria-labelledby="reg-title">
@@ -630,18 +635,13 @@ footer a:hover{color:#fff}
   var place = function (s) { return s.college || s.city; };
   var at = function (s) { return s.college ? 'at ' + s.college : 'in ' + s.city; };
 
-  /* the next session, everywhere it shows. Sessions on the same day show together. */
+  /* the next session, everywhere it shows */
   if (next) {
-    var same = sessions.filter(function (s) { return s.shortDate === next.shortDate; });
-    var many = same.length > 1;
-    $$('[data-next-label]').forEach(function (e) { e.textContent = many ? 'Next sessions' : 'Next session'; });
-    $$('[data-next-where]').forEach(function (e) { e.textContent = many ? same.slice(0, -1).map(place).join(', ') + ' and ' + place(same[same.length - 1]) : place(next); });
-    $$('[data-next-short]').forEach(function (e) { e.textContent = many ? same.length + ' cities' : place(next); });
+    $$('[data-next-where]').forEach(function (e) { e.textContent = place(next); });
     $$('[data-next-date]').forEach(function (e) { e.textContent = next.shortDate; });
     $$('[data-next-when]').forEach(function (e) { e.textContent = next.shortDate + ', ' + next.time; });
   } else {
-    $$('[data-next-label]').forEach(function (e) { e.textContent = 'Next session'; });
-    $$('[data-next-where], [data-next-short]').forEach(function (e) { e.textContent = 'Coming to your campus'; });
+    $$('[data-next-where]').forEach(function (e) { e.textContent = 'Coming to your campus'; });
     $$('[data-next-date]').forEach(function (e) { e.textContent = 'New dates soon'; });
     $$('[data-next-when]').forEach(function (e) { e.textContent = 'Pre-register to hear first'; });
   }
@@ -660,8 +660,7 @@ footer a:hover{color:#fff}
   function headcount() {
     if (!C.countUrl) return;
     fetch(C.countUrl, { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (d) {
-      // every open session added up, or the overall total if the server only sends that
-      var n = d.bySession ? sessions.reduce(function (t, s) { return t + (d.bySession[s.id] || 0); }, 0) || d.total : d.total;
+      var n = next && d.bySession && d.bySession[next.id] != null ? d.bySession[next.id] : d.total;
       if (typeof n === 'number' && n > 0) { $('[data-count]').textContent = n.toLocaleString('en-IN'); $('[data-heads]').classList.add('on'); }
     }).catch(function () { /* the page works without it */ });
   }
@@ -691,6 +690,7 @@ footer a:hover{color:#fff}
 
   /* upcoming cities: one card per open session, then an invite for every other campus */
   var ART = {
+    pune: 'M10 124h130M12 124V62h28v62M12 62q3.5-7 7 0q3.5-7 7 0q3.5-7 7 0q3.5-7 7 0M110 124V62h28v62M110 62q3.5-7 7 0q3.5-7 7 0q3.5-7 7 0q3.5-7 7 0M40 124V48h70v76M40 48q5-7 10 0q5-7 10 0q5-7 10 0q5-7 10 0q5-7 10 0q5-7 10 0q5-7 10 0M60 124V90C60 78 75 70 75 64C75 70 90 78 90 90v34M70 124V92M80 124V92M48 66v-6a4 4 0 0 1 8 0v6zM94 66v-6a4 4 0 0 1 8 0v6zM75 41V26l12 4-12 4',
     ahmedabad: 'M10 124h130M30 124V34h14v90M27 96h20v4H27zM27 66h20v4H27zM30 34q7-14 14 0M37 27v-8M106 124V34h14v90M103 96h20v4h-20zM103 66h20v4h-20zM106 34q7-14 14 0M113 27v-8M44 124V84h62v40M44 78h62v6H44zM64 124v-20q11-18 22 0v20',
     mumbai: 'M10 124h130M28 124V56h94v68M60 124V90q15-24 30 0v34M36 124v-22q6-10 12 0v22M102 124v-22q6-10 12 0v22M24 50h102v6H24zM58 50q17-26 34 0M30 50V38h8v12M30 38q4-7 8 0M112 50V38h8v12M112 38q4-7 8 0M50 50V40h6v10M50 40q3-6 6 0M94 50V40h6v10M94 40q3-6 6 0',
     jaipur: 'M10 124h130M16 124V96h118v28M26 96V76h98v20M38 76V58h74v18M50 58V42h50v16M62 42V30h26v12M62 30q6.5-9 13 0M75 30q6.5-9 13 0M22 118v-9a3 3 0 0 1 6 0v9M32 118v-9a3 3 0 0 1 6 0v9M42 118v-9a3 3 0 0 1 6 0v9M52 118v-9a3 3 0 0 1 6 0v9M62 118v-9a3 3 0 0 1 6 0v9M72 118v-9a3 3 0 0 1 6 0v9M82 118v-9a3 3 0 0 1 6 0v9M92 118v-9a3 3 0 0 1 6 0v9M102 118v-9a3 3 0 0 1 6 0v9M112 118v-9a3 3 0 0 1 6 0v9M122 118v-9a3 3 0 0 1 6 0v9M32 92v-7a3 3 0 0 1 6 0v7M42 92v-7a3 3 0 0 1 6 0v7M52 92v-7a3 3 0 0 1 6 0v7M62 92v-7a3 3 0 0 1 6 0v7M72 92v-7a3 3 0 0 1 6 0v7M82 92v-7a3 3 0 0 1 6 0v7M92 92v-7a3 3 0 0 1 6 0v7M102 92v-7a3 3 0 0 1 6 0v7M112 92v-7a3 3 0 0 1 6 0v7M44 72v-6a3 3 0 0 1 6 0v6M54 72v-6a3 3 0 0 1 6 0v6M64 72v-6a3 3 0 0 1 6 0v6M74 72v-6a3 3 0 0 1 6 0v6M84 72v-6a3 3 0 0 1 6 0v6M94 72v-6a3 3 0 0 1 6 0v6M56 54v-5a3 3 0 0 1 6 0v5M66 54v-5a3 3 0 0 1 6 0v5M76 54v-5a3 3 0 0 1 6 0v5M86 54v-5a3 3 0 0 1 6 0v5M68 39v-3a3 3 0 0 1 6 0v3M78 39v-3a3 3 0 0 1 6 0v3',
@@ -699,6 +699,8 @@ footer a:hover{color:#fff}
   };
   var esc = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
   var art = function (city) { return '<svg class="art" viewBox="0 0 150 130" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + (ART[String(city).toLowerCase().replace('new ', '')] || ART.campus) + '"/></svg>'; };
+  var CLOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>';
+  var soon = (C.comingSoon || []).map(function (city) { return { id: 'soon-' + city.toLowerCase().replace(/[^a-z]+/g, '-'), city: city }; });
   var PIN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>', CAL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>';
   var track = $('[data-cities]');
   track.innerHTML = sessions.map(function (s) {
@@ -706,6 +708,10 @@ footer a:hover{color:#fff}
       '<div class="r">' + CAL + esc(s.shortDate) + '</div>' +
       '<div class="r' + (s.college ? '' : ' soft') + '">' + PIN + esc(s.college || 'Venue to be announced') + '</div>' +
       '<button class="btn sm" type="button" data-open="' + esc(s.id) + '">Pre-register</button>' + art(s.city) + '</article>';
+  }).join('') + soon.map(function (c) {
+    return '<article class="city"><span class="pill"><i></i>' + esc(c.city) + '</span>' +
+      '<div class="r soft">' + CLOCK + 'Coming soon</div>' +
+      '<button class="btn sm ghost" type="button" data-open="' + esc(c.id) + '">Pre-register</button>' + art(c.city) + '</article>';
   }).join('') + '<article class="city next"><span class="pill"><i></i>Your city</span>' +
     '<div class="r soft">Not on the list yet?</div><div class="r">Bring Futuready to your college.</div>' +
     '<button class="btn sm ghost" type="button" data-open="bring-to-my-college">Tell us</button>' + art('campus') + '</article>';
@@ -725,10 +731,12 @@ footer a:hover{color:#fff}
   /* the form */
   var modal = $('.modal'), form = $('form', modal), ok = $('.ok', modal), msg = $('.msg', modal), sel = $('#f-session');
   sessions.forEach(function (s) { var o = document.createElement('option'); o.value = s.id; o.textContent = place(s) + ', ' + s.shortDate; sel.appendChild(o); });
+  soon.forEach(function (c) { var o = document.createElement('option'); o.value = c.id; o.textContent = c.city + ', coming soon'; sel.appendChild(o); });
   var bring = document.createElement('option'); bring.value = 'bring-to-my-college'; bring.textContent = 'Bring Futuready to my college'; sel.appendChild(bring);
   function open(e) {
     var id = e && e.currentTarget && e.currentTarget.getAttribute('data-open');
-    if (id) sel.value = id;
+    // a city card picks its own session; every other button picks the next session
+    sel.value = id || (next ? next.id : sel.value);
     if (C.eventUrl) { window.open(C.eventUrl, '_blank', 'noopener'); return; }
     modal.classList.add('on'); document.body.style.overflow = 'hidden';
     setTimeout(function () { $('#f-name').focus(); }, 50);
@@ -764,9 +772,10 @@ footer a:hover{color:#fff}
       .then(function (d) {
         if (d && d.ok === false) throw new Error(d.error || 'failed');
         var s = sessions.filter(function (x) { return x.id === data.session; })[0];
+        var c = soon.filter(function (x) { return x.id === data.session; })[0];
         var first = data.name.split(' ')[0];
         $('[data-ok-title]').textContent = 'You’re in, ' + first + '!';
-        $('[data-ok-text]').textContent = s ? 'See you ' + at(s) + ' on ' + s.date + ', ' + s.time + '. Bring a charged phone.' : 'We will tell you when Futuready comes to your college.';
+        $('[data-ok-text]').textContent = s ? 'See you ' + at(s) + ' on ' + s.date + ', ' + s.time + '. Bring a charged phone.' : 'We will tell you when Futuready comes to ' + (c ? c.city : 'your college') + '.';
         var cal = $('[data-cal]');
         if (s && s.start) {
           var t0 = new Date(s.start), t1 = new Date(t0.getTime() + 2 * 36e5);
