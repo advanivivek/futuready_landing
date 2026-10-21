@@ -3,16 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Futuready by Hack2skill | Campus AI Bootcamp Series</title>
-<meta name="description" content="Futuready by Hack2skill: free 2-hour, hands-on campus bootcamps that make developers ready for the AI era. Episode 01, Builder Basecamp. Pre-register now.">
-<meta property="og:title" content="Futuready by Hack2skill">
-<meta property="og:description" content="How can developers stay relevant when AI writes all the code. A free, hands-on campus bootcamp series. Pre-register now.">
+<title>Futuready Builders Lab by Hack2skill | Campus AI bootcamp series</title>
+<meta name="description" content="Futuready Builders Lab by Hack2skill: 2-hour, hands-on campus bootcamps at zero cost that make developers ready for the AI era. Episode 01, Builder Basecamp. Pre-register now.">
+<meta property="og:title" content="Futuready Builders Lab by Hack2skill">
+<meta property="og:description" content="How can developers stay relevant when AI writes all the code. A hands-on campus bootcamp series at zero cost. Pre-register now.">
 <meta property="og:image" content="assets/futuready-banner.png">
 <meta property="og:type" content="website">
 <meta name="theme-color" content="#3463AF">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&family=Source+Code+Pro:wght@400;600&family=Mulish:wght@400;600;700&family=Bricolage+Grotesque:opsz,wght@12..96,800&family=Tiro+Devanagari+Hindi&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&family=Source+Code+Pro:wght@400;600&family=Mulish:wght@400;600;700&display=swap">
 
 <!-- ============================================================
      SETTINGS FOR THE HACK2SKILL WEB TEAM
@@ -31,17 +31,17 @@ window.FUTUREADY = {
   // Optional: send people to a Hack2skill event page instead of the form above.
   eventUrl: '',
   // The sessions people can pre-register for. The first open one is shown as "Next session".
+  // Each open one also gets a card under "Upcoming cities".
+  // college is the venue. Leave it empty and the card says "Venue to be announced".
   sessions: [
-    {
-      id: 'mitpune-2026-10-22',
-      college: 'MIT Pune',
-      city: 'Pune',
-      date: 'Thursday, 22 October 2026',
-      shortDate: 'Thu, 22 Oct 2026',
-      time: '10:30 AM to 12:30 PM',
-      start: '2026-10-22T10:30:00+05:30',
-      closes: '2026-10-21T23:59:00+05:30',
-    },
+    { id: 'ahmedabad-2026-10-27', city: 'Ahmedabad', college: '', date: 'Tuesday, 27 October 2026', shortDate: 'Tue, 27 Oct 2026',
+      time: '10:30 AM to 12:30 PM', start: '2026-10-27T10:30:00+05:30', closes: '2026-10-26T23:59:00+05:30' },
+    { id: 'mumbai-2026-10-27', city: 'Mumbai', college: '', date: 'Tuesday, 27 October 2026', shortDate: 'Tue, 27 Oct 2026',
+      time: '10:30 AM to 12:30 PM', start: '2026-10-27T10:30:00+05:30', closes: '2026-10-26T23:59:00+05:30' },
+    { id: 'jaipur-2026-10-27', city: 'Jaipur', college: '', date: 'Tuesday, 27 October 2026', shortDate: 'Tue, 27 Oct 2026',
+      time: '10:30 AM to 12:30 PM', start: '2026-10-27T10:30:00+05:30', closes: '2026-10-26T23:59:00+05:30' },
+    { id: 'delhi-2026-10-27', city: 'Delhi', college: '', date: 'Tuesday, 27 October 2026', shortDate: 'Tue, 27 Oct 2026',
+      time: '10:30 AM to 12:30 PM', start: '2026-10-27T10:30:00+05:30', closes: '2026-10-26T23:59:00+05:30' },
   ],
   support: 'support@hack2skill.com',
   speakerPhoto: '', // optional: a square photo URL for the speaker card
@@ -52,7 +52,9 @@ window.FUTUREADY = {
 :root{
   --blue:#3463AF; --blue-d:#284f91; --cyan:#32B7EC; --ink:#0F172A; --ink2:#001E2B; --grey:#6C757D; --grey2:#94A3B8;
   --line:#EBEFF4; --line2:#E8EDEA; --soft:#F8FAFC; --navy:#101223; --white:#fff;
-  --R:#E0566F; --E:#1FA67A; --A:#2F86D6; --D:#EA7F22; --Y:#C99413;
+  --tint:#EEF4FF; --tint2:#C9D8F2; --err:#D14343;
+  /* the Hack2skill gradient, as in the logo */
+  --grad:linear-gradient(110deg,#3463AF 0%,#2F3A96 40%,#3C1B7E 75%,#1D1236 100%);
   --sans:"Open Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   --head:"Plus Jakarta Sans","Open Sans",system-ui,sans-serif;
   --mono:"Source Code Pro",ui-monospace,Menlo,monospace;
@@ -86,30 +88,21 @@ a{color:inherit}
 .support{padding:10px 0;font:400 14px var(--sans);color:var(--grey);display:flex;gap:8px;align-items:center}
 .support svg{width:14px;height:14px}
 
-/* ---------- the banner: Futuready's sky, in Hack2skill's banner slot ---------- */
-.banner{position:relative;aspect-ratio:3/1;border-radius:16px;overflow:hidden;container-type:inline-size;
-  background:linear-gradient(100deg,#03061A 0%,#0C1236 34%,#2A2766 58%,#8E5A9E 78%,#FF9E6B 100%)}
-.banner svg.scene{position:absolute;inset:0;width:100%;height:100%}
-.banner .copy{position:absolute;left:6cqw;top:0;bottom:4%;display:flex;flex-direction:column;justify-content:center;color:#F7F3EA}
-.banner .kicker{font:600 1.15cqw/1 var(--mono);letter-spacing:.35em;text-transform:uppercase;color:rgba(247,243,234,.75)}
-.banner .wm{font:800 8.6cqw/.9 "Bricolage Grotesque",var(--head);letter-spacing:-.04em;margin:1.4cqw 0 1.2cqw;
-  background:linear-gradient(180deg,#FFF7E8 10%,#FFD9A0 55%,#FF9F6A 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
-.banner .sub{font:600 1.9cqw/1.3 var(--head);color:#F7F3EA}
-.banner .sub em{font-style:normal;color:#FFD27A}
-.banner .stamps{position:absolute;right:5cqw;top:14%;display:flex;gap:1cqw}
-.banner .stamps span{width:5.4cqw;height:5.4cqw;border-radius:50%;display:grid;place-items:center;font:800 2.6cqw/1 "Bricolage Grotesque",var(--head);
-  color:var(--c);border:.32cqw solid var(--c);background:rgba(6,10,30,.35);transform:rotate(var(--r))}
-.banner .powered{position:absolute;right:4cqw;bottom:7%;display:flex;align-items:center;gap:1cqw;padding:.8cqw 1.4cqw;border-radius:99px;background:rgba(255,255,255,.94);
-  font:600 .95cqw/1 var(--mono);letter-spacing:.2em;color:#4A4F72;text-transform:uppercase}
-.banner .powered img{height:1.9cqw;width:auto}
+/* ---------- the banner: logo, title, tagline on the Hack2skill gradient ---------- */
+.banner{position:relative;aspect-ratio:3/1;border-radius:16px;overflow:hidden;container-type:inline-size;background:var(--grad);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff}
+.banner::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.07) 1px,transparent 1px);
+  background-size:4cqw 4cqw;-webkit-mask-image:radial-gradient(ellipse at 50% 55%,#000 10%,transparent 70%);mask-image:radial-gradient(ellipse at 50% 55%,#000 10%,transparent 70%)}
+.banner::after{content:"";position:absolute;left:50%;top:55%;width:70cqw;height:30cqw;transform:translate(-50%,-50%);background:radial-gradient(closest-side,rgba(255,255,255,.14),transparent)}
+.banner > *{position:relative;z-index:1}
+.banner .logo{position:absolute;top:9%;left:50%;transform:translateX(-50%);height:5.2cqw;width:auto;filter:brightness(0) invert(1)}
+.banner .ttl{margin:4.6cqw 0 0;font:800 7cqw/1.02 var(--head);letter-spacing:-.03em;color:#fff}
+.banner .tag{margin:1.8cqw 0 0;font:600 2.2cqw/1.3 var(--head);color:#fff;opacity:.85}
 
 /* ---------- title card ---------- */
 .head{display:flex;gap:24px;align-items:center;padding:28px 0 22px;border-bottom:1px solid var(--line)}
-.thumb{flex:none;width:120px;height:120px;border-radius:12px;border:1px solid var(--line);padding:6px;background:#fff}
-.thumb div{width:100%;height:100%;border-radius:8px;background:radial-gradient(circle at 30% 20%,#283A8F,#141E55 60%,#0C1338);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#E9C27A}
-.thumb svg{width:46px;height:46px}
-.thumb b{font:800 11px/1 var(--head);letter-spacing:.14em}
-@media (max-width:640px){.thumb b{font-size:8.5px;letter-spacing:.08em}.thumb svg{width:34px;height:34px}}
+.thumb{flex:none;width:120px;height:120px;border-radius:12px;border:1px solid var(--line);padding:14px;background:#fff;display:grid;place-items:center}
+.thumb img{width:100%;height:auto}
 .head h1{margin:0 0 10px;font:700 30px/1.15 var(--head);color:var(--ink2);letter-spacing:-.01em}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;font:500 12px/1 var(--sans);color:var(--grey)}
@@ -117,11 +110,11 @@ a{color:inherit}
 .head .grow{flex:1;min-width:0}
 .share{flex:none;align-self:flex-start;background:none;border:1px solid var(--line);border-radius:8px;padding:8px;cursor:pointer;color:var(--grey);position:relative}
 .share svg{width:18px;height:18px;display:block}
-.share .done{position:absolute;right:0;top:110%;white-space:nowrap;font:600 12px var(--sans);color:var(--E);opacity:0;transition:opacity .3s}
+.share .done{position:absolute;right:0;top:110%;white-space:nowrap;font:600 12px var(--sans);color:var(--blue);opacity:0;transition:opacity .3s}
 .share.copied .done{opacity:1}
 .datebox{flex:none;display:flex;gap:12px;align-items:center;padding:12px 16px;border:1px solid var(--line);border-radius:10px}
 .datebox svg{width:22px;height:22px;color:var(--grey)}
-.label{font:500 12px/1.3 var(--sans);text-transform:uppercase;color:var(--grey);letter-spacing:.02em}
+.label{font:500 12px/1.3 var(--sans);color:var(--grey)}
 .datebox b{display:block;font:700 14px/1.3 var(--sans);color:var(--ink)}
 
 /* ---------- section tabs ---------- */
@@ -134,35 +127,53 @@ a{color:inherit}
 /* ---------- body: content and the sticky card ---------- */
 .grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:48px;padding-top:36px;padding-bottom:64px}
 section{padding-bottom:44px}
+.content{min-width:0}
 h2{margin:0 0 18px;font:700 24px/1.25 var(--sans);color:var(--ink);letter-spacing:-.8px}
 h3{margin:0;font:700 20px/1.3 var(--head);color:var(--ink2)}
 p{margin:0 0 14px;color:#334155}
-.eyebrow{display:inline-flex;align-items:center;gap:8px;padding:5px 12px;border:1px solid var(--line2);border-radius:100px;font:400 11.2px/1.2 var(--mono);letter-spacing:2px;text-transform:uppercase;color:var(--ink2);margin-bottom:14px}
-.eyebrow i{width:6px;height:6px;border-radius:50%;background:var(--E);box-shadow:0 0 0 3px rgba(31,166,122,.18)}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;padding:5px 12px;border:1px solid var(--line2);border-radius:100px;font:400 12px/1.2 var(--mono);color:var(--ink2);margin-bottom:14px}
+.eyebrow i{width:6px;height:6px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 3px rgba(52,99,175,.18)}
 .lead{font-size:16.5px;color:#334155}
-.lead b{color:var(--ink)}
+.lead b{color:inherit}
 .cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:22px}
 .card{border:1px solid var(--line);border-radius:12px;padding:18px;background:#fff}
-.card .n{font:600 12px var(--mono);color:var(--E)}
+.card .n{font:600 12px var(--mono);color:var(--blue)}
 .card h4{margin:6px 0 6px;font:700 16px/1.3 var(--head);color:var(--ink2)}
 .card p{font-size:14px;margin:0;color:var(--grey)}
-.strip{margin:26px 0 4px;padding:18px 22px;border-radius:12px;background:var(--navy);color:#fff;text-align:center;font:600 17px/1.4 var(--sans)}
-.strip em{font-style:normal;color:#FFD27A}
-.strip b{color:var(--cyan);font-weight:600}
+.strip{margin:26px 0 4px;padding:18px 22px;border-radius:12px;background:var(--grad);color:#fff;text-align:center;font:500 17px/1.4 var(--sans)}
+.strip b{font-weight:800}
 
-/* what you will learn: one card per letter */
-.learn{display:flex;flex-direction:column;gap:14px}
-.lvl{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}
-.lvl .side{position:relative;background:linear-gradient(160deg,#141A3E,#0B1030);color:#fff;padding:16px;display:flex;flex-direction:column;justify-content:flex-end;gap:4px;min-height:150px}
-.lvl .side .L{position:absolute;left:10px;top:4px;font:800 64px/1 "Bricolage Grotesque",var(--head);color:var(--c);opacity:.95}
-.lvl .side small{font:600 10.5px var(--mono);letter-spacing:1.6px;text-transform:uppercase;color:rgba(255,255,255,.6)}
-.lvl .side strong{font:700 17px/1.2 var(--head)}
-.lvl .main{padding:16px 18px}
-.lvl .tag{display:inline-block;font:600 10.5px var(--mono);letter-spacing:1.6px;text-transform:uppercase;color:var(--c);margin-bottom:4px}
-.lvl h4{margin:0 0 8px;font:700 16px/1.35 var(--sans);color:var(--ink)}
-.lvl ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
-.lvl li{display:flex;gap:10px;font-size:14px;color:#475569;line-height:1.45}
-.lvl li span{flex:none;width:22px;height:22px;border-radius:6px;background:var(--soft);border:1px solid var(--line);display:grid;place-items:center;font:600 10px var(--mono);color:var(--grey)}
+/* upcoming cities: one card per open session */
+.sub-h{margin:-8px 0 16px;color:var(--grey)}
+.ctrack{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 2px 6px;scrollbar-width:none}
+.ctrack::-webkit-scrollbar{display:none}
+.city{position:relative;flex:0 0 300px;scroll-snap-align:start;display:flex;flex-direction:column;gap:9px;min-height:178px;padding:14px;border:1px solid var(--line);border-radius:14px;background:#fff;overflow:hidden}
+.city .pill{align-self:flex-start;display:inline-flex;align-items:center;gap:8px;padding:4px 14px 4px 4px;border-radius:99px;background:var(--navy);color:#fff;font:700 13px/1.2 var(--sans)}
+.city .pill i{width:16px;height:16px;border-radius:50%;background:var(--grad);border:2px solid #fff}
+.city .r{position:relative;z-index:1;display:flex;gap:8px;align-items:flex-start;max-width:150px;font:600 13px/1.35 var(--sans);color:var(--ink)}
+.city .r svg{flex:none;width:15px;height:15px;margin-top:1px;color:var(--grey)}
+.city .r.soft{font-weight:500;color:var(--grey)}
+.city .btn{position:relative;z-index:1;margin-top:auto;align-self:flex-start}
+.city .art{position:absolute;right:-4px;bottom:0;width:150px;height:130px;color:#B4C0D6;pointer-events:none}
+.city.next{border-style:dashed;background:var(--soft)}
+.carr{display:none;gap:8px;justify-content:center;margin-top:12px}
+.carr.on{display:flex}
+.carr button{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;display:grid;place-items:center}
+.carr button:disabled{opacity:.35;cursor:default}
+.carr svg{width:16px;height:16px}
+
+/* what you will learn: five levels side by side */
+.learn{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.lvl{position:relative;display:flex;flex-direction:column;gap:4px;min-height:168px;padding:16px 14px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.lvl .ic{width:44px;height:44px;margin-bottom:auto;border-radius:12px;background:var(--grad);display:grid;place-items:center;color:#fff}
+.lvl .ic svg{width:22px;height:22px}
+.lvl .L{position:absolute;right:12px;top:10px;font:800 26px/1 var(--head);color:var(--tint2)}
+.lvl small{margin-top:18px;font:500 12px/1.3 var(--sans);color:var(--grey)}
+.lvl strong{font:700 15px/1.25 var(--head);color:var(--ink2)}
+.lvl.boss{background:var(--grad);border-color:transparent}
+.lvl.boss .ic{background:rgba(255,255,255,.16)}
+.lvl.boss .L{color:rgba(255,255,255,.3)}
+.lvl.boss small,.lvl.boss strong{color:#fff}
 
 /* what's in it for you */
 .perks{display:grid;grid-template-columns:260px 1fr;gap:22px;align-items:start}
@@ -173,33 +184,39 @@ p{margin:0 0 14px;color:#334155}
 .perk .ic svg{width:18px;height:18px}
 .perk h4{margin:0 0 2px;font:700 15px/1.35 var(--sans);color:var(--ink)}
 .perk p{margin:0;font-size:14px;color:var(--grey)}
-.pp{border-radius:14px;overflow:hidden;background:radial-gradient(circle at 30% 15%,#22348A,#0C1338);padding:16px;color:#E9C27A;box-shadow:0 18px 40px rgba(16,18,35,.25)}
-.pp .top{text-align:center;padding:6px 0 12px}
-.pp .top small{display:block;font:400 15px "Tiro Devanagari Hindi",serif}
-.pp .top b{display:block;font:800 22px/1 "Bricolage Grotesque",var(--head);letter-spacing:.02em}
-.pp .top span{font:600 9px var(--mono);letter-spacing:2.6px}
-.pp .page{background:linear-gradient(135deg,#FFF8EA,#EEDFC2);border-radius:10px;padding:14px;color:#22253A}
-.pp .page small{font:600 9px var(--mono);letter-spacing:1.8px;color:#5A5F86}
-.pp .page strong{display:block;font:800 18px/1.1 var(--head);margin:4px 0 10px}
-.pp .st{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;justify-items:center}
-.pp .st span{width:46px;height:46px;border-radius:50%;border:2.5px solid var(--c);color:var(--c);display:grid;place-items:center;font:800 20px/1 "Bricolage Grotesque",var(--head);transform:rotate(var(--r));opacity:.9}
-.pp .mrz{margin-top:10px;font:500 8.5px/1.5 var(--mono);color:#6A6F95;letter-spacing:.05em;white-space:nowrap;overflow:hidden}
+/* the digital passport, as it looks on a phone at the end of the session */
+.pp{width:236px;max-width:100%;margin:0 auto;padding:9px;border-radius:30px;background:#0F1530;box-shadow:0 18px 40px rgba(16,18,35,.22)}
+.pp .scr{border-radius:22px;overflow:hidden;background:#fff}
+.pp .hd{padding:18px 16px 14px;background:var(--grad);color:#fff}
+.pp .hd small{display:block;font:500 11px/1.3 var(--sans);opacity:.85}
+.pp .hd b{display:block;margin-top:2px;font:800 17px/1.15 var(--head)}
+.pp .bd{padding:14px 16px 16px}
+.pp .bd small{display:block;font:500 11px/1.3 var(--sans);color:var(--grey)}
+.pp .bd strong{display:block;margin:2px 0 12px;font:700 16px/1.2 var(--head);color:var(--ink2)}
+.pp .st{display:flex;justify-content:space-between;margin-bottom:6px}
+.pp .st span{width:34px;height:34px;border-radius:50%;border:2px solid var(--blue);color:var(--blue);display:grid;place-items:center;transform:rotate(var(--r))}
+.pp .st svg{width:16px;height:16px}
+.pp .sig{display:block;width:100%;height:38px;margin-top:6px;border-bottom:1px dashed var(--tint2);color:var(--ink2)}
+.pp .save{margin-top:12px;padding:9px;border-radius:8px;background:var(--blue);color:#fff;text-align:center;font:700 12px/1 var(--sans)}
+.how{margin:16px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;counter-reset:s}
+.how li{display:flex;gap:10px;align-items:center;font:500 13.5px/1.35 var(--sans);color:#475569;counter-increment:s}
+.how li::before{content:counter(s);flex:none;width:22px;height:22px;border-radius:50%;background:var(--tint);color:var(--blue);display:grid;place-items:center;font:700 11px var(--sans)}
 
 /* episodes */
 .ep{display:grid;grid-template-columns:1fr;gap:12px}
 .ep1{display:flex;gap:16px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:16px;background:linear-gradient(90deg,#fff,#F5F8FF)}
-.ep1 .num{flex:none;width:56px;height:56px;border-radius:12px;background:var(--navy);color:#FFD27A;display:grid;place-items:center;font:800 20px var(--head)}
+.ep1 .num{flex:none;width:56px;height:56px;border-radius:12px;background:var(--grad);color:#fff;display:grid;place-items:center;font:800 20px var(--head)}
 .ep1 h4{margin:0;font:700 16px var(--head);color:var(--ink2)}
 .ep1 p{margin:2px 0 0;font-size:14px;color:var(--grey)}
-.live{display:inline-flex;align-items:center;gap:6px;font:600 10.5px var(--mono);letter-spacing:1.6px;text-transform:uppercase;color:var(--E)}
-.live i{width:7px;height:7px;border-radius:50%;background:var(--E);animation:pulse 1.6s infinite}
+.live{display:inline-flex;align-items:center;gap:6px;font:600 12px var(--mono);color:var(--blue)}
+.live i{width:7px;height:7px;border-radius:50%;background:var(--blue);animation:pulse 1.6s infinite}
 @keyframes pulse{50%{opacity:.3}}
 .soon{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
 .soon span{padding:8px 12px;border-radius:8px;border:1px dashed #CBD5E1;font:500 13px var(--sans);color:#475569;background:#fff}
 
 /* speaker */
 .spk{display:grid;grid-template-columns:150px 1fr;gap:22px;border:1px solid var(--line);border-radius:12px;padding:18px}
-.spk .ph{width:150px;height:150px;border-radius:12px;background:linear-gradient(140deg,#3463AF,#32B7EC);display:grid;place-items:center;color:#fff;font:800 44px var(--head);overflow:hidden}
+.spk .ph{width:150px;height:150px;border-radius:12px;background:var(--grad);display:grid;place-items:center;color:#fff;font:800 44px var(--head);overflow:hidden}
 .spk .ph img{width:100%;height:100%;object-fit:cover}
 .spk h4{margin:0;display:flex;align-items:center;gap:8px;font:800 22px/1.2 var(--head);color:var(--ink2)}
 .spk h4 a{display:inline-flex;color:#0A66C2}
@@ -207,14 +224,14 @@ p{margin:0 0 14px;color:#334155}
 .spk .role{font:600 13px var(--sans);color:var(--blue);margin:4px 0 10px}
 .spk p{font-size:14px;color:#475569}
 .spk .tags{display:flex;gap:8px;flex-wrap:wrap}
-.spk .tags span{font:600 10px var(--mono);letter-spacing:1.4px;text-transform:uppercase;padding:4px 10px;border-radius:99px;border:1px solid #BEE3D3;color:var(--E);background:#F0FBF6}
+.spk .tags span{font:600 12px var(--mono);padding:4px 10px;border-radius:99px;border:1px solid var(--tint2);color:var(--blue);background:var(--tint)}
 
 /* timeline */
 .tl{position:relative;padding-left:26px}
 .tl::before{content:"";position:absolute;left:6px;top:8px;bottom:8px;width:2px;background:var(--line)}
 .tl li{list-style:none;position:relative;display:grid;grid-template-columns:150px 1fr;gap:14px;padding:12px 14px;margin-bottom:10px;border:1px solid var(--line);border-radius:10px;background:#fff}
 .tl li::before{content:"";position:absolute;left:-25px;top:18px;width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid var(--blue)}
-.tl .when{font:600 11px/1.5 var(--mono);letter-spacing:1px;text-transform:uppercase;color:var(--D)}
+.tl .when{font:600 12px/1.5 var(--mono);color:var(--blue)}
 .tl h4{margin:0;font:700 15px/1.35 var(--sans);color:var(--ink)}
 .tl p{margin:2px 0 0;font-size:13.5px;color:var(--grey)}
 .tl ul{margin:0;padding:0}
@@ -239,11 +256,11 @@ p{margin:0 0 14px;color:#334155}
 .row svg{flex:none;width:30px;height:30px;padding:6px;border:1px solid var(--line);border-radius:8px;color:var(--grey)}
 .row b{display:block;font:700 14px/1.35 var(--sans);color:var(--ink)}
 .count{font:700 15px/1 var(--mono);color:var(--ink);letter-spacing:.5px}
-.heads{display:none;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:#F0FBF6;border:1px solid #BEE3D3;margin-bottom:14px;font:600 13.5px var(--sans);color:#065F46}
+.heads{display:none;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:var(--tint);border:1px solid var(--tint2);margin-bottom:14px;font:600 13.5px var(--sans);color:#1E3A8A}
 .heads.on{display:flex}
-.heads b{font:800 18px var(--head);color:#065F46}
+.heads b{font:800 18px var(--head);color:#1E3A8A}
 .price{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border:1px solid var(--line);border-radius:8px;margin-bottom:12px;font:600 13px var(--sans);color:var(--grey)}
-.price strong{color:var(--E)}
+.price strong{color:var(--blue)}
 .regcard .note{font-size:13px;color:var(--grey);margin:12px 0 0;text-align:center}
 .regcard .note a{color:var(--blue);font-weight:600}
 
@@ -264,16 +281,16 @@ form{padding:18px 24px 24px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .f{display:flex;flex-direction:column;gap:6px}
 .f.full{grid-column:1/-1}
 .f label{font:600 13px var(--sans);color:#334155}
-.f label i{color:var(--R);font-style:normal}
+.f label i{color:var(--err);font-style:normal}
 .f input,.f select{font:400 15px var(--sans);color:var(--ink);padding:11px 12px;border:1px solid #D7DEE8;border-radius:8px;background:#fff;width:100%}
 .f input:focus,.f select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(52,99,175,.15)}
 .f input:invalid:not(:placeholder-shown){border-color:#F3A6B4}
 .tick{grid-column:1/-1;display:flex;gap:10px;align-items:flex-start;font-size:13.5px;color:#475569}
 .tick input{width:18px;height:18px;margin-top:2px;accent-color:var(--blue)}
-.msg{grid-column:1/-1;font-size:14px;min-height:0;color:var(--R)}
+.msg{grid-column:1/-1;font-size:14px;min-height:0;color:var(--err)}
 .ok{display:none;padding:28px 24px;text-align:center}
 .ok.on{display:block}
-.ok .stamp{width:84px;height:84px;margin:0 auto 12px;border-radius:50%;border:4px solid var(--E);color:var(--E);display:grid;place-items:center;font:800 34px "Bricolage Grotesque",var(--head);transform:rotate(-10deg)}
+.ok .stamp{width:84px;height:84px;margin:0 auto 12px;border-radius:50%;border:4px solid var(--blue);color:var(--blue);display:grid;place-items:center;font:800 34px var(--head);transform:rotate(-10deg)}
 .ok h3{margin:0 0 6px}
 .ok p{color:var(--grey)}
 .ok .acts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:10px}
@@ -296,7 +313,7 @@ footer a:hover{color:#fff}
 
 /* ---------- phones ---------- */
 @media (max-width:960px){
-  .grid{grid-template-columns:1fr;gap:0}
+  .grid{grid-template-columns:minmax(0,1fr);gap:0}
   .aside{order:-1;margin-bottom:28px}
   .regcard{position:static}
   .nav ul{display:none}
@@ -306,20 +323,19 @@ footer a:hover{color:#fff}
 @media (max-width:640px){
   .wrap{padding:0 16px}
   .banner{aspect-ratio:16/10;border-radius:12px}
-  .banner .copy{left:6cqw;bottom:22%}
-  .banner .kicker{font-size:2.4cqw}
-  .banner .wm{font-size:15cqw}
-  .banner .sub{font-size:3.6cqw}
-  .banner .stamps{right:auto;left:6cqw;top:auto;bottom:22%}
-  .banner .stamps span{width:9cqw;height:9cqw;font-size:4.4cqw;border-width:.6cqw}
-  .banner .powered{font-size:1.9cqw;padding:1.6cqw 2.6cqw;bottom:6%}
-  .banner .powered img{height:3.6cqw}
+  .banner::before{background-size:8cqw 8cqw}
+  .banner .logo{height:9cqw;top:10%}
+  .banner .ttl{margin-top:9cqw;font-size:12cqw}
+  .banner .ttl span{display:block}
+  .banner .tag{margin-top:3cqw;font-size:4.4cqw}
   .head{flex-wrap:wrap;gap:16px}
-  .thumb{width:88px;height:88px}
+  .thumb{width:88px;height:88px;padding:10px}
   .head h1{font-size:24px}
   .cards3{grid-template-columns:1fr}
-  .lvl{grid-template-columns:1fr}
-  .lvl .side{min-height:128px}
+  .city{flex-basis:84%}
+  .learn{grid-template-columns:1fr 1fr}
+  .lvl{min-height:140px}
+  .lvl.boss{grid-column:1/-1}
   .perks{grid-template-columns:1fr}
   .spk{grid-template-columns:1fr}
   .tl li{grid-template-columns:1fr;gap:2px}
@@ -352,49 +368,25 @@ footer a:hover{color:#fff}
     <div class="support"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span>Email - <a href="mailto:support@hack2skill.com">support@hack2skill.com</a></span></div>
 
     <!-- ============ banner ============ -->
-    <div class="banner" role="img" aria-label="Futuready by Hack2skill. A campus bootcamp series. Episode 01: Builder Basecamp.">
-      <svg class="scene" viewBox="0 0 1200 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-        <defs>
-          <radialGradient id="sun" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1010 318) scale(260)"><stop offset="0" stop-color="#FFE7B8"/><stop offset=".18" stop-color="#FFB46B" stop-opacity=".95"/><stop offset=".55" stop-color="#FF8A5B" stop-opacity=".35"/><stop offset="1" stop-color="#FF8A5B" stop-opacity="0"/></radialGradient>
-        </defs>
-        <g fill="#fff" class="stars">
-          <circle cx="60" cy="40" r="1.4"/><circle cx="140" cy="90" r="1"/><circle cx="230" cy="30" r="1.6"/><circle cx="320" cy="70" r="1"/><circle cx="410" cy="24" r="1.2"/><circle cx="480" cy="96" r="1"/>
-          <circle cx="560" cy="42" r="1.5"/><circle cx="640" cy="80" r=".9"/><circle cx="700" cy="30" r="1.2"/><circle cx="90" cy="150" r="1"/><circle cx="270" cy="140" r="1.3"/><circle cx="520" cy="150" r="1"/>
-          <circle cx="760" cy="70" r="1"/><circle cx="35" cy="210" r="1.2"/><circle cx="610" cy="130" r="1.3"/><circle cx="380" cy="180" r=".9"/>
-        </g>
-        <circle cx="1010" cy="318" r="260" fill="url(#sun)"/>
-        <circle cx="1010" cy="318" r="34" fill="#FFD9A0"/>
-        <path d="M0 330 C120 300 210 318 330 296 C460 272 560 316 700 300 C820 286 900 262 1010 288 C1090 306 1150 296 1200 288 L1200 400 L0 400Z" fill="#2B2560" opacity=".95"/>
-        <path d="M0 356 C140 330 260 352 380 336 C520 318 600 350 760 338 C880 328 980 318 1080 336 C1140 346 1180 342 1200 338 L1200 400 L0 400Z" fill="#1B1948"/>
-        <path d="M0 382 C160 366 300 380 460 370 C620 360 760 384 920 372 C1040 364 1130 372 1200 368 L1200 400 L0 400Z" fill="#0F0E30"/>
-      </svg>
-      <div class="copy">
-        <div class="kicker">A Hack2skill bootcamp series</div>
-        <div class="wm">FUTUREADY</div>
-        <div class="sub">Episode 01: <em>Builder Basecamp</em></div>
-      </div>
-      <div class="stamps" aria-hidden="true">
-        <span style="--c:#FF7A93;--r:-10deg">R</span><span style="--c:#5CE1B9;--r:6deg">E</span><span style="--c:#8FD3FF;--r:-4deg">A</span><span style="--c:#FF9F45;--r:8deg">D</span><span style="--c:#FFD27A;--r:-7deg">Y</span>
-      </div>
-      <div class="powered">Powered by <img src="https://h2svision.github.io/publicAssets/vision/H2S_Gradient_Logo.png" alt="Hack2skill"></div>
+    <div class="banner" role="img" aria-label="Hack2skill. Futuready Builders Lab. A Hack2skill bootcamp series.">
+      <img class="logo" src="https://h2svision.github.io/publicAssets/vision/H2S_Gradient_Logo.png" alt="">
+      <div class="ttl"><span>Futuready</span> <span>Builders Lab</span></div>
+      <div class="tag">A Hack2skill bootcamp series</div>
     </div>
 
     <!-- ============ title card ============ -->
     <div class="head">
-      <div class="thumb" aria-hidden="true"><div>
-        <svg viewBox="0 0 100 100"><g fill="none" stroke="#E9C27A" stroke-width="3" stroke-linecap="round"><path d="M14 66h72"/><path d="M26 66a24 24 0 0 1 48 0"/><path d="M50 30v-12M33 37l-7-8M67 37l7-8M22 52l-10-3M78 52l10-3"/></g></svg>
-        <b>FUTUREADY</b>
-      </div></div>
+      <div class="thumb"><img src="https://h2svision.github.io/publicAssets/vision/H2S_Gradient_Logo.png" alt="Hack2skill"></div>
       <div class="grow">
-        <h1>Futuready by Hack2skill</h1>
+        <h1>Futuready Builders Lab</h1>
         <div class="chips">
-          <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>In Person</span>
-          <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>2 Hours</span>
-          <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10l9-6 9 6-9 6-9-6z"/><path d="M7 12v5c3 2 7 2 10 0v-5"/></svg>Campus Series</span>
-          <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg>Free</span>
+          <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>In-person</span>
+          <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>2 hours</span>
+          <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10l9-6 9 6-9 6-9-6z"/><path d="M7 12v5c3 2 7 2 10 0v-5"/></svg>Campus series</span>
+          <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg>At zero cost</span>
         </div>
       </div>
-      <div class="datebox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><div><div class="label">Next session</div><b data-next-date>Thu, 22 Oct 2026</b></div></div>
+      <div class="datebox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><div><div class="label">Next session</div><b data-next-date>Tue, 27 Oct 2026</b></div></div>
       <button class="share" type="button" aria-label="Copy link to this page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg><span class="done">Link copied</span></button>
     </div>
   </div>
@@ -403,8 +395,9 @@ footer a:hover{color:#fff}
   <nav class="tabs" aria-label="Sections">
     <div class="wrap"><ul>
       <li><a href="#about" class="on">About</a></li>
+      <li><a href="#cities">Upcoming cities</a></li>
       <li><a href="#learn">What you will learn</a></li>
-      <li><a href="#perks">What's in it for you?</a></li>
+      <li><a href="#perks">What's in it for you</a></li>
       <li><a href="#episodes">Episodes</a></li>
       <li><a href="#speaker">Meet your speaker</a></li>
       <li><a href="#timeline">Event timeline</a></li>
@@ -419,15 +412,23 @@ footer a:hover{color:#fff}
       <section id="about">
         <h2>About</h2>
         <span class="eyebrow"><i></i>In-person campus series</span>
-        <h3 style="margin-bottom:10px">Futuready by Hack2skill</h3>
+        <h3 style="margin-bottom:10px">Futuready Builders Lab</h3>
         <p class="lead">AI now writes most of the code. It finds its own bugs, fixes them and even tests its own security. So what will make <b>you</b> valuable in 2031?</p>
-        <p class="lead">Futuready is a series of free, 2-hour, hands-on bootcamp series that answers that question on your campus. No long lectures. Phones out, squads up, learn and build for the future.</p>
+        <p class="lead">Futuready Builders Lab is a series of 2-hour, hands-on bootcamps at zero cost that answers that question on your campus. No long lectures. Phones out, squads up, learn and build for the future.</p>
         <div class="cards3">
           <div class="card"><div class="n">01</div><h4>Hands-on, not a lecture</h4><p>Live polls, games and a leaderboard on your phone, all session long.</p></div>
           <div class="card"><div class="n">02</div><h4>Built for the AI era</h4><p>Real AI tools, real code, real bugs. Skills that hold when AI does the typing.</p></div>
-          <div class="card"><div class="n">03</div><h4>A framework for life</h4><p>READY: five skills you can use whenever the next big technology arrives.</p></div>
+          <div class="card"><div class="n">03</div><h4>A framework for life</h4><p>Ready: five skills you can use whenever the next big technology arrives.</p></div>
         </div>
-        <div class="strip">When AI writes all the code, <b>builders</b> will have <em>new roles.</em> Learn to find yours.</div>
+        <div class="strip">When AI writes all the code, <b>builders</b> will have <b>new roles.</b> Learn to find yours.</div>
+      </section>
+
+      <!-- Upcoming cities -->
+      <section id="cities">
+        <h2>Upcoming cities</h2>
+        <p class="sub-h">Pick the city near you and pre-register.</p>
+        <div class="ctrack" data-cities></div>
+        <div class="carr" data-carr><button type="button" data-cprev aria-label="Previous cities"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button><button type="button" data-cnext aria-label="More cities"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div>
       </section>
 
       <!-- What you will learn -->
@@ -435,38 +436,40 @@ footer a:hover{color:#fff}
         <h2>What you will learn</h2>
         <p>Episode 01, <b>Builder Basecamp</b>, is a hands-on game of five levels. Clear a level, earn a stamp.</p>
         <div class="learn">
-          <article class="lvl" style="--c:var(--R)"><div class="side"><span class="L">R</span><small>Level 1</small><strong>Requirements</strong></div>
-        </article>
-          <article class="lvl" style="--c:var(--E)"><div class="side"><span class="L">E</span><small>Level 2</small><strong>Evaluate</strong></div>
-        </article>
-          <article class="lvl" style="--c:var(--A)"><div class="side"><span class="L">A</span><small>Level 3</small><strong>Architect</strong></div>
-        </article>
-          <article class="lvl" style="--c:var(--D)"><div class="side"><span class="L">D</span><small>Level 4</small><strong>Direct</strong></div>
-        </article>
-          <article class="lvl" style="--c:var(--Y)"><div class="side"><span class="L">Y</span><small>Boss level</small><strong>You</strong></div>
-        </article>
+          <article class="lvl"><span class="L" aria-hidden="true">R</span><div class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3"/></svg></div><small>Level 1</small><strong>Requirements</strong></article>
+          <article class="lvl"><span class="L" aria-hidden="true">E</span><div class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5M8.5 11l2 2 3.5-3.5"/></svg></div><small>Level 2</small><strong>Evaluate</strong></article>
+          <article class="lvl"><span class="L" aria-hidden="true">A</span><div class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg></div><small>Level 3</small><strong>Architect</strong></article>
+          <article class="lvl"><span class="L" aria-hidden="true">D</span><div class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="8" width="14" height="11" rx="3"/><path d="M12 4v4M9 13h.01M15 13h.01M9 16h6"/></svg></div><small>Level 4</small><strong>Direct</strong></article>
+          <article class="lvl boss"><span class="L" aria-hidden="true">Y</span><div class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg></div><small>Boss level</small><strong>You</strong></article>
         </div>
       </section>
 
       <!-- What's in it for you -->
       <section id="perks">
-        <h2>What's in it for you?</h2>
+        <h2>What's in it for you</h2>
         <span class="eyebrow"><i></i>Proof, not just notes</span>
         <div class="perks">
-          <div class="pp" aria-label="A Futuready Passport with all five stamps">
-            <div class="top"><small>भविष्य</small><b>FUTUREADY</b><span>PASSPORT · EDITION 01</span></div>
-            <div class="page"><small>HOLDER</small><strong>Your name here</strong>
-              <div class="st"><span style="--c:var(--R);--r:-12deg">R</span><span style="--c:var(--E);--r:8deg">E</span><span style="--c:var(--A);--r:-4deg">A</span><span style="--c:var(--D);--r:10deg">D</span><span style="--c:var(--Y);--r:-8deg">Y</span></div>
-              <div class="mrz">P&lt;FUTUREADY&lt;&lt;YOUR&lt;NAME&lt;&lt;&lt;&lt;&lt;&lt;&lt;<br>R&lt;E&lt;A&lt;D&lt;Y&lt;&lt;EP01&lt;&lt;HACK2SKILL</div>
+          <div>
+            <div class="pp" role="img" aria-label="The Futuready digital passport on a phone, with all five stamps and a signature">
+              <div class="scr">
+                <div class="hd"><small>Futuready Builders Lab</small><b>Your digital passport</b></div>
+                <div class="bd"><small>Holder</small><strong>Your name here</strong>
+                  <div class="st"><span style="--r:-10deg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3"/></svg></span><span style="--r:7deg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5M8.5 11l2 2 3.5-3.5"/></svg></span><span style="--r:-4deg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg></span><span style="--r:9deg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="8" width="14" height="11" rx="3"/><path d="M12 4v4M9 13h.01M15 13h.01M9 16h6"/></svg></span><span style="--r:-7deg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg></span></div>
+                  <small>5 of 5 stamps</small>
+                  <svg class="sig" viewBox="0 0 200 38" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 28c10-18 18-20 16-6s8-10 14-8-2 14 6 10 10-16 18-12 0 12 8 10 14-8 22-6"/></svg>
+                  <div class="save">Make it mine</div>
+                </div>
+              </div>
             </div>
+            <ol class="how"><li>Clear a level, earn a stamp.</li><li>Sign your passport on your phone.</li><li>Save it to your photos.</li></ol>
           </div>
           <div>
-            <p class="big">Skills for the future + A digital passport.</p>
-            <div class="perk"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg></div><div><h4>The READY framework</h4><p>A way of thinking you can reuse for years, whatever AI does next.</p></div></div>
+            <p class="big">Skills for the future + a digital passport.</p>
+            <div class="perk"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg></div><div><h4>The Ready framework</h4><p>A way of thinking you can reuse for years, whatever AI does next.</p></div></div>
             <div class="perk"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg></div><div><h4>A live leaderboard</h4><p>The fastest bug hunters are on the big screen, by name.</p></div></div>
             <div class="perk"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg></div><div><h4>Hands on real AI tools</h4><p>Build a working solution with the AI tools you already use, in a squad of four.</p></div></div>
             <div class="perk"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M15 14.5c3 0 6 1.8 6 5.5"/></svg></div><div><h4>A community of builders</h4><p>Meet developers across campuses who refuse to be replaced.</p></div></div>
-            <div class="perk"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="2"/><circle cx="12" cy="10" r="3"/><path d="M9 17h6"/></svg></div><div><h4>Your Futuready Digital Passport</h4><p>With all five basecamp stamps. Collect a new stamp every episode.</p></div></div>
+            <div class="perk"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="2"/><circle cx="12" cy="10" r="3"/><path d="M9 17h6"/></svg></div><div><h4>Your Futuready digital passport</h4><p>With all five basecamp stamps. Collect a new stamp every episode.</p></div></div>
           </div>
         </div>
       </section>
@@ -504,7 +507,7 @@ footer a:hover{color:#fff}
           <li><div class="when">Open now</div><div><h4>Pre-registrations</h4><p>Pre-register below so your college knows how many seats to plan.</p></div></li>
           <li><div class="when" data-t="10:15 AM">10:15 AM</div><div><h4>Doors open</h4><p>Take a seat. Scan the QR code. Your name lights up the big screen.</p></div></li>
           <li><div class="when">10:30 AM</div><div><h4>Warm up and the big question</h4><p>Fast games, honest polls, and the question of the day.</p></div></li>
-          <li><div class="when">11:05 AM</div><div><h4>First 4 Levels R, E, A, D</h4><p>The Literal Bot, the Bug Hunt, System Test and your AI team.</p></div></li>
+          <li><div class="when">11:05 AM</div><div><h4>First 4 levels R, E, A, D</h4><p>The Literal Bot, the Bug Hunt, System Test and your AI team.</p></div></li>
           <li><div class="when">11:45 AM</div><div><h4>Boss level "Y": build something real in teams</h4><p>Squad up, spec it, build it with AI, then break it.</p></div></li>
           <li><div class="when">12:20 PM</div><div><h4>Your digital passport</h4><p>The last stamp, your signed passport, and what comes next.</p></div></li>
         </ul>
@@ -512,10 +515,10 @@ footer a:hover{color:#fff}
 
       <!-- FAQs -->
       <section id="faqs">
-        <h2>Frequently Asked Questions (FAQs)</h2>
+        <h2>Frequently asked questions (FAQs)</h2>
         <div class="faq">
           <details open><summary>Who can attend?</summary><p>College students from any year, from first-year beginners to final-year students, especially CSE, IT, AI and data science, and allied branches. Seniors get harder challenges in the same room.</p></details>
-          <details><summary>Is it free?</summary><p>Yes. Futuready is free for students.</p></details>
+          <details><summary>Do I need to pay?</summary><p>No. Futuready Builders Lab is at zero cost for students.</p></details>
           <details><summary>Do I need a laptop?</summary><p>No. Your phone is enough for the whole session. For the build, one laptop per squad of four helps, but it is not a must.</p></details>
           <details><summary>Do I need to know AI already?</summary><p>No. If you have used any AI chatbot even once, you are ready. If you have used none, you will leave having built something with one.</p></details>
           <details><summary>What should I bring?</summary><p>A charged phone and your curiosity. A laptop if you have one.</p></details>
@@ -528,14 +531,14 @@ footer a:hover{color:#fff}
     <!-- ============ sticky registration card ============ -->
     <aside class="aside" aria-label="Pre-register">
       <div class="regcard">
-        <h3>Futuready</h3>
+        <h3>Futuready Builders Lab</h3>
         <p class="ep-t">Episode 01: Builder Basecamp</p>
         <div class="rows">
-          <div class="row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><div><div class="label">Next session</div><b data-next-where>MIT Pune</b><b data-next-when style="font-weight:500;color:var(--grey)">Thu, 22 Oct 2026, 10:30 AM to 12:30 PM</b></div></div>
+          <div class="row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><div><div class="label" data-next-label>Next sessions</div><b data-next-where>Ahmedabad, Mumbai, Jaipur and Delhi</b><b data-next-when style="font-weight:500;color:var(--grey)">Tue, 27 Oct 2026, 10:30 AM to 12:30 PM</b></div></div>
           <div class="row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/></svg><div><div class="label">Pre-registration closes in</div><div class="count" data-countdown>0d:0h:0m</div></div></div>
         </div>
         <div class="heads" data-heads><b data-count>0</b><span>students have pre-registered</span></div>
-        <div class="price"><span>Entry</span><strong>Free</strong></div>
+        <div class="price"><span>Entry</span><strong>At zero cost</strong></div>
         <button class="btn block" type="button" data-open>Pre-register now</button>
         <p class="note">Want Futuready at your college? <a href="mailto:support@hack2skill.com?subject=Bring%20Futuready%20to%20our%20college">Tell us</a></p>
       </div>
@@ -544,14 +547,14 @@ footer a:hover{color:#fff}
 </main>
 
 <!-- mobile: the register button is always one thumb away -->
-<div class="mbar"><div><b data-next-where>MIT Pune</b><span data-next-date>Thu, 22 Oct 2026</span> · Free</div><button class="btn" type="button" data-open>Pre-register</button></div>
+<div class="mbar"><div><b data-next-short>4 cities</b><span data-next-date>Tue, 27 Oct 2026</span> · At zero cost</div><button class="btn" type="button" data-open>Pre-register</button></div>
 
 <!-- ============ the pre-registration form ============ -->
 <div class="modal" role="dialog" aria-modal="true" aria-labelledby="reg-title">
   <div class="sheet">
     <div class="top">
-      <h3 id="reg-title">Pre-register for Futuready</h3>
-      <p>Free. Takes 30 seconds. We will send updates to your email.</p>
+      <h3 id="reg-title">Pre-register for Futuready Builders Lab</h3>
+      <p>At zero cost. Takes 30 seconds. We will send updates to your email.</p>
       <button class="x" type="button" aria-label="Close" data-close>&times;</button>
     </div>
     <form novalidate>
@@ -624,13 +627,21 @@ footer a:hover{color:#fff}
   var sessions = (C.sessions || []).filter(function (s) { return !s.closes || new Date(s.closes).getTime() > now(); });
   var next = sessions[0] || null;
 
-  /* the next session, everywhere it shows */
+  var place = function (s) { return s.college || s.city; };
+  var at = function (s) { return s.college ? 'at ' + s.college : 'in ' + s.city; };
+
+  /* the next session, everywhere it shows. Sessions on the same day show together. */
   if (next) {
-    $$('[data-next-where]').forEach(function (e) { e.textContent = next.college; });
+    var same = sessions.filter(function (s) { return s.shortDate === next.shortDate; });
+    var many = same.length > 1;
+    $$('[data-next-label]').forEach(function (e) { e.textContent = many ? 'Next sessions' : 'Next session'; });
+    $$('[data-next-where]').forEach(function (e) { e.textContent = many ? same.slice(0, -1).map(place).join(', ') + ' and ' + place(same[same.length - 1]) : place(next); });
+    $$('[data-next-short]').forEach(function (e) { e.textContent = many ? same.length + ' cities' : place(next); });
     $$('[data-next-date]').forEach(function (e) { e.textContent = next.shortDate; });
     $$('[data-next-when]').forEach(function (e) { e.textContent = next.shortDate + ', ' + next.time; });
   } else {
-    $$('[data-next-where]').forEach(function (e) { e.textContent = 'Coming to your campus'; });
+    $$('[data-next-label]').forEach(function (e) { e.textContent = 'Next session'; });
+    $$('[data-next-where], [data-next-short]').forEach(function (e) { e.textContent = 'Coming to your campus'; });
     $$('[data-next-date]').forEach(function (e) { e.textContent = 'New dates soon'; });
     $$('[data-next-when]').forEach(function (e) { e.textContent = 'Pre-register to hear first'; });
   }
@@ -649,7 +660,8 @@ footer a:hover{color:#fff}
   function headcount() {
     if (!C.countUrl) return;
     fetch(C.countUrl, { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (d) {
-      var n = next && d.bySession && d.bySession[next.id] != null ? d.bySession[next.id] : d.total;
+      // every open session added up, or the overall total if the server only sends that
+      var n = d.bySession ? sessions.reduce(function (t, s) { return t + (d.bySession[s.id] || 0); }, 0) || d.total : d.total;
       if (typeof n === 'number' && n > 0) { $('[data-count]').textContent = n.toLocaleString('en-IN'); $('[data-heads]').classList.add('on'); }
     }).catch(function () { /* the page works without it */ });
   }
@@ -677,11 +689,46 @@ footer a:hover{color:#fff}
     $$('section[id]').forEach(function (s) { io.observe(s); });
   }
 
+  /* upcoming cities: one card per open session, then an invite for every other campus */
+  var ART = {
+    ahmedabad: 'M10 124h130M30 124V34h14v90M27 96h20v4H27zM27 66h20v4H27zM30 34q7-14 14 0M37 27v-8M106 124V34h14v90M103 96h20v4h-20zM103 66h20v4h-20zM106 34q7-14 14 0M113 27v-8M44 124V84h62v40M44 78h62v6H44zM64 124v-20q11-18 22 0v20',
+    mumbai: 'M10 124h130M28 124V56h94v68M60 124V90q15-24 30 0v34M36 124v-22q6-10 12 0v22M102 124v-22q6-10 12 0v22M24 50h102v6H24zM58 50q17-26 34 0M30 50V38h8v12M30 38q4-7 8 0M112 50V38h8v12M112 38q4-7 8 0M50 50V40h6v10M50 40q3-6 6 0M94 50V40h6v10M94 40q3-6 6 0',
+    jaipur: 'M10 124h130M16 124V96h118v28M26 96V76h98v20M38 76V58h74v18M50 58V42h50v16M62 42V30h26v12M62 30q6.5-9 13 0M75 30q6.5-9 13 0M22 118v-9a3 3 0 0 1 6 0v9M32 118v-9a3 3 0 0 1 6 0v9M42 118v-9a3 3 0 0 1 6 0v9M52 118v-9a3 3 0 0 1 6 0v9M62 118v-9a3 3 0 0 1 6 0v9M72 118v-9a3 3 0 0 1 6 0v9M82 118v-9a3 3 0 0 1 6 0v9M92 118v-9a3 3 0 0 1 6 0v9M102 118v-9a3 3 0 0 1 6 0v9M112 118v-9a3 3 0 0 1 6 0v9M122 118v-9a3 3 0 0 1 6 0v9M32 92v-7a3 3 0 0 1 6 0v7M42 92v-7a3 3 0 0 1 6 0v7M52 92v-7a3 3 0 0 1 6 0v7M62 92v-7a3 3 0 0 1 6 0v7M72 92v-7a3 3 0 0 1 6 0v7M82 92v-7a3 3 0 0 1 6 0v7M92 92v-7a3 3 0 0 1 6 0v7M102 92v-7a3 3 0 0 1 6 0v7M112 92v-7a3 3 0 0 1 6 0v7M44 72v-6a3 3 0 0 1 6 0v6M54 72v-6a3 3 0 0 1 6 0v6M64 72v-6a3 3 0 0 1 6 0v6M74 72v-6a3 3 0 0 1 6 0v6M84 72v-6a3 3 0 0 1 6 0v6M94 72v-6a3 3 0 0 1 6 0v6M56 54v-5a3 3 0 0 1 6 0v5M66 54v-5a3 3 0 0 1 6 0v5M76 54v-5a3 3 0 0 1 6 0v5M86 54v-5a3 3 0 0 1 6 0v5M68 39v-3a3 3 0 0 1 6 0v3M78 39v-3a3 3 0 0 1 6 0v3',
+    delhi: 'M14 124h122M22 124v-6h106v6M40 118V44h70v74M62 118V80a13 13 0 0 1 26 0v38M36 38h78v6H36zM46 38V26h58v12M58 26q17-14 34 0M48 52v58M102 52v58',
+    campus: 'M10 124h130M18 124v-6h114v6M24 118V62h102v56M18 62h114M22 56L75 30l53 26zM36 70v42M52 70v42M68 70v42M84 70v42M100 70v42M114 70v42M70 46a5 5 0 1 0 10 0a5 5 0 1 0-10 0',
+  };
+  var esc = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  var art = function (city) { return '<svg class="art" viewBox="0 0 150 130" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + (ART[String(city).toLowerCase().replace('new ', '')] || ART.campus) + '"/></svg>'; };
+  var PIN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>', CAL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>';
+  var track = $('[data-cities]');
+  track.innerHTML = sessions.map(function (s) {
+    return '<article class="city"><span class="pill"><i></i>' + esc(s.city) + '</span>' +
+      '<div class="r">' + CAL + esc(s.shortDate) + '</div>' +
+      '<div class="r' + (s.college ? '' : ' soft') + '">' + PIN + esc(s.college || 'Venue to be announced') + '</div>' +
+      '<button class="btn sm" type="button" data-open="' + esc(s.id) + '">Pre-register</button>' + art(s.city) + '</article>';
+  }).join('') + '<article class="city next"><span class="pill"><i></i>Your city</span>' +
+    '<div class="r soft">Not on the list yet?</div><div class="r">Bring Futuready to your college.</div>' +
+    '<button class="btn sm ghost" type="button" data-open="bring-to-my-college">Tell us</button>' + art('campus') + '</article>';
+  var carr = $('[data-carr]'), prev = $('[data-cprev]'), more = $('[data-cnext]');
+  function arrows() {
+    var max = track.scrollWidth - track.clientWidth;
+    carr.classList.toggle('on', max > 4);
+    prev.disabled = track.scrollLeft <= 4; more.disabled = track.scrollLeft >= max - 4;
+  }
+  function slide(d) { track.scrollBy({ left: d * ($('.city', track).offsetWidth + 14), behavior: 'smooth' }); }
+  prev.addEventListener('click', function () { slide(-1); });
+  more.addEventListener('click', function () { slide(1); });
+  track.addEventListener('scroll', arrows, { passive: true });
+  window.addEventListener('resize', arrows);
+  arrows();
+
   /* the form */
   var modal = $('.modal'), form = $('form', modal), ok = $('.ok', modal), msg = $('.msg', modal), sel = $('#f-session');
-  sessions.forEach(function (s) { var o = document.createElement('option'); o.value = s.id; o.textContent = s.college + ', ' + s.shortDate; sel.appendChild(o); });
+  sessions.forEach(function (s) { var o = document.createElement('option'); o.value = s.id; o.textContent = place(s) + ', ' + s.shortDate; sel.appendChild(o); });
   var bring = document.createElement('option'); bring.value = 'bring-to-my-college'; bring.textContent = 'Bring Futuready to my college'; sel.appendChild(bring);
-  function open() {
+  function open(e) {
+    var id = e && e.currentTarget && e.currentTarget.getAttribute('data-open');
+    if (id) sel.value = id;
     if (C.eventUrl) { window.open(C.eventUrl, '_blank', 'noopener'); return; }
     modal.classList.add('on'); document.body.style.overflow = 'hidden';
     setTimeout(function () { $('#f-name').focus(); }, 50);
@@ -719,15 +766,15 @@ footer a:hover{color:#fff}
         var s = sessions.filter(function (x) { return x.id === data.session; })[0];
         var first = data.name.split(' ')[0];
         $('[data-ok-title]').textContent = 'You’re in, ' + first + '!';
-        $('[data-ok-text]').textContent = s ? 'See you at ' + s.college + ' on ' + s.date + ', ' + s.time + '. Bring a charged phone.' : 'We will tell you when Futuready comes to your college.';
+        $('[data-ok-text]').textContent = s ? 'See you ' + at(s) + ' on ' + s.date + ', ' + s.time + '. Bring a charged phone.' : 'We will tell you when Futuready comes to your college.';
         var cal = $('[data-cal]');
         if (s && s.start) {
           var t0 = new Date(s.start), t1 = new Date(t0.getTime() + 2 * 36e5);
           var z = function (d) { return d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, ''); };
-          cal.href = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent('Futuready by Hack2skill: Builder Basecamp') + '&dates=' + z(t0) + '/' + z(t1) + '&location=' + encodeURIComponent(s.college + ', ' + s.city) + '&details=' + encodeURIComponent('A free, hands-on AI bootcamp. Bring a charged phone. ' + location.href);
+          cal.href = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=' + encodeURIComponent('Futuready Builders Lab: Builder Basecamp') + '&dates=' + z(t0) + '/' + z(t1) + '&location=' + encodeURIComponent(s.college ? s.college + ', ' + s.city : s.city) + '&details=' + encodeURIComponent('A hands-on AI bootcamp at zero cost. Bring a charged phone. ' + location.href);
           cal.style.display = '';
         } else cal.style.display = 'none';
-        $('[data-wa]').href = 'https://wa.me/?text=' + encodeURIComponent('I just pre-registered for Futuready by Hack2skill, a free hands-on AI bootcamp' + (s ? ' at ' + s.college + ' on ' + s.shortDate : '') + '. Join my squad: ' + location.href);
+        $('[data-wa]').href = 'https://wa.me/?text=' + encodeURIComponent('I just pre-registered for Futuready Builders Lab by Hack2skill, a hands-on AI bootcamp at zero cost' + (s ? ' ' + at(s) + ' on ' + s.shortDate : '') + '. Join my squad: ' + location.href);
         form.style.display = 'none'; ok.classList.add('on');
         headcount();
       })
