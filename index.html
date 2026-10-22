@@ -25,7 +25,7 @@ window.FUTUREADY = {
   // Use Hack2skill's own form API, or the Google Sheet script in apps-script.gs.
   // Leave empty and the form says "Pre-registrations open soon" instead.
   registerUrl: '',
-  // Where the live headcount comes from (GET, returns { "total": 123, "bySession": { "mitpune-2026-10-22": 80 } }).
+  // Where the live headcount comes from (GET, returns { "total": 123, "bySession": { "taepune-2026-10-22": 80 } }).
   // The Google Sheet script answers this too. Leave empty to hide the headcount.
   countUrl: '',
   // Optional: send people to a Hack2skill event page instead of the form above.
@@ -35,14 +35,14 @@ window.FUTUREADY = {
   // college is the venue. Leave it empty and the page says "Venue to be announced".
   sessions: [
     {
-      id: 'mitpune-2026-10-27',
-      college: 'MIT Pune',
+      id: 'taepune-2026-10-27',
+      college: 'Trinity Academy of Engineering',
       city: 'Pune',
-      date: 'Tuesday, 27 October 2026',
-      shortDate: 'Tue, 27 Oct 2026',
-      time: '10:30 AM to 12:30 PM',
-      start: '2026-10-27T10:30:00+05:30',
-      closes: '2026-10-26T23:59:00+05:30',
+      date: 'Monday, 26 October 2026',
+      shortDate: 'Mon, 26 Oct 2026',
+      time: '1:00 PM to 3:00 PM',
+      start: '2026-10-26T13:00:00+05:30',
+      closes: '2026-10-26T15:00:00+05:30',
     },
   ],
   // Cities coming next, with no date yet. Each gets a "Coming soon" card under "Upcoming cities",
@@ -510,11 +510,11 @@ footer a:hover{color:#fff}
         <h2>Event timeline</h2>
         <ul class="tl" data-timeline>
           <li><div class="when">Open now</div><div><h4>Pre-registrations</h4><p>Pre-register below so your college knows how many seats to plan.</p></div></li>
-          <li><div class="when" data-t="10:15 AM">10:15 AM</div><div><h4>Doors open</h4><p>Take a seat. Scan the QR code. Your name lights up the big screen.</p></div></li>
-          <li><div class="when">10:30 AM</div><div><h4>Warm up and the big question</h4><p>Fast games, honest polls, and the question of the day.</p></div></li>
-          <li><div class="when">11:05 AM</div><div><h4>First 4 levels R, E, A, D</h4><p>The Literal Bot, the Bug Hunt, System Test and your AI team.</p></div></li>
-          <li><div class="when">11:45 AM</div><div><h4>Boss level "Y": build something real in teams</h4><p>Squad up, spec it, build it with AI, then break it.</p></div></li>
-          <li><div class="when">12:20 PM</div><div><h4>Your digital passport</h4><p>The last stamp, your signed passport, and what comes next.</p></div></li>
+          <li><div class="when" data-t="10:15 AM">12:45 PM</div><div><h4>Doors open</h4><p>Take a seat. Scan the QR code. Your name lights up the big screen.</p></div></li>
+          <li><div class="when">01:00 PM</div><div><h4>Warm up and the big question</h4><p>Fast games, honest polls, and the question of the day.</p></div></li>
+          <li><div class="when">01:15 PM</div><div><h4>First 4 levels R, E, A, D</h4><p>The Literal Bot, the Bug Hunt, System Test and your AI team.</p></div></li>
+          <li><div class="when">02:00 PM</div><div><h4>Boss level "Y": build something real in teams</h4><p>Squad up, spec it, build it with AI, then break it.</p></div></li>
+          <li><div class="when">02:40 PM</div><div><h4>Your digital passport</h4><p>The last stamp, your signed passport, and what comes next.</p></div></li>
         </ul>
       </section>
 
@@ -539,7 +539,7 @@ footer a:hover{color:#fff}
         <h3>Futuready Builders Lab</h3>
         <p class="ep-t">Episode 01: Builder Basecamp</p>
         <div class="rows">
-          <div class="row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><div><div class="label">Next session</div><b data-next-where>MIT Pune</b><b data-next-when style="font-weight:500;color:var(--grey)">Tue, 27 Oct 2026, 10:30 AM to 12:30 PM</b></div></div>
+          <div class="row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.1-7-11a7 7 0 0 1 14 0c0 4.9-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><div><div class="label">Next session</div><b data-next-where>Trinity Academy of Engineering</b><b data-next-when style="font-weight:500;color:var(--grey)">Tue, 27 Oct 2026, 10:30 AM to 12:30 PM</b></div></div>
           <div class="row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/></svg><div><div class="label">Pre-registration closes in</div><div class="count" data-countdown>0d:0h:0m</div></div></div>
         </div>
         <div class="heads" data-heads><b data-count>0</b><span>students have pre-registered</span></div>
@@ -552,7 +552,7 @@ footer a:hover{color:#fff}
 </main>
 
 <!-- mobile: the register button is always one thumb away -->
-<div class="mbar"><div><b data-next-where>MIT Pune</b><span data-next-date>Tue, 27 Oct 2026</span> · At zero cost</div><button class="btn" type="button" data-open>Pre-register</button></div>
+<div class="mbar"><div><b data-next-where>Trinity Academy of Engineering</b><span data-next-date>Tue, 27 Oct 2026</span> · At zero cost</div><button class="btn" type="button" data-open>Pre-register</button></div>
 
 <!-- ============ the pre-registration form ============ -->
 <div class="modal" role="dialog" aria-modal="true" aria-labelledby="reg-title">
@@ -567,7 +567,7 @@ footer a:hover{color:#fff}
       <div class="f"><label for="f-name">Full name <i>*</i></label><input id="f-name" name="name" required autocomplete="name" placeholder="Riya Sharma" maxlength="80"></div>
       <div class="f"><label for="f-email">Email <i>*</i></label><input id="f-email" name="email" type="email" required autocomplete="email" placeholder="riya@college.edu" maxlength="120"></div>
       <div class="f"><label for="f-phone">WhatsApp number <i>*</i></label><input id="f-phone" name="phone" type="tel" required autocomplete="tel" placeholder="98765 43210" pattern="[0-9 +\-]{10,15}" maxlength="15"></div>
-      <div class="f"><label for="f-college">College <i>*</i></label><input id="f-college" name="college" required placeholder="MIT Pune" maxlength="120"></div>
+      <div class="f"><label for="f-college">College <i>*</i></label><input id="f-college" name="college" required placeholder="Trinity Academy of Engineering" maxlength="120"></div>
       <div class="f"><label for="f-year">Year of study <i>*</i></label><select id="f-year" name="year" required><option value="">Choose</option><option>1st year</option><option>2nd year</option><option>3rd year</option><option>4th year</option><option>Postgraduate</option><option>Graduated</option></select></div>
       <div class="f"><label for="f-branch">Branch <i>*</i></label><select id="f-branch" name="branch" required><option value="">Choose</option><option>CSE</option><option>IT</option><option>AI / Data Science</option><option>ECE / EEE</option><option>Mechanical / Civil</option><option>Other</option></select></div>
       <div class="f full"><label for="f-city">City <i>*</i></label><input id="f-city" name="city" required placeholder="Pune" maxlength="60"></div>
