@@ -25,24 +25,24 @@ export const LEVELS = [
   { k: 'Y', name: 'You', color: '#E7B21C' },
 ];
 
-// Real screens from the Builders Lab, as students saw them on their phones.
-export const LAB = [
-  { image: '/lab/01-join-phone.jpg', text: 'Join' },
-  { image: '/lab/04-tools-phone.jpg', text: 'Confess' },
-  { image: '/lab/06-bug1-phone.jpg', text: 'Hunt' },
-  { image: '/lab/08-podium-phone.jpg', text: 'Climb' },
-  { image: '/lab/boss-build.jpg', text: 'Build' },
-  { image: '/lab/boss-card.jpg', text: 'Get scored' },
-  { image: '/lab/passport-phone.jpg', text: 'Sign' },
+// Real words from students at Futuready Builders Lab, Pune (their LinkedIn posts, word for word).
+export const VOICES_FULL = [
+  {
+    quote: 'One of those rare sessions where you don’t feel bored even for a second!',
+    name: 'Swapnaja Waghapure',
+    role: 'MCA student',
+  },
+  {
+    quote: 'One more step towards becoming a builder rather than just a thinker.',
+    name: 'Durga Khadbade',
+    role: 'Engineering student, TAE Pune',
+  },
+  {
+    quote: 'Live interactive activities, multiple levels to progress through, and a team-based prompting challenge.',
+    name: 'Aditi Guddeti',
+    role: 'IT engineering, GDG TAE',
+  },
 ];
-
-// Real words from students at Futuready Builders Lab, Pune (LinkedIn posts, word for word).
-export const VOICES = [
-  'you don’t feel bored even for a second',
-  'a builder rather than just a thinker',
-  'informative and inspiring',
-];
-export const VOICE_NAMES = 'Swapnaja Waghapure, Durga Khadbade, Sneha Koul';
 
 // Hack2skill brand shades.
 export const H2S = {
