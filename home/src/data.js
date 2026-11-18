@@ -2,15 +2,24 @@
    SETTINGS: everything a non-developer may need to change.
    ============================================================ */
 
-// The tour, in route order. status: 'past' (it happened), 'next' (dated), 'soon' (no date yet).
-// url is that city's own page, where registration happens.
-// lon/lat place the city on the route map.
+// Where the cities on the train come from. Nothing here needs code changes when a city is added.
+//   On hack2skill.com the page reads Hack2skill's live event list directly.
+//   Anywhere else, `npm run events` (also run before every build) saves that list as public/events.json.
+//   Name each event on Hack2skill like "Futuready Builders Lab: Pune" so it is picked up.
+export const EVENTS = {
+  hack2skillApi: 'https://hack2skill.com/api/v1/innovator/public/event/list?page=1&records=100',
+  match: 'futuready', // events whose title or link contains this word go on the train
+  file: '/events.json',
+};
+
+// Used until (or unless) the live list arrives. status is worked out from the dates when left out:
+// 'past' (it happened), 'open' (registrations open), 'soon' (announced, not open yet).
 export const CITIES = [
-  { city: 'Pune', campus: 'Trinity Academy of Engineering', date: '26 Oct 2026', status: 'past', url: './pune/', lon: 73.86, lat: 18.52 },
-  { city: 'Mumbai', status: 'soon', url: './mumbai/', lon: 72.88, lat: 19.08 },
-  { city: 'Ahmedabad', status: 'soon', url: './ahmedabad/', lon: 72.57, lat: 23.02 },
-  { city: 'Jaipur', status: 'soon', url: './jaipur/', lon: 75.79, lat: 26.91 },
-  { city: 'Delhi', status: 'soon', url: './delhi/', lon: 77.21, lat: 28.61 },
+  { city: 'Pune', campus: 'Trinity Academy of Engineering', date: '26 Oct 2026', status: 'past', url: './pune/' },
+  { city: 'Mumbai', status: 'soon', url: './mumbai/' },
+  { city: 'Ahmedabad', status: 'soon', url: './ahmedabad/' },
+  { city: 'Jaipur', status: 'soon', url: './jaipur/' },
+  { city: 'Delhi', status: 'soon', url: './delhi/' },
 ];
 
 export const SUPPORT = 'support@hack2skill.com';

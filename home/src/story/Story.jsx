@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { back, clamp, inout, lerp, out, seg, Stage, useMedia } from './kit';
 import { SCENES } from './scenes';
+import { sound } from './sound';
 import { LEVELS } from '../data';
+import { useCities } from '../events';
 import { paintPass, sharePass } from '../pass';
 
 const WIPE = 0.7; // screens over which the next scene slides up over the last
@@ -10,6 +12,7 @@ const TOTAL = STARTS[STARTS.length - 1] + SCENES[SCENES.length - 1].len;
 const INDEX = Object.fromEntries(SCENES.map((sc, i) => [sc.id, i]));
 const LEVEL_IDS = ['R', 'E', 'A', 'D', 'Y'];
 const STAMP_AT = 1.5; // when, inside a level scene, its stamp lands
+const CREAM = '#efe6d2';
 
 const buzz = p => {
   try {
@@ -19,18 +22,28 @@ const buzz = p => {
   }
 };
 
-/* scroll position in screens, smoothed on phones so every scrubbed motion glides */
+/*
+  Scroll position in screens. On phones it is eased toward the finger with a time-based
+  exponential (the same feel at 60 Hz and 120 Hz); laptops get Lenis instead (see App).
+*/
 function useScreens(unit, smooth) {
   const [u, setU] = useState(0);
   useEffect(() => {
     let target = scrollY / unit;
     let cur = target;
     let raf = 0;
-    const tick = () => {
-      cur += (target - cur) * (smooth ? 0.2 : 1);
-      if (Math.abs(target - cur) < 0.0005) cur = target;
+    let t0 = 0;
+    const tick = now => {
+      const dt = t0 ? Math.min(64, now - t0) : 16;
+      t0 = now;
+      cur = smooth ? cur + (target - cur) * (1 - Math.exp(-dt / 70)) : target;
+      if (Math.abs(target - cur) < 0.0004) cur = target;
       setU(cur);
-      raf = cur !== target ? requestAnimationFrame(tick) : 0;
+      if (cur !== target) raf = requestAnimationFrame(tick);
+      else {
+        raf = 0;
+        t0 = 0;
+      }
     };
     const on = () => {
       target = scrollY / unit;
@@ -46,18 +59,24 @@ function useScreens(unit, smooth) {
   return u;
 }
 
-function useStageSize() {
-  const [size, setSize] = useState(() => ({ W: innerWidth, H: innerHeight }));
+function useWidth() {
+  const [W, setW] = useState(() => innerWidth);
   useEffect(() => {
     let raf = 0;
     const on = () => {
       cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => setSize(p => (p.W === innerWidth && Math.abs(p.H - innerHeight) < 2 ? p : { W: innerWidth, H: innerHeight })));
+      raf = requestAnimationFrame(() => setW(innerWidth));
     };
     addEventListener('resize', on);
     return () => removeEventListener('resize', on);
   }, []);
-  return size;
+  return W;
+}
+
+function useSound() {
+  const [on, setOn] = useState(sound.on);
+  useEffect(() => sound.subscribe(setOn), []);
+  return on;
 }
 
 function StampMark({ lv, on, tilt }) {
@@ -96,7 +115,7 @@ function Passport({ u, W, H }) {
   const bh = bw / 0.74;
   const cw = W < 600 ? 56 : 72;
   const centre = { x: W / 2, y: H * (W > H ? 0.52 : 0.5) };
-  const corner = { x: W - 16 - cw / 2, y: 74 + (cw / 0.74) / 2 };
+  const corner = { x: W - 16 - cw / 2, y: 74 + cw / 0.74 / 2 };
 
   const drop = back(seg(sFive, 0.3, 0.8));
   const k = inout(seg(sFive, 1.2, 1.5)) * (1 - inout(seg(sPass, 0.15, 0.7)));
@@ -106,7 +125,6 @@ function Passport({ u, W, H }) {
   const scale = lerp(1, cw / bw, k);
 
   const got = LEVEL_IDS.map(id => at(id) >= STAMP_AT);
-  // the rubber stamp coming down on the corner passport
   const active = LEVEL_IDS.find(id => at(id) > 1.2 && at(id) < 1.8);
   const q = active ? seg(at(active), 1.25, 1.75) : 0;
   const press = q < 0.5 ? out(q * 2) : 1 - out((q - 0.5) * 2);
@@ -159,11 +177,32 @@ function PassDialog({ open, onClose }) {
   });
   const [img, setImg] = useState('');
   const [busy, setBusy] = useState(false);
+
   useEffect(() => {
     const d = ref.current;
     if (open && !d.open) d.showModal();
     if (!open && d.open) d.close();
   }, [open]);
+
+  // light dismiss where <dialog closedby="any"> is not supported yet (Safari)
+  useEffect(() => {
+    const d = ref.current;
+    if ('closedBy' in HTMLDialogElement.prototype) return;
+    const outside = e => {
+      const r = d.getBoundingClientRect();
+      return e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom;
+    };
+    let pressedOutside = false;
+    const down = e => (pressedOutside = outside(e));
+    const up = e => pressedOutside && outside(e) && d.close();
+    d.addEventListener('pointerdown', down);
+    d.addEventListener('pointerup', up);
+    return () => {
+      d.removeEventListener('pointerdown', down);
+      d.removeEventListener('pointerup', up);
+    };
+  }, []);
+
   useEffect(() => {
     if (!open) return;
     let alive = true;
@@ -181,6 +220,7 @@ function PassDialog({ open, onClose }) {
       clearTimeout(t);
     };
   }, [open, name]);
+
   const keep = async () => {
     setBusy(true);
     try {
@@ -190,8 +230,9 @@ function PassDialog({ open, onClose }) {
     }
     setBusy(false);
   };
+
   return (
-    <dialog ref={ref} className="sheet" onClose={onClose} onClick={e => e.target === ref.current && onClose()} aria-labelledby="sheet-h">
+    <dialog ref={ref} className="sheet" closedby="any" onClose={onClose} aria-labelledby="sheet-h">
       <div className="sheet__body">
         <h2 id="sheet-h">Your Futuready passport</h2>
         {img ? <img className="sheet__pass" src={img} alt={`Futuready passport for ${name.trim() || 'you'}`} /> : <div className="sheet__pass" />}
@@ -200,42 +241,47 @@ function PassDialog({ open, onClose }) {
         </label>
         <input id="pp-name" className="sheet__input" value={name} maxLength={26} onChange={e => setName(e.target.value)} placeholder="Your name" autoComplete="given-name" autoCapitalize="words" enterKeyHint="done" />
         <div className="sheet__row">
-          <button className="pill pill--ink" onClick={keep} disabled={busy}>
+          <button className="pill pill--ink" onClick={keep} disabled={busy} autoFocus>
             {busy ? 'Saving…' : 'Keep it'}
           </button>
-          <button className="pill pill--ghost-ink" onClick={onClose}>
-            Back to the story
-          </button>
+          <form method="dialog">
+            <button className="pill pill--ghost-ink">Back to the story</button>
+          </form>
         </div>
       </div>
     </dialog>
   );
 }
 
+const SpeakerIcon = ({ on }) => (
+  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor" stroke="none" />
+    {on ? <path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" /> : <path d="m16 9 6 6m0-6-6 6" />}
+  </svg>
+);
+
 export default function Story() {
   const touch = useMedia('(hover: none) and (pointer: coarse)');
   const reduced = useMedia('(prefers-reduced-motion: reduce)');
-  const { W, H } = useStageSize();
-  const land = W > H * 1.05;
+  const W = useWidth();
   const probe = useRef(null);
   const [unit, setUnit] = useState(() => innerHeight);
   const [sheet, setSheet] = useState(false);
+  const soundOn = useSound();
+  const cities = useCities();
+  const jumping = useRef(0);
 
-  // one "screen" of scroll = the small viewport height, so iOS toolbars never shift the story
+  // One "screen" = the small viewport height (100svh), so iOS toolbars never move the floor or the story.
   useEffect(() => {
     const m = () => setUnit(probe.current.getBoundingClientRect().height || innerHeight);
     m();
-    addEventListener('orientationchange', m);
     addEventListener('resize', m);
-    return () => {
-      removeEventListener('orientationchange', m);
-      removeEventListener('resize', m);
-    };
+    return () => removeEventListener('resize', m);
   }, []);
-
+  const H = unit;
+  const land = W > H * 1.05;
   const u = useScreens(unit, touch && !reduced);
 
-  // for scripts/shots.mjs: where each scene starts, in screens
   useEffect(() => {
     window.__story = { starts: STARTS, ids: SCENES.map(x => x.id), lens: SCENES.map(x => x.len), unit };
   }, [unit]);
@@ -243,6 +289,7 @@ export default function Story() {
   const jump = useCallback(
     (id, s = 0) => {
       const y = (STARTS[INDEX[id]] + s) * unit;
+      jumping.current = performance.now() + 2400;
       if (window.__lenis) window.__lenis.scrollTo(y, { duration: 2.2 });
       else window.scrollTo({ top: y, behavior: reduced ? 'auto' : 'smooth' });
     },
@@ -250,18 +297,32 @@ export default function Story() {
   );
   const onPass = useCallback(() => setSheet(true), []);
 
-  // haptic tap as each stamp lands
+  // sounds and haptics as you move forward through the story
   const stamps = LEVEL_IDS.filter(id => u - STARTS[INDEX[id]] >= STAMP_AT).length;
-  const last = useRef(stamps);
+  const lastStamps = useRef(stamps);
+  const lastU = useRef(u);
   useEffect(() => {
-    if (stamps > last.current) buzz(stamps === 5 ? [16, 50, 24, 50, 40] : 14);
-    last.current = stamps;
+    if (stamps > lastStamps.current) {
+      buzz(stamps === 5 ? [16, 50, 24, 50, 40] : 14);
+      sound.play('thunk');
+    }
+    lastStamps.current = stamps;
   }, [stamps]);
+  useEffect(() => {
+    const a = lastU.current;
+    lastU.current = u;
+    if (!sound.on || u <= a || u - a > 1 || performance.now() < jumping.current) return;
+    SCENES.forEach((sc, i) => {
+      const st = STARTS[i];
+      if (i && a < st - WIPE * 0.85 && u >= st - WIPE * 0.85) sound.play('whoosh');
+      sc.cues?.forEach(([at, name]) => a < st + at && u >= st + at && sound.play(name));
+    });
+  }, [u]);
 
-  // warm the cache with every picture, after the first scene is up
+  // warm the cache with every picture once the first scene is up
   useEffect(() => {
     const t = setTimeout(() => {
-      ['girl-sit', 'girl-list', 'girl-lens', 'girl-baton', 'girl-walk', 'bot-type', 'bot-lens', 'bot-paper', 'bot-block', 'bot-horn', 'bug', 'tv', 'blocks', 'stamp', 'squad', 'engine', 'coach', 'crowd', 'tv-04-tools-stage', 'tv-07-bug1-reveal-stage', 'tv-08-podium-stage', 'tv-words-feel'].forEach(n => {
+      ['girl-sit', 'girl-list', 'girl-lens', 'girl-baton', 'girl-walk', 'boy-sit', 'boy-plan', 'boy-run', 'boy-thumb', 'boy-wave', 'bot-type', 'bot-cage-open', 'bot-cage', 'bot-paper', 'bot-block', 'bot-horn', 'bot-wave', 'bug', 'tv', 'blocks', 'stamp', 'squad', 'engine', 'coach', 'crowd', 'tv-04-tools-stage', 'tv-07-bug1-reveal-stage', 'tv-08-podium-stage', 'tv-words-feel'].forEach(n => {
         const i = new Image();
         i.src = `/story/${n}.webp`;
       });
@@ -275,19 +336,22 @@ export default function Story() {
   });
   const nextS = idx + 1 < SCENES.length ? u - STARTS[idx + 1] : -9;
   const headInk = nextS > -0.12 ? SCENES[idx + 1].ink : SCENES[idx].ink;
-  const ctx = useMemo(() => ({ W, H, land, jump, onPass }), [W, H, land, jump, onPass]);
+  const ctx = useMemo(() => ({ W, H, land, jump, onPass, cities, reduced }), [W, H, land, jump, onPass, cities, reduced]);
 
   return (
     <>
       <div ref={probe} className="probe" aria-hidden="true" />
       <div className="track" style={{ height: TOTAL * unit + H }} />
-      <div className="theatre" aria-live="off">
+      <div className="theatre">
         {SCENES.map((sc, i) => {
           const s = u - STARTS[i];
           if (s < -WIPE || s > sc.len + 0.02) return null;
           const lift = s < 0 ? inout(clamp(-s / WIPE)) : 0;
+          const k = { ...ctx, F: sc.F };
+          const ss = Math.max(s, 0);
+          const cam = !reduced && sc.cam ? sc.cam(ss, k) : null;
           return (
-            <Stage.Provider key={sc.id} value={{ ...ctx, F: sc.F }}>
+            <Stage.Provider key={sc.id} value={k}>
               <section
                 className={`scene scene--${sc.id}`}
                 aria-hidden={i !== idx}
@@ -297,26 +361,35 @@ export default function Story() {
                   '--ink': sc.ink,
                   '--F': `${sc.F * 100}%`,
                   zIndex: i,
-                  transform: lift ? `translateY(${lift * 100}%)` : undefined,
+                  transform: lift && !reduced ? `translate3d(0, ${lift * 100}%, 0)` : undefined,
+                  opacity: lift && reduced ? 1 - lift : undefined,
                   boxShadow: lift ? '0 -24px 60px rgba(10, 12, 30, 0.22)' : undefined,
                 }}
               >
-                <div className="wall" />
-                <div className="floor" />
-                {sc.render(Math.max(s, 0), { ...ctx, F: sc.F })}
+                <div className="cam" style={cam ? { transformOrigin: `${cam.x * 100}% ${cam.y * 100}%`, transform: `scale(${cam.z})` } : undefined}>
+                  <div className="wall" />
+                  <div className="floor" />
+                  {sc.world ? sc.world(ss, k) : null}
+                </div>
+                {sc.ui ? sc.ui(ss, k) : null}
               </section>
             </Stage.Provider>
           );
         })}
         <Passport u={u} W={W} H={H} />
-        <header className={`head ${headInk === '#efe6d2' ? 'is-light' : ''}`} style={{ '--ink': headInk }}>
+        <header className={`head ${headInk === CREAM ? 'is-light' : ''}`} style={{ '--ink': headInk }}>
           <a href="#top" className="head__brand" onClick={e => (e.preventDefault(), jump('title'))}>
             <img src="/h2s-logo.png" alt="Hack2skill" width="48" height="18" />
             <span>Futuready</span>
           </a>
-          <button className="pill pill--small" onClick={() => jump('train', 1.6)}>
-            Cities
-          </button>
+          <div className="head__actions">
+            <button className="pill pill--small pill--icon" aria-pressed={soundOn} aria-label="Sound" onClick={() => (soundOn ? sound.disable() : sound.enable())}>
+              <SpeakerIcon on={soundOn} />
+            </button>
+            <button className="pill pill--small" onClick={() => jump('train', 1.6)}>
+              Cities
+            </button>
+          </div>
         </header>
         <div className="progress" style={{ transform: `scaleX(${clamp(u / TOTAL)})` }} aria-hidden="true" />
       </div>

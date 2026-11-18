@@ -1,4 +1,5 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { sound } from './sound';
 
 /* ---------- timing ---------- */
 export const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
@@ -44,7 +45,7 @@ const poke = e => {
   d: how far forward on the floor (0 = on the wall line).   dx/dy: offsets in px.
   Any of x, h, d can be [portrait, landscape].
 */
-export function Cut({ src, alt = '', x, h, d = 0.06, z = 2, dx = 0, dy = 0, r = 0, sc = 1, o = 1, flip = false, shadow = true, wiggle = 'hop', className = '', style, onClick, children }) {
+export function Cut({ src, alt = '', x, h, d = 0.06, z = 2, dx = 0, dy = 0, r = 0, sc = 1, o = 1, flip = false, shadow = true, wiggle = 'hop', priority, className = '', style, onClick, children }) {
   const { W, H, land, F } = useStage();
   const height = pick(h, land) * H;
   const left = pick(x, land) * W + dx;
@@ -66,7 +67,7 @@ export function Cut({ src, alt = '', x, h, d = 0.06, z = 2, dx = 0, dy = 0, r = 
       onAnimationEnd={e => e.currentTarget.classList.remove('is-poked')}
     >
       {shadow ? <i className="cut__shadow" aria-hidden="true" /> : null}
-      <img src={src} alt={alt} draggable={false} decoding="async" />
+      <img src={src} alt={alt} draggable={false} decoding="async" fetchPriority={priority} />
       {children}
     </div>
   );
@@ -75,6 +76,12 @@ export function Cut({ src, alt = '', x, h, d = 0.06, z = 2, dx = 0, dy = 0, r = 
 /* Text that types itself as you scroll. p: 0 → 1. */
 export function Typed({ text, p, className = '' }) {
   const n = Math.round(text.length * clamp(p));
+  // a typewriter key for every new letter (when sound is on)
+  const prev = useRef(n);
+  useEffect(() => {
+    if (n > prev.current && n < text.length + 1) sound.play('tick');
+    prev.current = n;
+  }, [n, text.length]);
   return (
     <span className={`typed ${className}`} aria-label={text} role="text">
       <span aria-hidden="true">{text.slice(0, n)}</span>

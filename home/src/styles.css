@@ -116,6 +116,12 @@ button {
   will-change: transform;
 }
 
+.cam {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+
 .wall {
   position: absolute;
   inset: 0;
@@ -148,7 +154,7 @@ button {
   user-select: none;
   -webkit-user-select: none;
   -webkit-user-drag: none;
-  filter: drop-shadow(0 1px 0.5px rgba(0, 0, 0, 0.18)) drop-shadow(0 6px 10px rgba(0, 0, 0, 0.1));
+  filter: drop-shadow(0 3px 2px rgba(10, 12, 30, 0.16)) drop-shadow(0 10px 14px rgba(10, 12, 30, 0.12));
 }
 
 .cut__shadow {
@@ -166,12 +172,10 @@ button {
   cursor: pointer;
 }
 
-.cut[data-wiggle='hop'].is-poked img {
-  animation: hop 0.6s var(--spring);
-}
-
-.cut[data-wiggle='fly'].is-poked img {
-  animation: flyaway 1.6s var(--out);
+@media (prefers-reduced-motion: no-preference) {
+  .cut[data-wiggle='hop'].is-poked img {
+    animation: hop 0.6s var(--spring);
+  }
 }
 
 @keyframes hop {
@@ -183,22 +187,12 @@ button {
   }
 }
 
-@keyframes flyaway {
-  45% {
-    transform: translate(-60vw, -70vh) rotate(-200deg) scale(0.6);
+@media (prefers-reduced-motion: no-preference) {
+  .rise:not(.cut),
+  .cut.rise > img {
+    animation: rise 1.1s var(--out) both;
+    animation-delay: var(--d, 0s);
   }
-  55% {
-    transform: translate(60vw, -70vh) rotate(200deg) scale(0.6);
-  }
-  100% {
-    transform: none;
-  }
-}
-
-.rise:not(.cut),
-.cut.rise > img {
-  animation: rise 1.1s var(--out) both;
-  animation-delay: var(--d, 0s);
 }
 
 @keyframes rise {
@@ -246,6 +240,7 @@ button {
   font-weight: 460;
   letter-spacing: -0.03em;
   line-height: 1.12;
+  text-wrap: balance;
 }
 
 .line--big {
@@ -267,9 +262,15 @@ button {
   display: inline-block;
   width: 0.08em;
   height: 0.95em;
-  margin: 0 0.04em -0.12em;
+  /* takes no room, so a line never re-wraps while it types */
+  margin: 0 -0.04em -0.12em;
   background: currentColor;
-  animation: blink 0.9s steps(1) infinite;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .caret {
+    animation: blink 0.9s steps(1) infinite;
+  }
 }
 
 @keyframes blink {
@@ -279,6 +280,7 @@ button {
 }
 
 .note {
+  text-wrap: balance;
   margin: 0.7em 0 0;
   font-family: var(--mono);
   font-size: 0.8rem;
@@ -296,6 +298,7 @@ button {
   font-size: clamp(3rem, 13.4vw, 9rem);
   letter-spacing: -0.035em;
   line-height: 0.94;
+  text-wrap: balance;
 }
 
 .display span {
@@ -345,7 +348,12 @@ button {
 
 .scroll-hint span {
   display: inline-block;
-  animation: bob 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .scroll-hint span {
+    animation: bob 1.6s ease-in-out infinite;
+  }
 }
 
 @keyframes bob {
@@ -395,7 +403,7 @@ button {
   font-family: var(--serif);
   font-weight: 800;
   font-variation-settings: 'SOFT' 100, 'WONK' 0, 'opsz' 144;
-  font-size: min(92vw, 68vh);
+  font-size: min(92vw, 68svh);
   line-height: 1;
   letter-spacing: -0.04em;
   filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.1));
@@ -409,7 +417,7 @@ button {
   font-family: var(--serif);
   font-weight: 800;
   font-variation-settings: 'SOFT' 100, 'opsz' 144;
-  font-size: min(44vw, 46vh);
+  font-size: min(44vw, 46svh);
   letter-spacing: -0.05em;
   line-height: 1;
   color: rgba(22, 26, 58, 0.07);
@@ -417,23 +425,41 @@ button {
   white-space: nowrap;
 }
 
+.lines--you {
+  max-width: none;
+}
+
 .you {
-  position: absolute;
-  left: 50%;
-  top: 47%;
-  z-index: 3;
+  display: block;
+  width: fit-content;
+  margin: 0.02em 0 0 -0.05em;
+  /* background-clip: text only paints inside the box, so the box must hold the descender and the ? */
+  padding: 0.04em 0.12em 0.2em 0.05em;
   font-family: var(--serif);
   font-weight: 900;
   font-variation-settings: 'SOFT' 100, 'WONK' 1, 'opsz' 144;
-  font-size: min(44vw, 40vh);
-  line-height: 1;
+  font-size: min(36vw, 30svh);
+  line-height: 0.86;
   letter-spacing: -0.04em;
   white-space: nowrap;
   color: transparent;
   background: url('/story/crowd.webp') 40% 45% / cover;
   -webkit-background-clip: text;
   background-clip: text;
-  filter: drop-shadow(0 12px 18px rgba(10, 12, 30, 0.22));
+  transform-origin: 0 60%;
+  filter: drop-shadow(0 10px 16px rgba(10, 12, 30, 0.2));
+}
+
+/* a little starburst when the cage snaps shut */
+.burst {
+  position: absolute;
+  z-index: 5;
+  width: 120px;
+  height: 120px;
+  pointer-events: none;
+  background: repeating-conic-gradient(from 6deg, rgba(255, 252, 245, 0.95) 0 5deg, transparent 5deg 30deg);
+  -webkit-mask: radial-gradient(closest-side, transparent 42%, #000 44%, #000 70%, transparent 72%);
+  mask: radial-gradient(closest-side, transparent 42%, #000 44%, #000 70%, transparent 72%);
 }
 
 .floater {
@@ -531,7 +557,7 @@ button {
 }
 
 .paper {
-  margin: 0 0 14px;
+  margin: 0 0 20px;
   padding: 18px 18px 14px;
   background: var(--paper);
   border-radius: 3px;
@@ -557,6 +583,7 @@ button {
 
 .paper blockquote {
   margin: 0;
+  text-wrap: pretty;
   font-family: var(--serif);
   font-style: italic;
   font-weight: 450;
@@ -581,6 +608,7 @@ button {
 
 /* ---------- the train ---------- */
 .station {
+  text-wrap: balance;
   margin-top: 0.12em;
   font-family: var(--serif);
   font-weight: 600;
@@ -619,8 +647,17 @@ button {
   will-change: transform;
 }
 
-.train__engine {
-  filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.18));
+/* no filter on the train: WebKit leaves unpainted holes around filtered, moving images */
+.train::after {
+  content: '';
+  position: absolute;
+  left: 1%;
+  right: 1%;
+  bottom: -5px;
+  height: 12px;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(10, 12, 30, 0.32), rgba(10, 12, 30, 0));
 }
 
 .coach {
@@ -635,7 +672,6 @@ button {
 .coach img {
   width: 100%;
   height: 100%;
-  filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.18));
 }
 
 .coach__board {
@@ -851,6 +887,22 @@ button {
   transition: color 0.3s;
 }
 
+.head__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pill--icon {
+  width: 36px;
+  padding: 0;
+}
+
+.pill--icon[aria-pressed='true'] {
+  background: #161a3a;
+  color: var(--paper);
+}
+
 .head__brand {
   display: flex;
   align-items: center;
@@ -933,8 +985,29 @@ button {
   max-height: 92svh;
 }
 
+dialog.sheet:modal {
+  overscroll-behavior: contain;
+}
+
+.sheet::backdrop {
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+
 .sheet[open] {
   animation: sheet 0.5s var(--out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet[open] {
+    animation-name: fade;
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
 }
 
 @keyframes sheet {
@@ -999,6 +1072,10 @@ button {
   align-items: center;
 }
 
+.sheet__row form {
+  margin: 0;
+}
+
 /* ---------- laptops ---------- */
 @media (min-width: 760px) and (orientation: landscape) {
   :root {
@@ -1033,15 +1110,5 @@ button {
   }
   .paper blockquote {
     font-size: clamp(1.1rem, 1.5vw, 1.5rem);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
   }
 }
