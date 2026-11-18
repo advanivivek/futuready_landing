@@ -1,0 +1,12 @@
+{
+  "name": "Futuready by Hack2skill",
+  "short_name": "Futuready",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#05060F",
+  "theme_color": "#05060F",
+  "icons": [
+    { "src": "/icon-180.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}
