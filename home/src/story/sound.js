@@ -463,7 +463,7 @@ const GESTURES = ['pointerdown', 'touchend', 'keydown', 'click'];
 const gesture = e => {
   if (pref() === 'off') return;
   if (ctx && ctx.state === 'running' && state === 'on') return;
-  if (e.target?.closest?.('[data-sound-toggle]')) return;
+  if (e.target?.closest?.('[data-sound-toggle], [data-no-sound]')) return;
   if (e.type === 'keydown' && (e.key === 'Escape' || e.metaKey || e.ctrlKey)) return;
   enable();
 };

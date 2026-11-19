@@ -2220,6 +2220,77 @@ dialog.sheet:modal {
   margin: 0;
 }
 
+/* ---------- team preview: the code screen ---------- */
+.gate {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: calc(env(safe-area-inset-top) + 24px) var(--gutter) calc(env(safe-area-inset-bottom) + 24px);
+  background: var(--blue);
+  color: var(--cream);
+}
+
+.gate__card {
+  width: min(100%, 360px);
+  display: grid;
+  gap: 14px;
+}
+
+.gate__brand {
+  margin: 0;
+  font-family: var(--brand);
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.gate h1 {
+  margin: 8px 0 0;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(2rem, 9vw, 2.6rem);
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+
+.gate__note {
+  margin: 0 0 6px;
+  font-size: 0.98rem;
+  line-height: 1.45;
+  opacity: 0.85;
+}
+
+.gate input {
+  min-height: 52px;
+  padding: 0 16px;
+  border: 1.5px solid transparent;
+  border-radius: 14px;
+  background: #fffcf5;
+  color: #161a3a;
+  font: 500 max(16px, 1.05rem) / 1.2 var(--sans);
+  outline: none;
+}
+
+.gate input:focus {
+  border-color: var(--marigold);
+}
+
+.gate input[aria-invalid='true'] {
+  border-color: #ffb3c1;
+}
+
+.gate__err {
+  margin: -4px 0 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #ffd2db;
+}
+
+.gate .pill--ink {
+  width: 100%;
+}
+
 /* ---------- small phones (iPhone SE, small Androids) ---------- */
 @media (max-width: 374px) {
   :root {
