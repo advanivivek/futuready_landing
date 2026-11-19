@@ -227,7 +227,6 @@ function You({ s, k }) {
 // standing poses only (tap him for the next). k: how much taller the picture is than he is (a chair, a raised foot),
 // so he is the same size in every one. a: width / height of the picture.
 const POSES = [
-  { src: 'vivek-stand', a: 313 / 1021, k: 1 },
   { src: 'vivek-walk', a: 343 / 1022, k: 1 },
   { src: 'vivek-dance', a: 443 / 1022, k: 1.03 },
   { src: 'vivek-kick', a: 692 / 986, k: 1.05 },
@@ -387,13 +386,16 @@ function stationSize(city, k) {
 }
 
 /* ---------- the goodbye: three of them, centred together ---------- */
+// on phones they stand a little smaller, under the two buttons and the share link
 const END = [
-  { src: 'girl-phone', a: 280 / 866, h: [0.4, 0.5], d: 0.1, alt: 'The two friends and a robot, waving goodbye' },
-  { src: 'boy-wave', a: 338 / 782, h: [0.4, 0.5], d: 0.09, alt: '' },
-  { src: 'bot-wave', a: 410 / 802, h: [0.3, 0.36], d: 0.1, alt: '' },
+  { src: 'girl-phone', a: 280 / 866, h: [0.31, 0.5], d: 0.1, alt: 'The two friends and a robot, waving goodbye' },
+  { src: 'boy-wave', a: 338 / 782, h: [0.31, 0.5], d: 0.09, alt: '' },
+  { src: 'bot-wave', a: 410 / 802, h: [0.235, 0.36], d: 0.1, alt: '' },
 ];
+// short phones (iPhone SE) have less room under the buttons
+const endScale = ({ H, land }) => (!land && H < 620 ? 0.8 : 1);
 function endRow({ W, H, land }) {
-  const ws = END.map(p => p.a * pick(p.h, land) * H);
+  const ws = END.map(p => p.a * pick(p.h, land) * endScale({ H, land }) * H);
   const gap = -0.04 * Math.min(ws[0], ws[1]);
   const total = ws.reduce((a, b) => a + b, 0) + gap * 2;
   let left = (land ? 0.68 : 0.5) * W - total / 2;
@@ -546,7 +548,8 @@ export const SCENES = [
   /* 3. so what's left for you? The bug scene shrinks away like a photo; the "?" drops its dot. */
   {
     id: 'you',
-    rest: 1.05,
+    rest: 1.0,
+    hold: 0.25, // a short pause: the "?" is the cue, and its dot should soon move
     after: 0.55,
     wall: '#a6d8ee',
     floor: CREAM,
@@ -748,8 +751,10 @@ export const SCENES = [
           <button className="pill pill--ink pill--big" onClick={() => jump('train', 1.0)}>
             Attend Futuready
           </button>
-          <p className="note">› Free to attend</p>
-          <ShareButton label="Tell your squad first" />
+          <p className="pass-cta__row">
+            <span className="note">› Free to attend</span>
+            <ShareButton label="Share with friends" />
+          </p>
         </div>
       </>
     ),
@@ -785,7 +790,7 @@ export const SCENES = [
     },
     ui: s => (
       <Lines fit>
-        <Rows rows={['Futuready is not a lecture.', 'It is highly interactive.']} p={seg(s, 0.1, 0.65)} />
+        <Rows rows={['Futuready is not a lecture.', 'It is an interactive lab.']} p={seg(s, 0.1, 0.65)} />
         <div className="learn">
           <Rows rows={['Students participate in', 'realtime via phones.']} p={seg(s, 0.8, 1.35)} />
         </div>
@@ -943,19 +948,21 @@ export const SCENES = [
     cam: s => ({ z: lerp(1.14, 1, out(seg(s, 0, 0.9))), x: 0.5, y: 0.8 }),
     world: (s, k) => {
       const xs = endRow(k);
-      return END.map((p, i) => <Cut key={p.src} src={A(p.src)} alt={p.alt} x={xs[i]} h={p.h} d={p.d} dx={(1 - out(seg(s, i * 0.05, 0.5 + i * 0.05))) * [-80, 60, 80][i]} />);
+      return END.map((p, i) => <Cut key={p.src} src={A(p.src)} alt={p.alt} x={xs[i]} h={pick(p.h, k.land) * endScale(k)} d={p.d} dx={(1 - out(seg(s, i * 0.05, 0.5 + i * 0.05))) * [-80, 60, 80][i]} />);
     },
     ui: (s, { land, openBring }) => (
       <>
         <div className="title title--end" style={{ opacity: seg(s, 0, 0.35) }}>
           <h2 className="display">Didn’t find your city?</h2>
-          <p className="end-line">
-            <a href={VIRTUAL_URL}>Attend Virtual</a>
-          </p>
-          <button type="button" className="end-bring" onClick={() => openBring()}>
-            or bring it to your campus
-          </button>
-          <ShareButton label="Be the first to share it" className="share--end" />
+          <div className="end-cta">
+            <a className="pill pill--yellow" href={VIRTUAL_URL}>
+              Attend Virtual
+            </a>
+            <button type="button" className="pill" onClick={() => openBring()}>
+              Bring to your campus
+            </button>
+          </div>
+          <ShareButton label="Share with friends" className="share--end" />
         </div>
         <footer className="foot" style={{ opacity: seg(s, 0.3, 0.6) }}>
           <img src={`${BASE}h2s-logo.png`} alt="Hack2skill" width="48" height="18" />

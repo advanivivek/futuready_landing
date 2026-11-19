@@ -4,7 +4,7 @@ import { SCENES } from './scenes';
 import { sound } from './sound';
 import { Book, passportPose, STAMP_AT } from './Passport';
 import { useCities } from '../events';
-import { BringDialog } from './Extras';
+import { BringDialog, ShareButton } from './Extras';
 
 // how light a colour is (0 dark, 1 light), for the little line at the bottom
 const light = hex => {
@@ -12,15 +12,14 @@ const light = hex => {
   return (0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255;
 };
 const KEEP = 'futuready-at';
-// read once, as the page loads: a shared "add your voice" link
-const SHARED = typeof location !== 'undefined' ? /^#bring(?:=(.*))?$/.exec(location.hash) : null;
+
 
 /*
   The timeline. Scrolling moves through the scenes, measured in screens (one screen = 100svh).
   When a scene has everything on it (its rest point), the next stretch of scrolling barely moves it: the
   story slows down smoothly, holds, and speeds up again, so the moment can be seen before it moves on.
 */
-const HOLD = 0.65; // screens of scrolling the story spends nearly still at each rest point
+const HOLD = 0.5; // screens of scrolling the story spends nearly still at each rest point
 const SLOW = 0.05; // how fast the story still moves while holding (a slight drift keeps it alive)
 const RAMP = 0.3; // share of the hold spent slowing down and speeding up again
 const EXTRA = 0.55; // screens of stretch past the last scene, where FUTUREADY peeps through
@@ -304,7 +303,7 @@ export default function Story() {
   const cities = useCities();
   const jumping = useRef(0);
   const [bring, setBring] = useState(null);
-  const openBring = useCallback((city = '', campus = '') => setBring({ city, campus }), []);
+  const openBring = useCallback((city = '') => setBring({ city }), []);
 
   // One "screen" = the small viewport height (100svh), so iOS toolbars never move the floor or the story.
   useEffect(() => {
@@ -364,14 +363,6 @@ export default function Story() {
       document.removeEventListener('visibilitychange', onHide);
     };
   }, []);
-
-  // a shared "add your voice" link (…#bring=Campus) opens the request, filled in
-  useEffect(() => {
-    if (!SHARED) return;
-    if (location.hash) history.replaceState(null, '', location.pathname + location.search);
-    const t = setTimeout(() => openBring('', SHARED[1] ? decodeURIComponent(SHARED[1]) : ''), 1400);
-    return () => clearTimeout(t);
-  }, [openBring]);
 
   useEffect(() => {
     // for scripts/shots.mjs: where (in px) a scene is at story time s, and halfway through its arrival
@@ -491,7 +482,7 @@ export default function Story() {
     const t = setTimeout(() => {
       [
         'girl-sit', 'girl-list', 'girl-lens', 'girl-baton', 'girl-walk', 'boy-sit', 'boy-plan', 'boy-run', 'boy-wave', 'bot-type', 'bot-cage-open', 'bot-cage',
-        'bot-paper', 'bot-block', 'bot-horn', 'bot-wave', 'bug', 'tv', 'blocks', 'stamp', 'squad', 'engine', 'coach', 'crowd', 'vivek-stand', 'vivek-walk',
+        'bot-paper', 'bot-block', 'bot-horn', 'bot-wave', 'bug', 'tv', 'blocks', 'stamp', 'squad', 'engine', 'coach', 'crowd', 'vivek-walk',
         'vivek-dance', 'vivek-kick', 'vivek-step', 'vivek-chair', 'vivek-lean', 'tv-04-tools-stage', 'tv-07-bug1-reveal-stage', 'tv-08-podium-stage', 'tv-words-feel',
       ].forEach((n, j) => {
         // fetch and decode ahead, a few at a time, so no picture decodes in the middle of a scroll
@@ -513,7 +504,16 @@ export default function Story() {
 
   // the header takes the colours of whichever scene is behind it
   const nextUp = SCENES[idx + 1];
-  const headInk = nextUp && enterP(nextUp.id) > (nextUp.enter.edge ?? FX[nextUp.enter.type].edge) ? nextUp.ink : SCENES[idx].ink;
+  const topScene = nextUp && enterP(nextUp.id) > (nextUp.enter.edge ?? FX[nextUp.enter.type].edge) ? nextUp : SCENES[idx];
+  const headInk = topScene.ink;
+  const topWall = topScene.wall;
+
+  // The phone's own bars (the status bar by the notch, Android's address bar) take the colour of the scene
+  // at the top, and so does the page behind them, so the page reads as one piece with the phone.
+  useEffect(() => {
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', topWall);
+    document.documentElement.style.backgroundColor = topWall;
+  }, [topWall]);
   // past the end the page lifts; on phones by less, the word there is smaller
   const lift = over > 0 ? H * (land ? 0.46 : 0.24) * (1 - Math.pow(1 - over, 2.2)) : 0;
 
@@ -597,6 +597,7 @@ export default function Story() {
             <img src={`${import.meta.env.BASE_URL}h2s-logo.png`} alt="" width="48" height="18" />
           </a>
           <div className="head__actions">
+            <ShareButton label="Share" iconOnly icon={20} className="share--head" />
             <button className="snd" data-sound-toggle="" data-state={soundState} aria-pressed={soundState === 'on'} aria-label="Sound" onClick={() => sound.toggle()}>
               <SpeakerIcon state={soundState} />
             </button>
@@ -619,7 +620,7 @@ export default function Story() {
         </div>
         <div className="progress" style={{ transform: `scaleX(${clamp(u / TOTAL)})` }} aria-hidden="true" />
       </div>
-      <BringDialog open={!!bring} city={bring?.city} campus={bring?.campus} onClose={() => setBring(null)} />
+      <BringDialog open={!!bring} city={bring?.city} onClose={() => setBring(null)} />
     </>
   );
 }

@@ -19,7 +19,11 @@ export default defineConfig({
     react(),
     {
       name: 'site-url',
-      transformIndexHtml: html => html.replaceAll('%SITE%', site === '/' ? base : site),
+      transformIndexHtml: html =>
+        html
+          .replaceAll('%SITE%', site === '/' ? base : site)
+          // the one true address of the page, once it is known
+          .replace('<!--canonical-->', site.startsWith('http') ? `<link rel="canonical" href="${site}" />` : ''),
     },
   ],
   server: { host: true, port: 5188 },

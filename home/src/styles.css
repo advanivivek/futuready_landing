@@ -69,6 +69,8 @@ html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   background: var(--blue);
+  /* no double-tap zoom (pinch zoom still works) */
+  touch-action: manipulation;
 }
 
 body {
@@ -138,6 +140,15 @@ button {
   overflow: hidden;
   contain: strict;
   background: #0b0820;
+  /* a long press while scrolling the story should not start selecting words */
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* no "Save image" menu on a long press: the pictures are part of the story */
+.theatre img {
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
 }
 
 /* a faint paper grain over everything */
@@ -1593,7 +1604,52 @@ button.coach {
 
 .share--end {
   justify-items: start;
-  margin-top: 2px;
+  margin-top: 22px;
+}
+
+/* the header share: just the icon, like the speaker next to it */
+.share--head .share__btn {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  justify-content: center;
+  color: var(--ink);
+  transition: color 0.3s;
+}
+
+.share--head .share__tip {
+  right: 0;
+  top: 100%;
+  color: var(--ink);
+}
+
+.pass-cta__row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 2px 14px;
+  margin: 2px 0 0;
+}
+
+.pass-cta__row .note {
+  margin: 0;
+}
+
+.end-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 12px;
+  margin-top: 18px;
+}
+
+.title--end .share--end {
+  margin-top: 12px;
+}
+
+.pill--yellow {
+  background: var(--marigold);
+  color: #161a3a;
 }
 
 .share__tip {
@@ -2094,9 +2150,45 @@ dialog.sheet:modal {
   outline-offset: 2px;
 }
 
-.bring__more {
+.bring__step {
   display: grid;
   gap: 14px;
+}
+
+.bring__step[hidden] {
+  display: none;
+}
+
+/* two short bars: which step you are on */
+.bring__steps {
+  display: flex;
+  gap: 6px;
+  margin: -4px 0 2px;
+  padding: 0;
+  list-style: none;
+}
+
+.bring__steps li {
+  width: 26px;
+  height: 4px;
+  border-radius: 4px;
+  background: rgba(22, 26, 58, 0.16);
+  transition: background-color 0.3s;
+}
+
+.bring__steps li.is-on {
+  background: #161a3a;
+}
+
+.bring .bring__back {
+  justify-self: center;
+  text-decoration: none;
+}
+
+.bring__also {
+  margin-top: 6px !important;
+  font-size: 0.92rem !important;
+  opacity: 0.8;
 }
 
 .bring .link-btn {
@@ -2126,6 +2218,28 @@ dialog.sheet:modal {
 
 .bring__done form {
   margin: 0;
+}
+
+/* ---------- small phones (iPhone SE, small Androids) ---------- */
+@media (max-width: 374px) {
+  :root {
+    --gutter: max(20px, env(safe-area-inset-left), env(safe-area-inset-right));
+  }
+  .head__brand {
+    min-width: 104px;
+    font-size: 0.74rem;
+    letter-spacing: 0.05em;
+  }
+  .head__actions {
+    gap: 0;
+  }
+  .snd,
+  .share--head .share__btn {
+    width: 40px;
+  }
+  .pill--head {
+    padding: 0 14px;
+  }
 }
 
 /* ---------- laptops ---------- */

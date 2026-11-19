@@ -8,13 +8,17 @@ export const pageUrl = () => SITE_URL || new URL(BASE, location.href).href;
 /* ---------- sharing ---------- */
 // The phone's own share sheet where there is one (the visitor never leaves the page); otherwise a small
 // menu: copy the link, or open WhatsApp / LinkedIn / X / email in a new tab.
-const SHARE_ICON = (
-  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M12 3v12M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" />
+// the share symbol everyone knows: three dots joined by two lines
+export const ShareIcon = ({ size = 16 }) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+    <circle cx="18" cy="5" r="2.6" fill="currentColor" stroke="none" />
+    <circle cx="6" cy="12" r="2.6" fill="currentColor" stroke="none" />
+    <circle cx="18" cy="19" r="2.6" fill="currentColor" stroke="none" />
+    <path d="m8.3 10.8 7.4-4.3M8.3 13.2l7.4 4.3" />
   </svg>
 );
 
-export function ShareButton({ label, text = SHARE_TEXT, url, className = '' }) {
+export function ShareButton({ label, text = SHARE_TEXT, url, className = '', icon = 16, iconOnly = false }) {
   const id = useId();
   const menu = useRef(null);
   const btn = useRef(null);
@@ -38,6 +42,7 @@ export function ShareButton({ label, text = SHARE_TEXT, url, className = '' }) {
     // sit just above (or below) the button
     const r = btn.current.getBoundingClientRect();
     m.style.left = `${Math.min(Math.max(12, r.left + r.width / 2 - 120), innerWidth - 252)}px`;
+    m.style.right = 'auto';
     m.style.top = r.top > 260 ? `${r.top - 8}px` : `${r.bottom + 8}px`;
     m.style.translate = r.top > 260 ? '0 -100%' : '0 0';
     m.togglePopover();
@@ -66,9 +71,9 @@ export function ShareButton({ label, text = SHARE_TEXT, url, className = '' }) {
   ];
   return (
     <span className={`share ${className}`}>
-      <button ref={btn} type="button" className="share__btn" onClick={open}>
-        {SHARE_ICON}
-        {label}
+      <button ref={btn} type="button" className="share__btn" onClick={open} aria-label={iconOnly ? label : undefined}>
+        <ShareIcon size={icon} />
+        {iconOnly ? null : label}
       </button>
       <span ref={tip} className="share__tip" role="status" />
       <span ref={menu} id={id} className="share__menu" popover="auto">
@@ -109,12 +114,13 @@ function Field({ id, label, hint, error, children }) {
   );
 }
 
-export function BringDialog({ open, city = '', campus: preset = '', onClose }) {
+export function BringDialog({ open, city: presetCity = '', onClose }) {
   const ref = useRef(null);
   const form = useRef(null);
-  const [campus, setCampus] = useState('');
+  const [step, setStep] = useState(1);
+  const [college, setCollege] = useState('');
+  const [city, setCity] = useState('');
   const [role, setRole] = useState('Student');
-  const [more, setMore] = useState(false);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(null);
   const [failed, setFailed] = useState('');
@@ -124,16 +130,20 @@ export function BringDialog({ open, city = '', campus: preset = '', onClose }) {
     if (open && !d.open) {
       setDone(null);
       setFailed('');
-      setCampus(preset);
+      setStep(1);
+      form.current?.reset();
+      setCollege('');
+      setCity(presetCity);
+      setRole('Student');
       d.showModal();
       // laptops start typing straight away; phones keep the keyboard down until a field is tapped
-      if (matchMedia('(pointer: fine)').matches) d.querySelector('#bf-campus')?.focus();
+      if (matchMedia('(pointer: fine)').matches) d.querySelector('#bf-college')?.focus();
       else d.querySelector('#bring-h')?.focus();
       window.__lenis?.stop();
       sound.play('whoosh');
     }
     if (!open && d.open) d.close();
-  }, [open, preset]);
+  }, [open, presetCity]);
 
   // light dismiss where <dialog closedby="any"> is not supported yet (Safari)
   useEffect(() => {
@@ -154,45 +164,52 @@ export function BringDialog({ open, city = '', campus: preset = '', onClose }) {
     };
   }, []);
 
-  // errors show once a field has been left (or on send), and clear as soon as it is fixed
+  // errors show once a field has been left (or on Next / Send), and clear as soon as it is fixed
   const check = el => {
     const bad = !el.validity.valid;
     el.setAttribute('aria-invalid', bad ? 'true' : 'false');
     if (bad) el.setAttribute('aria-describedby', `${el.id}-err`);
     else el.removeAttribute('aria-describedby');
     el.closest('.field')?.classList.toggle('is-bad', bad);
+    return !bad;
   };
-  const onBlur = e => e.target.matches('input') && e.target.value && check(e.target);
+  const onBlur = e => e.target.matches('input:not([type=radio])') && e.target.value && check(e.target);
   const onInput = e => e.target.matches('input') && e.target.closest('.is-bad') && check(e.target);
+  // checks one step's fields; the first problem gets the focus
+  const valid = n => {
+    const inputs = [...form.current.querySelectorAll(`[data-step="${n}"] input:not([type=radio])`)];
+    const ok = inputs.map(check);
+    const first = inputs[ok.indexOf(false)];
+    first?.focus();
+    return !first;
+  };
+
+  const next = () => {
+    if (!valid(1)) return;
+    setStep(2);
+    sound.play('page');
+    requestAnimationFrame(() => (matchMedia('(pointer: fine)').matches ? form.current.querySelector('#bf-email') : ref.current.querySelector('#bring-h'))?.focus());
+  };
 
   const submit = async e => {
     e.preventDefault();
-    const f = form.current;
-    const inputs = [...f.querySelectorAll('input:not([type=radio])')];
-    inputs.forEach(check);
-    const first = inputs.find(el => !el.validity.valid);
-    if (first) {
-      first.focus();
-      return;
-    }
-    const data = Object.fromEntries(new FormData(f));
-    data.city = city;
+    if (step === 1) return next();
+    if (!valid(2)) return;
+    const data = Object.fromEntries(new FormData(form.current));
     data.page = location.href;
     setBusy(true);
     setFailed('');
     try {
-      let count = 0;
       if (BRING_FORM_URL) {
         const res = await fetch(BRING_FORM_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(data) });
         const out = await res.json().catch(() => ({ ok: res.ok }));
         if (out.ok === false) throw new Error(out.error || 'failed');
-        count = Number(out.count) || 0;
       } else {
-        // not connected to a sheet yet: hand the request to their email app instead
-        const body = `Campus: ${data.campus}\nCity: ${city}\nName: ${data.name}\nI am: ${data.role}\nEmail: ${data.email}\nPhone: ${data.phone || ''}\nLinkedIn: ${data.linkedin || ''}`;
-        location.href = `mailto:${SUPPORT}?subject=${encodeURIComponent(`Bring Futuready to ${data.campus}`)}&body=${encodeURIComponent(body)}`;
+        // not connected to the Google Sheet yet: hand the request to their email app instead
+        const body = ['College: ' + data.college, 'City: ' + data.city, 'Name: ' + data.name, 'I am: ' + data.role, 'Email: ' + data.email, 'Phone: ' + (data.phone || ''), 'LinkedIn: ' + (data.linkedin || '')].join('\n');
+        location.href = `mailto:${SUPPORT}?subject=${encodeURIComponent(`Bring Futuready to ${data.college}, ${data.city}`)}&body=${encodeURIComponent(body)}`;
       }
-      setDone({ campus: data.campus, first: String(data.name).trim().split(/\s+/)[0], count, mail: !BRING_FORM_URL });
+      setDone({ ...data, first: String(data.name).trim().split(/\s+/)[0], mail: !BRING_FORM_URL });
       sound.play('thunk');
       setTimeout(() => sound.play('chime'), 380);
       try {
@@ -200,14 +217,14 @@ export function BringDialog({ open, city = '', campus: preset = '', onClose }) {
       } catch {
         /* no haptics */
       }
+      requestAnimationFrame(() => ref.current.querySelector('#bring-h')?.focus());
     } catch {
       setFailed('That did not go through. Please check your connection and try again.');
     }
     setBusy(false);
   };
 
-  const board = (done ? done.campus : campus).trim() || 'Your campus';
-  const rally = done ? `I just asked for Futuready at ${done.campus}. Add your voice so it comes to us sooner:` : '';
+  const board = (done ? done.college : college).trim() || 'Your college';
   return (
     <dialog
       ref={ref}
@@ -243,16 +260,17 @@ export function BringDialog({ open, city = '', campus: preset = '', onClose }) {
       {done ? (
         <div className="bring__done" role="status">
           <h2 id="bring-h" tabIndex={-1}>
-            {done.mail ? 'Almost there.' : `${done.campus} is on the map.`}
+            {done.mail ? 'Almost there.' : 'Request received.'}
           </h2>
-          <p>
-            {done.mail
-              ? 'Your email app has the request ready. Press send and it is ours.'
-              : done.count > 1
-                ? `Thank you, ${done.first}. You are voice #${done.count} for your campus. The more voices, the sooner the train stops there.`
-                : `Thank you, ${done.first}. You are the first voice for your campus. Bring a few more and the train will stop there sooner.`}
-          </p>
-          <ShareButton label="Rally your campus" text={rally} url={`${pageUrl()}#bring=${encodeURIComponent(done.campus)}`} className="share--big" />
+          {done.mail ? (
+            <p>Your email app has the request ready. Press send, and we will take it from there.</p>
+          ) : (
+            <p>
+              Thank you, {done.first}. We will write to you at <b>{done.email}</b> about bringing Futuready to {done.college}, {done.city}.
+            </p>
+          )}
+          <p className="bring__also">Know someone who would love this?</p>
+          <ShareButton label="Share with friends" />
           <form method="dialog">
             <button className="link-btn">Back to the story</button>
           </form>
@@ -262,47 +280,57 @@ export function BringDialog({ open, city = '', campus: preset = '', onClose }) {
           <h2 id="bring-h" tabIndex={-1}>
             Bring Futuready to your campus
           </h2>
-          <p className="note">› Free for your campus. Takes 20 seconds.{city ? ` · ${city}` : ''}</p>
-          <Field id="bf-campus" label="College or campus" error="Please enter your college or campus.">
-            <input id="bf-campus" name="campus" required maxLength={140} autoComplete="organization" enterKeyHint="next" value={campus} onChange={e => setCampus(e.target.value)} placeholder="e.g. COEP, Pune" />
-          </Field>
-          <Field id="bf-name" label="Your name" error="Please enter your name.">
-            <input id="bf-name" name="name" required maxLength={80} autoComplete="name" enterKeyHint="next" />
-          </Field>
-          <fieldset className="chips">
-            <legend>You are</legend>
-            {ROLES.map(r => (
-              <label key={r} className={role === r ? 'is-on' : ''}>
-                <input type="radio" name="role" value={r} checked={role === r} onChange={() => setRole(r)} />
-                {r}
-              </label>
-            ))}
-          </fieldset>
-          <Field id="bf-email" label="Email" error="Please enter an email like you@college.edu.">
-            <input id="bf-email" name="email" type="email" required maxLength={120} autoComplete="email" autoCapitalize="none" autoCorrect="off" spellCheck={false} enterKeyHint={more ? 'next' : 'send'} />
-          </Field>
-          {more ? (
-            <div className="bring__more">
-              <Field id="bf-phone" label="Phone" hint="(optional)" error="Please check the number.">
-                <input id="bf-phone" name="phone" type="tel" maxLength={20} autoComplete="tel" inputMode="tel" pattern="[0-9+()\s\-]{7,20}" enterKeyHint="next" />
-              </Field>
-              <Field id="bf-li" label="LinkedIn" hint="(optional)" error="">
-                <input id="bf-li" name="linkedin" maxLength={160} autoComplete="url" autoCapitalize="none" autoCorrect="off" spellCheck={false} placeholder="linkedin.com/in/…" enterKeyHint="send" />
-              </Field>
-            </div>
-          ) : (
-            <button type="button" className="link-btn" onClick={() => setMore(true)}>
-              + Add phone or LinkedIn (optional)
+          <ol className="bring__steps" aria-label={`Step ${step} of 2`}>
+            <li className={step === 1 ? 'is-on' : ''} aria-hidden="true" />
+            <li className={step === 2 ? 'is-on' : ''} aria-hidden="true" />
+          </ol>
+
+          <div data-step="1" className="bring__step" hidden={step !== 1}>
+            <Field id="bf-college" label="College name" error="Please enter your college name.">
+              <input id="bf-college" name="college" required maxLength={140} autoComplete="organization" enterKeyHint="next" value={college} onChange={e => setCollege(e.target.value)} />
+            </Field>
+            <Field id="bf-city" label="City" error="Please enter the city.">
+              <input id="bf-city" name="city" required maxLength={60} autoComplete="address-level2" enterKeyHint="next" value={city} onChange={e => setCity(e.target.value)} />
+            </Field>
+            <Field id="bf-name" label="Your name" error="Please enter your name.">
+              <input id="bf-name" name="name" required maxLength={80} autoComplete="name" enterKeyHint="next" />
+            </Field>
+            <button type="button" className="pill pill--ink pill--big" onClick={next}>
+              Next
             </button>
-          )}
-          {failed ? (
-            <p className="bring__failed" role="alert">
-              {failed}
-            </p>
-          ) : null}
-          <button type="submit" className="pill pill--ink pill--big" disabled={busy}>
-            {busy ? 'Sending…' : 'Request Futuready'}
-          </button>
+          </div>
+
+          <div data-step="2" className="bring__step" hidden={step !== 2}>
+            <Field id="bf-email" label="Your email" error="Please enter an email like you@college.edu.">
+              <input id="bf-email" name="email" type="email" required maxLength={120} autoComplete="email" autoCapitalize="none" autoCorrect="off" spellCheck={false} enterKeyHint="next" />
+            </Field>
+            <fieldset className="chips">
+              <legend>You are</legend>
+              {ROLES.map(r => (
+                <label key={r} className={role === r ? 'is-on' : ''}>
+                  <input type="radio" name="role" value={r} checked={role === r} onChange={() => setRole(r)} />
+                  {r}
+                </label>
+              ))}
+            </fieldset>
+            <Field id="bf-phone" label="Phone" hint="(optional)" error="Please check the number.">
+              <input id="bf-phone" name="phone" type="tel" maxLength={20} autoComplete="tel" inputMode="tel" pattern="[0-9+()\s\-]{7,20}" enterKeyHint="next" />
+            </Field>
+            <Field id="bf-li" label="LinkedIn" hint="(optional)" error="">
+              <input id="bf-li" name="linkedin" maxLength={160} autoComplete="url" autoCapitalize="none" autoCorrect="off" spellCheck={false} placeholder="linkedin.com/in/…" enterKeyHint="send" />
+            </Field>
+            {failed ? (
+              <p className="bring__failed" role="alert">
+                {failed}
+              </p>
+            ) : null}
+            <button type="submit" className="pill pill--ink pill--big" disabled={busy}>
+              {busy ? 'Sending…' : 'Request Futuready'}
+            </button>
+            <button type="button" className="link-btn bring__back" onClick={() => setStep(1)}>
+              ← Back
+            </button>
+          </div>
         </form>
       )}
     </dialog>

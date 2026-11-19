@@ -331,14 +331,18 @@ const SFX = {
   // the robot band: a fanfare on the chord, a trumpet note, a drum, a hi-hat
   jingle: t => {
     const r = PROG[chord].v.map(mtof);
-    [r[0], r[1], r[2], r[0] * 2].forEach((f, i) => tone(t + i * 0.13, i === 3 ? 0.45 : 0.14, { f, type: 'sawtooth', peak: 0.08, lp: 1800 }));
+    [r[0], r[1], r[2], r[0] * 2].forEach((f, i) => tone(t + i * 0.13, i === 3 ? 0.45 : 0.14, { f, type: 'sawtooth', peak: 0.14, lp: 1800 }));
   },
-  horn: t => tone(t, 0.55, { f: inKey(67), type: 'sawtooth', peak: 0.09, a: 0.03, lp: 1500, vib: 0.006 }),
+  horn: t => {
+    const f = inKey(67);
+    tone(t, 0.6, { f, type: 'sawtooth', peak: 0.22, a: 0.03, lp: 1700, vib: 0.006 });
+    tone(t, 0.6, { f: f * 2, type: 'triangle', peak: 0.06, a: 0.03, vib: 0.006 });
+  },
   drum: t => {
-    tone(t, 0.26, { f: 170, f2: 62, peak: 0.45 });
+    tone(t, 0.26, { f: 170, f2: 62, peak: 0.65 });
     noise(t, 0.07, { type: 'lowpass', f: 700, peak: 0.18, a: 0.001 });
   },
-  hat: t => noise(t, 0.05, { type: 'highpass', f: 7000, peak: 0.12, a: 0.001 }),
+  hat: t => noise(t, 0.06, { type: 'highpass', f: 7000, peak: 0.22, a: 0.001 }),
   // the passport, complete
   chime: t => {
     const r = PROG[chord].v.map(mtof);
