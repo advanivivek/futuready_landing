@@ -522,8 +522,8 @@ export default function Story() {
     const t = setTimeout(() => {
       [
         'girl-sit', 'girl-list', 'girl-lens', 'girl-baton', 'girl-walk', 'boy-sit', 'boy-plan', 'boy-run', 'boy-wave', 'bot-type', 'bot-cage-open', 'bot-cage',
-        'bot-paper', 'bot-block', 'bot-horn', 'bot-wave', 'bug', 'tv', 'blocks', 'stamp', 'squad', 'engine', 'coach', 'crowd', 'vivek-walk',
-        'vivek-dance', 'vivek-kick', 'vivek-step', 'vivek-chair', 'vivek-lean', 'tv-04-tools-stage', 'tv-07-bug1-reveal-stage', 'tv-08-podium-stage', 'tv-words-feel',
+        'bot-paper', 'bot-block', 'bot-horn', 'bot-wave', 'bug', 'tv', 'blocks', 'stamp', 'squad', 'engine', 'coach', 'crowd', 'vivek-dance',
+        'vivek-kick', 'vivek-walk', 'vivek-step', 'vivek-chair', 'vivek-lean', 'tv-04-tools-stage', 'tv-07-bug1-reveal-stage', 'tv-08-podium-stage', 'tv-words-feel',
       ].forEach((n, j) => {
         // fetch and decode ahead, a few at a time, so no picture decodes in the middle of a scroll
         setTimeout(() => {

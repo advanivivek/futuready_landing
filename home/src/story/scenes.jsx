@@ -227,9 +227,9 @@ function You({ s, k }) {
 // standing poses only (tap him for the next). k: how much taller the picture is than he is (a chair, a raised foot),
 // so he is the same size in every one. a: width / height of the picture.
 const POSES = [
-  { src: 'vivek-walk', a: 343 / 1022, k: 1 },
   { src: 'vivek-dance', a: 443 / 1022, k: 1.03 },
   { src: 'vivek-kick', a: 692 / 986, k: 1.05 },
+  { src: 'vivek-walk', a: 343 / 1022, k: 1 },
   { src: 'vivek-step', a: 287 / 1002, k: 1.3 },
   { src: 'vivek-chair', a: 715 / 1022, k: 1.33 },
   { src: 'vivek-lean', a: 341 / 1010, k: 1.06 },
@@ -950,7 +950,7 @@ export const SCENES = [
       const xs = endRow(k);
       return END.map((p, i) => <Cut key={p.src} src={A(p.src)} alt={p.alt} x={xs[i]} h={pick(p.h, k.land) * endScale(k)} d={p.d} dx={(1 - out(seg(s, i * 0.05, 0.5 + i * 0.05))) * [-80, 60, 80][i]} />);
     },
-    ui: (s, { land, openBring }) => (
+    ui: (s, { openBring }) => (
       <>
         <div className="title title--end" style={{ opacity: seg(s, 0, 0.35) }}>
           <h2 className="display">
@@ -970,7 +970,12 @@ export const SCENES = [
         <footer className="foot" style={{ opacity: seg(s, 0.3, 0.6) }}>
           <img src={`${BASE}h2s-logo.png`} alt="Hack2skill" width="48" height="18" />
           <a href={`mailto:${SUPPORT}`}>{SUPPORT}</a>
-          <span>{land ? 'Futuready by Hack2skill · ' : ''}© 2026</span>
+          <span>
+            Designed by{' '}
+            <a href={TRAINER.linkedin} target="_blank" rel="noopener noreferrer">
+              Vivek Advani
+            </a>
+          </span>
         </footer>
       </>
     ),
