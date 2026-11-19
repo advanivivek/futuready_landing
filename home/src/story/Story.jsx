@@ -95,13 +95,10 @@ function tearEdge(p, { W, H }, lift = 0) {
 }
 const clip = v => ({ clipPath: v, WebkitClipPath: v });
 const poly = pts => `polygon(${pts.map(([x, y]) => `${x.toFixed(1)}px ${y.toFixed(1)}px`).join(',')})`;
-const tvZoom = g => {
-  const ox = g.l + g.w / 2;
-  const oy = g.t + g.h / 2;
-  const Z = Math.max((2 * ox) / g.w, (2 * (g.W - ox)) / g.w, (2 * oy) / g.h, (2 * (g.H - oy)) / g.h) * 1.02;
-  return { ox, oy, Z };
-};
-
+// the TV's screen and how far the camera flies toward it. The lab scene is only ever scaled up to 2.4x:
+// scaling a whole screen up ten times (straight into the glass) made phones and laptops drop tiles and flicker.
+const TV_ZOOM = 2.4;
+const tvZoom = g => ({ ox: g.l + g.w / 2, oy: g.t + g.h / 2, Z: TV_ZOOM });
 const FX = {
   // a sheet of paper slides up over the last
   slide: {
@@ -116,7 +113,7 @@ const FX = {
       const R = Math.hypot(Math.max(g.x, g.W - g.x), Math.max(g.y, g.H - g.y));
       return { style: clip(`circle(${lerp(g.r0 || 0, R, inout(p)).toFixed(1)}px at ${g.x.toFixed(1)}px ${g.y.toFixed(1)}px)`) };
     },
-    out: (p, g) => (g.zoom && !g.calm ? { style: { transform: `scale(${1 + g.zoom * inout(p) * inout(p)})`, transformOrigin: `${g.x}px ${g.y}px` } } : null),
+    out: (p, g) => (g.zoom && !g.calm ? { style: { transform: `scale(${1 + g.zoom * inout(p) * inout(p)})`, transformOrigin: `${g.x}px ${g.y}px`, willChange: 'transform' } } : null),
   },
   // torn up from the bottom, leaving a white paper edge
   tear: {
@@ -134,6 +131,7 @@ const FX = {
       return {
         style: {
           transform: `translate3d(0, ${e * e * 80}%, 0) scale(${1 - 0.42 * e}) rotate(${-7 * e}deg)`,
+          willChange: 'transform',
           borderRadius: `${18 * e}px`,
           boxShadow: `0 0 0 ${Math.round(12 * e)}px #fffcf5, 0 40px 80px rgba(10, 12, 30, ${0.4 * e})`,
         },
@@ -162,15 +160,22 @@ const FX = {
     edge: 0.8,
     in: (p, g) => {
       const { ox, oy, Z } = tvZoom(g);
-      const z = lerp(1, Z, inout(p));
-      const box = (e, k) => [ox - (ox - g.l) * k, oy - (oy - g.t) * k, ox + (g.l + g.w - ox) * k, oy + (g.t + g.h - oy) * k][e];
-      const shape = `inset(${box(1, z)}px ${g.W - box(2, z)}px ${g.H - box(3, z)}px ${box(0, z)}px round ${g.round * z}px)`;
-      return { style: clip(shape), inner: g.calm ? null : { transform: `scale(${z / Z})`, transformOrigin: `${ox}px ${oy}px` } };
+      const zo = g.calm ? 1 : lerp(1, Z, inout(p));
+      // the TV's glass, where the camera has moved it, opening out to the whole page in the second half
+      const glass = [ox + (g.l - ox) * zo, oy + (g.t - oy) * zo, ox + (g.l + g.w - ox) * zo, oy + (g.t + g.h - oy) * zo];
+      const w = inout(seg(p, 0.3, 1));
+      const [L, T, R, B] = [lerp(glass[0], 0, w), lerp(glass[1], 0, w), lerp(glass[2], g.W, w), lerp(glass[3], g.H, w)];
+      // the trainer's scene, fitted to that window
+      const k = (B - T) / g.H;
+      return {
+        style: clip(`inset(${T.toFixed(1)}px ${(g.W - R).toFixed(1)}px ${(g.H - B).toFixed(1)}px ${L.toFixed(1)}px round ${(g.round * zo * (1 - w)).toFixed(1)}px)`),
+        inner: { transform: `translate3d(${((L + R) / 2 - g.W / 2).toFixed(1)}px, ${((T + B) / 2 - g.H / 2).toFixed(1)}px, 0) scale(${k.toFixed(4)})`, transformOrigin: '50% 50%', willChange: 'transform' },
+      };
     },
     out: (p, g) => {
       if (g.calm) return null;
       const { ox, oy, Z } = tvZoom(g);
-      return { style: { transform: `scale(${lerp(1, Z, inout(p))})`, transformOrigin: `${ox}px ${oy}px` } };
+      return { style: { transform: `scale(${lerp(1, Z, inout(p))})`, transformOrigin: `${ox}px ${oy}px`, willChange: 'transform' } };
     },
   },
 };
@@ -180,7 +185,7 @@ const TSOUND = { slide: 'whoosh', iris: 'swell', tear: 'tear', shrink: 'whoosh',
   Scroll position in screens. On phones it is eased toward the finger with a time-based
   exponential (the same feel at 60 Hz and 120 Hz); laptops get Lenis instead (see App).
 */
-function useScreens(unit, smooth) {
+function useScreens(unit, smooth, paused) {
   const [u, setU] = useState(0);
   useEffect(() => {
     let target = scrollY / unit;
@@ -200,6 +205,8 @@ function useScreens(unit, smooth) {
       }
     };
     const on = () => {
+      // while a form is open the phone may scroll the page to show the keyboard: the story ignores it
+      if (paused.current) return;
       target = scrollY / unit;
       if (!raf) raf = requestAnimationFrame(tick);
     };
@@ -209,7 +216,7 @@ function useScreens(unit, smooth) {
       cancelAnimationFrame(raf);
       removeEventListener('scroll', on);
     };
-  }, [unit, smooth]);
+  }, [unit, smooth, paused]);
   return u;
 }
 
@@ -303,7 +310,33 @@ export default function Story() {
   const cities = useCities();
   const jumping = useRef(0);
   const [bring, setBring] = useState(null);
-  const openBring = useCallback((city = '') => setBring({ city }), []);
+  // While the campus form is open, the story is paused: nothing reacts to scrolling (a phone scrolls the page
+  // to lift a field above the keyboard), nothing springs back. When it closes, the page goes back exactly
+  // where it was and the story picks up again.
+  const paused = useRef(false);
+  const savedY = useRef(0);
+  const openBring = useCallback((city = '') => {
+    savedY.current = scrollY;
+    paused.current = true;
+    window.__lenis?.stop();
+    setBring({ city });
+  }, []);
+  const closeBring = useCallback(() => {
+    setBring(null);
+    const y = savedY.current;
+    const back = () => {
+      if (window.__lenis) {
+        window.__lenis.start();
+        window.__lenis.scrollTo(y, { immediate: true, force: true });
+      } else scrollTo(0, y);
+    };
+    back();
+    // the keyboard closing can scroll the page once more: put it back again, then let the story follow
+    setTimeout(() => {
+      if (Math.abs(scrollY - y) > 2) back();
+      paused.current = false;
+    }, 350);
+  }, []);
 
   // One "screen" = the small viewport height (100svh), so iOS toolbars never move the floor or the story.
   useEffect(() => {
@@ -318,9 +351,10 @@ export default function Story() {
   const H = unit;
   const land = W > H * 1.05;
   const gutter = land && W >= 760 ? Math.max(48, W * 0.04) : 28;
-  const u = useScreens(unit, touch && !reduced);
+  const u = useScreens(unit, touch && !reduced, paused);
   const uu = Math.min(u, TOTAL);
-  const over = clamp((u - TOTAL) / EXTRA);
+  // a hair past the end (a trackpad's last nudge) shows nothing; past that the page starts to lift
+  const over = clamp((u - TOTAL - 0.015) / EXTRA);
 
   const sAt = id => {
     const i = INDEX[id];
@@ -436,14 +470,20 @@ export default function Story() {
   useEffect(() => {
     let timer = 0;
     let touching = false;
+    let busyTill = 0;
     const go = (y, d) => {
-      if (window.__lenis) window.__lenis.scrollTo(y, { duration: d, easing: t => 1 - Math.pow(1 - t, 3) });
+      // while it glides there, a trackpad's leftover momentum cannot push it back (that made a loop)
+      busyTill = performance.now() + d * 1000 + 300;
+      if (window.__lenis) window.__lenis.scrollTo(y, { duration: d, easing: t => 1 - Math.pow(1 - t, 3), lock: true, force: true });
       else window.scrollTo({ top: y, behavior: 'smooth' });
     };
     const check = () => {
-      if (touching || window.__still || performance.now() < jumping.current) return;
+      if (touching || paused.current || window.__still) return;
+      const now = performance.now();
+      const wait = Math.max(busyTill, jumping.current) - now;
+      if (wait > 0) return later(wait + 30);
       const r = scrollY / unit;
-      if (r > TOTAL + 0.004) return go(TOTAL * unit, 0.9);
+      if (r > TOTAL + 0.03) return go(TOTAL * unit, 0.8);
       for (let i = 1; i < SCENES.length; i++) {
         const T = SCENES[i].enter.T;
         const b = TL[i].start;
@@ -620,7 +660,7 @@ export default function Story() {
         </div>
         <div className="progress" style={{ transform: `scaleX(${clamp(u / TOTAL)})` }} aria-hidden="true" />
       </div>
-      <BringDialog open={!!bring} city={bring?.city} onClose={() => setBring(null)} />
+      <BringDialog open={!!bring} city={bring?.city} onClose={closeBring} />
     </>
   );
 }

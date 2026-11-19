@@ -14,8 +14,8 @@
  */
 const SHEET = 'Requests';
 const SUMMARY = 'By campus';
-const HEAD = ['Time', 'College', 'City', 'Name', 'Role', 'Email', 'Phone', 'LinkedIn', 'From page'];
-const WIDTHS = [150, 280, 130, 180, 110, 230, 130, 230, 220];
+const HEAD = ['Time', 'College', 'City', 'Name', 'Role', 'Email', 'Phone', 'From page'];
+const WIDTHS = [150, 280, 130, 180, 110, 230, 130, 220];
 const ROLES = ['Student', 'Faculty', 'Management', 'Club lead', 'Other'];
 
 function setup_(ss) {
@@ -28,7 +28,7 @@ function setup_(ss) {
   sh.setFrozenRows(1);
   WIDTHS.forEach((w, i) => sh.setColumnWidth(i + 1, w));
   sh.getRange('A2:A').setNumberFormat('dd mmm yyyy, hh:mm');
-  sh.getRange('B2:I').setWrap(false);
+  sh.getRange('B2:H').setWrap(false);
   sh.getRange('E2:E').setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(ROLES, true).setAllowInvalid(true).build());
   sh.getRange(1, 1, sh.getMaxRows(), HEAD.length).applyRowBanding(SpreadsheetApp.BandingTheme.LIGHT_GREY, true, false);
   sh.getRange(1, 1, sh.getMaxRows(), HEAD.length).createFilter();
@@ -81,7 +81,7 @@ function doPost(e) {
       // a leading apostrophe stops a spreadsheet from treating text as a formula
       const safe = (v) => (/^[=+\-@]/.test(v) ? "'" + v : v);
       sh.appendRow([new Date(), safe(college), safe(city), safe(name), role, email,
-        safe(clean(d.phone, 20)), safe(clean(d.linkedin, 160)), clean(d.page, 200)]);
+        safe(clean(d.phone, 20)), clean(d.page, 200)]);
     }
     return json_({ ok: true, already: seen });
   } catch (err) {

@@ -11,10 +11,10 @@ export const pageUrl = () => SITE_URL || new URL(BASE, location.href).href;
 // the share symbol everyone knows: three dots joined by two lines
 export const ShareIcon = ({ size = 16 }) => (
   <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-    <circle cx="18" cy="5" r="2.6" fill="currentColor" stroke="none" />
-    <circle cx="6" cy="12" r="2.6" fill="currentColor" stroke="none" />
-    <circle cx="18" cy="19" r="2.6" fill="currentColor" stroke="none" />
-    <path d="m8.3 10.8 7.4-4.3M8.3 13.2l7.4 4.3" />
+    <circle cx="17.6" cy="5.4" r="3.4" fill="currentColor" stroke="none" />
+    <circle cx="6.2" cy="12" r="3.4" fill="currentColor" stroke="none" />
+    <circle cx="17.6" cy="18.6" r="3.4" fill="currentColor" stroke="none" />
+    <path d="m8.8 10.5 6.2-3.6M8.8 13.5l6.2 3.6" />
   </svg>
 );
 
@@ -139,7 +139,6 @@ export function BringDialog({ open, city: presetCity = '', onClose }) {
       // laptops start typing straight away; phones keep the keyboard down until a field is tapped
       if (matchMedia('(pointer: fine)').matches) d.querySelector('#bf-college')?.focus();
       else d.querySelector('#bring-h')?.focus();
-      window.__lenis?.stop();
       sound.play('whoosh');
     }
     if (!open && d.open) d.close();
@@ -206,7 +205,7 @@ export function BringDialog({ open, city: presetCity = '', onClose }) {
         if (out.ok === false) throw new Error(out.error || 'failed');
       } else {
         // not connected to the Google Sheet yet: hand the request to their email app instead
-        const body = ['College: ' + data.college, 'City: ' + data.city, 'Name: ' + data.name, 'I am: ' + data.role, 'Email: ' + data.email, 'Phone: ' + (data.phone || ''), 'LinkedIn: ' + (data.linkedin || '')].join('\n');
+        const body = ['College: ' + data.college, 'City: ' + data.city, 'Name: ' + data.name, 'I am: ' + data.role, 'Email: ' + data.email, 'Phone: ' + (data.phone || '')].join('\n');
         location.href = `mailto:${SUPPORT}?subject=${encodeURIComponent(`Bring Futuready to ${data.college}, ${data.city}`)}&body=${encodeURIComponent(body)}`;
       }
       setDone({ ...data, first: String(data.name).trim().split(/\s+/)[0], mail: !BRING_FORM_URL });
@@ -231,10 +230,7 @@ export function BringDialog({ open, city: presetCity = '', onClose }) {
       className="sheet bring"
       closedby="any"
       aria-labelledby="bring-h"
-      onClose={() => {
-        window.__lenis?.start();
-        onClose();
-      }}
+      onClose={onClose}
     >
       <form method="dialog" className="sheet__close">
         <button aria-label="Close">×</button>
@@ -314,10 +310,7 @@ export function BringDialog({ open, city: presetCity = '', onClose }) {
               ))}
             </fieldset>
             <Field id="bf-phone" label="Phone" hint="(optional)" error="Please check the number.">
-              <input id="bf-phone" name="phone" type="tel" maxLength={20} autoComplete="tel" inputMode="tel" pattern="[0-9+()\s\-]{7,20}" enterKeyHint="next" />
-            </Field>
-            <Field id="bf-li" label="LinkedIn" hint="(optional)" error="">
-              <input id="bf-li" name="linkedin" maxLength={160} autoComplete="url" autoCapitalize="none" autoCorrect="off" spellCheck={false} placeholder="linkedin.com/in/…" enterKeyHint="send" />
+              <input id="bf-phone" name="phone" type="tel" maxLength={20} autoComplete="tel" inputMode="tel" pattern="[0-9+()\s\-]{7,20}" enterKeyHint="send" />
             </Field>
             {failed ? (
               <p className="bring__failed" role="alert">

@@ -659,7 +659,7 @@ export const SCENES = [
         </>
       );
     },
-    ui: s => <LevelLines i={2} s={s} a={['Anyone can', 'stack blocks.']} b={['So learn to architect', 'scalable AI systems.']} />,
+    ui: s => <LevelLines i={2} s={s} a={['Anyone can', 'stack blocks.']} b={['Learn to architect', 'scalable AI systems.']} />,
   },
 
   /* 8. D: a band that never sleeps (tap them: trumpet, drum, hi-hat) */
