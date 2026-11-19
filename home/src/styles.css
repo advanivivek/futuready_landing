@@ -1607,11 +1607,11 @@ button.coach {
   margin-top: 22px;
 }
 
-/* the header share: just the icon, like the speaker next to it */
+/* the header share: just the icon, right beside the speaker; it hugs the icon and stays easy to tap (24 x 44) */
 .share--head .share__btn {
-  width: 44px;
+  min-width: 24px;
   height: 44px;
-  padding: 0;
+  padding: 0 2px;
   justify-content: center;
   color: var(--ink);
   transition: color 0.3s;
@@ -2233,8 +2233,7 @@ dialog.sheet:modal {
   .head__actions {
     gap: 0;
   }
-  .snd,
-  .share--head .share__btn {
+  .snd {
     width: 40px;
   }
   .pill--head {

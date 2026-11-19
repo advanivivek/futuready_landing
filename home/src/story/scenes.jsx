@@ -953,7 +953,10 @@ export const SCENES = [
     ui: (s, { land, openBring }) => (
       <>
         <div className="title title--end" style={{ opacity: seg(s, 0, 0.35) }}>
-          <h2 className="display">Didn’t find your city?</h2>
+          <h2 className="display">
+            <span>Didn’t find</span>
+            <span>your city?</span>
+          </h2>
           <div className="end-cta">
             <a className="pill pill--yellow" href={VIRTUAL_URL}>
               Attend Virtual
