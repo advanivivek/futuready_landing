@@ -950,7 +950,7 @@ export const SCENES = [
       const xs = endRow(k);
       return END.map((p, i) => <Cut key={p.src} src={A(p.src)} alt={p.alt} x={xs[i]} h={pick(p.h, k.land) * endScale(k)} d={p.d} dx={(1 - out(seg(s, i * 0.05, 0.5 + i * 0.05))) * [-80, 60, 80][i]} />);
     },
-    ui: (s, { openBring }) => (
+    ui: (s, { land, openBring }) => (
       <>
         <div className="title title--end" style={{ opacity: seg(s, 0, 0.35) }}>
           <h2 className="display">
@@ -970,12 +970,7 @@ export const SCENES = [
         <footer className="foot" style={{ opacity: seg(s, 0.3, 0.6) }}>
           <img src={`${BASE}h2s-logo.png`} alt="Hack2skill" width="48" height="18" />
           <a href={`mailto:${SUPPORT}`}>{SUPPORT}</a>
-          <span>
-            Designed by{' '}
-            <a href={TRAINER.linkedin} target="_blank" rel="noopener noreferrer">
-              Vivek Advani
-            </a>
-          </span>
+          <span>{land ? 'Futuready by Hack2skill · ' : ''}© 2026</span>
         </footer>
       </>
     ),

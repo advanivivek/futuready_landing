@@ -42,7 +42,7 @@ export const TRAINER = {
   name: 'Vivek Advani',
   linkedin: 'https://www.linkedin.com/in/vivekadvani',
   instagram: 'https://instagram.com/vivekadvani',
-  labels: ['DevRel · Hack2skill', 'Architect', 'Builds AI products', 'Loves Math', 'Dances Salsa', 'Plays music', 'Cares about Humanity'],
+  labels: ['DevRel · Hack2skill', 'Architect', 'Builds AI products', 'Loves Math', 'Dances Salsa', 'Plays music', 'Cares about Humanity', 'Makes sites like these'],
 };
 
 // The five levels of Episode 01. Clear a level, earn a stamp. ink: the stamp's colour on paper.
