@@ -170,3 +170,33 @@ export const Note = ({ o, children }) => (
     {children}
   </p>
 );
+
+/* ---------- haptics ---------- */
+let userInteracted = false;
+if (typeof window !== 'undefined') {
+  const onInteract = () => {
+    userInteracted = true;
+    window.removeEventListener('pointerdown', onInteract, true);
+    window.removeEventListener('keydown', onInteract, true);
+    window.removeEventListener('touchstart', onInteract, true);
+  };
+  window.addEventListener('pointerdown', onInteract, { capture: true, passive: true });
+  window.addEventListener('keydown', onInteract, { capture: true, passive: true });
+  window.addEventListener('touchstart', onInteract, { capture: true, passive: true });
+}
+
+export const canVibrate = () => {
+  if (typeof navigator === 'undefined' || typeof navigator.vibrate !== 'function') return false;
+  if ('userActivation' in navigator) return navigator.userActivation.hasBeenActive;
+  return userInteracted;
+};
+
+export const buzz = p => {
+  try {
+    if (!canVibrate()) return;
+    navigator.vibrate(p);
+  } catch {
+    /* no haptics */
+  }
+};
+

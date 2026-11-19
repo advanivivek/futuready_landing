@@ -402,11 +402,13 @@ function onVisibility() {
   if (document.hidden) {
     ctx.suspend().catch(() => {});
   } else if (pref() !== 'off') {
-    // allowed on most browsers without a tap; if not, the next tap does it (see gesture)
-    ctx.resume().then(
-      () => ctx.state !== 'running' && setState('armed'),
-      () => setState('armed')
-    );
+    if (ctx.state !== 'running') {
+      if (typeof navigator !== 'undefined' && navigator.userActivation?.isActive) {
+        ctx.resume().catch(() => setState('armed'));
+      } else {
+        setState('armed');
+      }
+    }
   }
 }
 
@@ -459,12 +461,13 @@ function disable() {
 }
 
 // every tap (except on the speaker itself, which has its own say) starts the sound, or brings it back
-const GESTURES = ['pointerdown', 'touchend', 'keydown', 'click'];
+const GESTURES = ['pointerup', 'touchend', 'keydown', 'click'];
 const gesture = e => {
   if (pref() === 'off') return;
   if (ctx && ctx.state === 'running' && state === 'on') return;
   if (e.target?.closest?.('[data-sound-toggle], [data-no-sound]')) return;
   if (e.type === 'keydown' && (e.key === 'Escape' || e.metaKey || e.ctrlKey)) return;
+  if (typeof navigator !== 'undefined' && navigator.userActivation && !navigator.userActivation.hasBeenActive) return;
   enable();
 };
 

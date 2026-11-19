@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { BRING_FORM_URL, LEVELS, SHARE_TEXT, SITE_URL, SUPPORT } from '../data';
 import { sound } from './sound';
+import { buzz } from './kit';
 
 const BASE = import.meta.env.BASE_URL;
 export const pageUrl = () => SITE_URL || new URL(BASE, location.href).href;
@@ -211,11 +212,7 @@ export function BringDialog({ open, city: presetCity = '', onClose }) {
       setDone({ ...data, first: String(data.name).trim().split(/\s+/)[0], mail: !BRING_FORM_URL });
       sound.play('thunk');
       setTimeout(() => sound.play('chime'), 380);
-      try {
-        navigator.vibrate?.([14, 40, 24]);
-      } catch {
-        /* no haptics */
-      }
+      buzz([14, 40, 24]);
       requestAnimationFrame(() => ref.current.querySelector('#bring-h')?.focus());
     } catch {
       setFailed('That did not go through. Please check your connection and try again.');

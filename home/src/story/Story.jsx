@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { back, clamp, inout, lerp, out, seg, Stage, useMedia } from './kit';
+import { back, buzz, clamp, inout, lerp, out, seg, Stage, useMedia } from './kit';
 import { SCENES } from './scenes';
 import { sound } from './sound';
 import { Book, passportPose, STAMP_AT } from './Passport';
 import { useCities } from '../events';
 import { BringDialog, ShareButton } from './Extras';
+import { TV_SCREENS } from '../data';
 
 // how light a colour is (0 dark, 1 light), for the little line at the bottom
 const light = hex => {
@@ -78,13 +79,6 @@ const rawAt = (i, s) => {
   return (a + b) / 2;
 };
 
-const buzz = p => {
-  try {
-    navigator.vibrate?.(p);
-  } catch {
-    /* no haptics */
-  }
-};
 
 /* ---------- how one scene arrives over another ---------- */
 const JAG = Array.from({ length: 40 }, (_, i) => Math.abs((Math.sin(i * 12.9898) * 43758.5453) % 1));
@@ -520,15 +514,22 @@ export default function Story() {
   // warm the cache with every picture once the first scene is up
   useEffect(() => {
     const t = setTimeout(() => {
-      [
-        'girl-sit', 'girl-list', 'girl-lens', 'girl-baton', 'girl-walk', 'boy-sit', 'boy-plan', 'boy-run', 'boy-wave', 'bot-type', 'bot-cage-open', 'bot-cage',
-        'bot-paper', 'bot-block', 'bot-horn', 'bot-wave', 'bug', 'tv', 'blocks', 'stamp', 'squad', 'engine', 'coach', 'crowd', 'vivek-dance',
-        'vivek-kick', 'vivek-walk', 'vivek-step', 'vivek-chair', 'vivek-lean', 'tv-04-tools-stage', 'tv-07-bug1-reveal-stage', 'tv-08-podium-stage', 'tv-words-feel',
-      ].forEach((n, j) => {
+      const base = import.meta.env.BASE_URL;
+      const urls = [
+        ...[
+          'girl-sit', 'girl-list', 'girl-lens', 'girl-baton', 'girl-walk', 'girl-phone',
+          'boy-sit', 'boy-plan', 'boy-run', 'boy-wave', 'boy-laptop', 'boy-thumb',
+          'bot-type', 'bot-cage-open', 'bot-cage', 'bot-paper', 'bot-block', 'bot-horn', 'bot-wave', 'bot-stand',
+          'bug', 'tv', 'blocks', 'desk', 'stamp', 'squad', 'engine', 'coach', 'crowd',
+          'vivek-dance', 'vivek-kick', 'vivek-walk', 'vivek-step', 'vivek-chair', 'vivek-lean',
+        ].map(n => `${base}story/${n}.webp`),
+        ...TV_SCREENS.map(f => `${base}${f}`),
+      ];
+      urls.forEach((src, j) => {
         // fetch and decode ahead, a few at a time, so no picture decodes in the middle of a scroll
         setTimeout(() => {
           const i = new Image();
-          i.src = `${import.meta.env.BASE_URL}story/${n}.webp`;
+          i.src = src;
           i.decode?.().catch(() => {});
         }, j * 60);
       });
