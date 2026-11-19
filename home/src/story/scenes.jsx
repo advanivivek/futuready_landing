@@ -2,7 +2,8 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { arc, back, Cut, inout, lerp, Lines, Note, out, pick, poke, Rows, seg, Typed } from './kit';
 import { sound } from './sound';
 import { diskPath, GUILLOCHE, kleinPath, SOLIDS, solidPath } from './geometry';
-import { BRING_URL, LEVELS, SUPPORT, TRAINER, VIRTUAL_URL, VOICES_FULL } from '../data';
+import { LEVELS, SUPPORT, TRAINER, TV_SCREENS, VIRTUAL_URL, VOICES_FULL } from '../data';
+import { ShareButton } from './Extras';
 
 /*
   Every scene:
@@ -19,7 +20,9 @@ import { BRING_URL, LEVELS, SUPPORT, TRAINER, VIRTUAL_URL, VOICES_FULL } from '.
   after0 (when the pause ends).
 */
 
-const A = n => `/story/${n}.webp`;
+// pictures live in public/; BASE_URL makes them work at a domain's root or under a folder (hack2skill.com/futuready/)
+const BASE = import.meta.env.BASE_URL;
+const A = n => `${BASE}story/${n}.webp`;
 const CREAM = '#efe6d2';
 const INK = '#161a3a';
 const BLUE = '#3463af';
@@ -433,7 +436,7 @@ export const SCENES = [
           </span>
         </h1>
         <div className="notes rise" style={{ '--d': '0.5s' }}>
-          <p>› A Hack2skill campus bootcamp</p>
+          <p>› A campus builder lab by H2S</p>
           <p>› Now touring India</p>
         </div>
       </div>
@@ -443,7 +446,7 @@ export const SCENES = [
   /* 1. 2031: opens out of her phone, on one robot's keyboard, then pulls back to a room of them */
   {
     id: 'y2031',
-    rest: 1.4,
+    rest: 1.45,
     wall: CREAM,
     floor: BLUE,
     F: 0.26,
@@ -478,7 +481,8 @@ export const SCENES = [
     ui: s => (
       <Lines>
         <Typed text="It’s 2031." p={seg(s, 0.1, 0.45)} className="line" />
-        <Typed text="AI writes the code." p={seg(s, 0.95, 1.35)} className="line" />
+        <Typed text="AI writes" p={seg(s, 0.95, 1.12)} className="line" />
+        <Typed text="all the code." p={seg(s, 1.12, 1.38)} className="line" />
       </Lines>
     ),
   },
@@ -533,7 +537,7 @@ export const SCENES = [
     },
     ui: s => (
       <Lines>
-        <Typed text="It finds its own bugs." p={seg(s, 0.1, 0.55)} className="line" />
+        <Typed text="It finds bugs." p={seg(s, 0.1, 0.45)} className="line" />
         <Typed text="And locks them up before lunch." p={seg(s, 1.0, 1.5)} className="line" />
       </Lines>
     ),
@@ -625,7 +629,7 @@ export const SCENES = [
         <Cut src={A('bug')} alt="A bug, found" x={land ? 0.69 : 0.79} h={[0.06, 0.075]} d={0.06} dy={-(land ? 0.17 : 0.13) * H} z={4} sc={back(seg(s, 0.62, 0.86))} o={seg(s, 0.62, 0.66)} shadow={false} r={20} />
       </>
     ),
-    ui: s => <LevelLines i={1} s={s} a={['If it looks right,', 'Is it really right?']} b={['Learn to evaluate how', 'Anthropic engineers do.']} />,
+    ui: s => <LevelLines i={1} s={s} a={['If it looks right,', 'Is it really right?']} b={['Evaluate like', 'Anthropic engineers.']} />,
   },
 
   /* 7. A: he brings the plan, the blocks follow it */
@@ -652,7 +656,7 @@ export const SCENES = [
         </>
       );
     },
-    ui: s => <LevelLines i={2} s={s} a={['Anyone can', 'stack blocks.']} b={['Learn to architect', 'scalable AI systems.']} />,
+    ui: s => <LevelLines i={2} s={s} a={['Anyone can', 'stack blocks.']} b={['So learn to architect', 'scalable AI systems.']} />,
   },
 
   /* 8. D: a band that never sleeps (tap them: trumpet, drum, hi-hat) */
@@ -745,6 +749,7 @@ export const SCENES = [
             Attend Futuready
           </button>
           <p className="note">› Free to attend</p>
+          <ShareButton label="Tell your squad first" />
         </div>
       </>
     ),
@@ -763,14 +768,14 @@ export const SCENES = [
     cues: [[0.15, 'tv']],
     cam: (s, { land }) => ({ z: lerp(1.1, 1, out(seg(s, 0, 0.9))), x: land ? 0.4 : 0.34, y: 0.7 }),
     world: (s, { W }) => {
-      const screens = ['tv-04-tools-stage', 'tv-07-bug1-reveal-stage', 'tv-08-podium-stage', 'tv-words-feel'];
-      const i = Math.min(3, Math.floor(seg(s, 0.2, 1.6) * 4));
+      const n = TV_SCREENS.length;
+      const i = Math.min(n - 1, Math.floor(seg(s, 0.2, 1.6) * n));
       return (
         <>
           <Cut src={A('tv')} alt="A vintage TV showing the real Builders Lab screens" x={LAB_TV.x} h={LAB_TV.h} d={LAB_TV.d} dy={(1 - back(seg(s, 0.1, 0.55))) * -60} o={seg(s, 0.1, 0.25)}>
             <div className="tv-screen">
-              {screens.map((n, j) => (
-                <img key={n} src={A(n)} alt="" style={{ opacity: j === i ? 1 : 0 }} />
+              {TV_SCREENS.map((f, j) => (
+                <img key={f} src={`${BASE}${f}`} alt="" style={{ opacity: j === i ? 1 : 0 }} />
               ))}
             </div>
           </Cut>
@@ -806,9 +811,14 @@ export const SCENES = [
         <h2 className="trainer-name" style={{ opacity: seg(s, 0.38, 0.55), transform: `translateY(${(1 - out(seg(s, 0.38, 0.6))) * 16}px)` }}>
           {TRAINER.name}
         </h2>
-        <a className="trainer-link" href={TRAINER.url} target="_blank" rel="noopener noreferrer" style={{ opacity: seg(s, 1.0, 1.15), pointerEvents: s > 1.0 ? 'auto' : 'none' }}>
-          LinkedIn ↗
-        </a>
+        <p className="trainer-links" style={{ opacity: seg(s, 1.0, 1.15), pointerEvents: s > 1.0 ? 'auto' : 'none' }}>
+          <a href={TRAINER.linkedin} target="_blank" rel="noopener noreferrer">
+            LinkedIn ↗
+          </a>
+          <a href={TRAINER.instagram} target="_blank" rel="noopener noreferrer">
+            Instagram ↗
+          </a>
+        </p>
       </Lines>
     ),
   },
@@ -868,15 +878,29 @@ export const SCENES = [
           <div className="train" style={{ bottom: t.railY, transform: `translateX(${t.X}px) translateY(${t.shake}px)` }}>
             <img className="train__engine" src={A('engine')} alt="A vintage tin toy train" style={{ height: t.eh, width: t.ew }} draggable={false} />
             <Floaters items={['', '', '', '']} s={s * 1.4} on={t.moving ? 1 : 0.4} x={t.ew * 0.13} y={t.eh * 0.95} rise={H * 0.16} spread={10} className="smoke" />
-            {cities.map((c, i) => (
-              <a key={c.city + i} className={`coach ${i === t.near ? 'is-near' : ''}`} href={c.url} style={{ height: t.ch, width: t.cw, marginLeft: t.gap }} aria-label={`Attend in ${c.city}: ${stationTag(c)}${c.date ? `, ${c.date}` : ''}`}>
-                <img src={A('coach')} alt="" draggable={false} />
-                <span className="coach__board">
-                  <b>{c.city}</b>
-                  <small>{coachTag(c)}</small>
-                </span>
-              </a>
-            ))}
+            {cities.map((c, i) => {
+              const inside = (
+                <>
+                  <img src={A('coach')} alt="" draggable={false} />
+                  <span className="coach__board">
+                    <b>{c.city}</b>
+                    <small>{coachTag(c)}</small>
+                  </span>
+                </>
+              );
+              const style = { height: t.ch, width: t.cw, marginLeft: t.gap };
+              const cls = `coach ${i === t.near ? 'is-near' : ''}`;
+              // a city with its own page opens it; one still boarding soon asks for Futuready there
+              return c.url ? (
+                <a key={c.city + i} className={cls} href={c.url} style={style} aria-label={`Attend in ${c.city}: ${stationTag(c)}${c.date ? `, ${c.date}` : ''}`}>
+                  {inside}
+                </a>
+              ) : (
+                <button key={c.city + i} type="button" className={cls} style={style} onClick={() => k.openBring(c.city)} aria-label={`${c.city}: boarding soon. Ask for Futuready at your campus in ${c.city}`}>
+                  {inside}
+                </button>
+              );
+            })}
           </div>
           <Cut src={A('girl-walk')} alt="She walks to the platform with her suitcase" x={lerp(-0.25, k.land ? 0.18 : 0.2, out(walk))} h={[0.36, 0.46]} d={0.1} z={5} o={walk > 0 ? 1 : 0} />
           <Cut src={A('boy-run')} alt="Her friend runs to catch the train" x={lerp(-0.3, k.land ? 0.36 : 0.64, out(run))} h={[0.33, 0.43]} d={0.13} z={6} o={run > 0 ? 1 : 0} />
@@ -921,19 +945,20 @@ export const SCENES = [
       const xs = endRow(k);
       return END.map((p, i) => <Cut key={p.src} src={A(p.src)} alt={p.alt} x={xs[i]} h={p.h} d={p.d} dx={(1 - out(seg(s, i * 0.05, 0.5 + i * 0.05))) * [-80, 60, 80][i]} />);
     },
-    ui: (s, { land }) => (
+    ui: (s, { land, openBring }) => (
       <>
         <div className="title title--end" style={{ opacity: seg(s, 0, 0.35) }}>
           <h2 className="display">Didn’t find your city?</h2>
           <p className="end-line">
             <a href={VIRTUAL_URL}>Attend Virtual</a>
           </p>
-          <a className="end-bring" href={BRING_URL}>
+          <button type="button" className="end-bring" onClick={() => openBring()}>
             or bring it to your campus
-          </a>
+          </button>
+          <ShareButton label="Be the first to share it" className="share--end" />
         </div>
         <footer className="foot" style={{ opacity: seg(s, 0.3, 0.6) }}>
-          <img src="/h2s-logo.png" alt="Hack2skill" width="48" height="18" />
+          <img src={`${BASE}h2s-logo.png`} alt="Hack2skill" width="48" height="18" />
           <a href={`mailto:${SUPPORT}`}>{SUPPORT}</a>
           <span>{land ? 'Futuready by Hack2skill · ' : ''}© 2026</span>
         </footer>
@@ -949,7 +974,8 @@ function tvScreen({ W, H, land }) {
   const w = h * LAB_TV.a;
   const left = pick(LAB_TV.x, land) * W - w / 2;
   const top = H - (LAB_TV.F - LAB_TV.d) * H - h;
-  return { l: left + 0.135 * w, t: top + 0.135 * h, w: 0.53 * w, h: 0.43 * h, round: 0.1 * w };
+  // the see-through glass in tv.webp: 11.6% in from the left, 11.7% down, 59.7% wide, 48.7% tall
+  return { l: left + 0.116 * w, t: top + 0.117 * h, w: 0.597 * w, h: 0.487 * h, round: 0.09 * w };
 }
 
 /* where the robot, its cage and the bug sit in the catch scene */

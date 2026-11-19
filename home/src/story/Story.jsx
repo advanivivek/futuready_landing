@@ -4,6 +4,16 @@ import { SCENES } from './scenes';
 import { sound } from './sound';
 import { Book, passportPose, STAMP_AT } from './Passport';
 import { useCities } from '../events';
+import { BringDialog } from './Extras';
+
+// how light a colour is (0 dark, 1 light), for the little line at the bottom
+const light = hex => {
+  const n = parseInt(hex.slice(1), 16);
+  return (0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255;
+};
+const KEEP = 'futuready-at';
+// read once, as the page loads: a shared "add your voice" link
+const SHARED = typeof location !== 'undefined' ? /^#bring(?:=(.*))?$/.exec(location.hash) : null;
 
 /*
   The timeline. Scrolling moves through the scenes, measured in screens (one screen = 100svh).
@@ -84,6 +94,7 @@ function tearEdge(p, { W, H }, lift = 0) {
   const n = 30;
   return Array.from({ length: n + 1 }, (_, j) => [(j / n) * W, H * (1.15 - 1.4 * e) + (j / n - 0.5) * 0.16 * H + (JAG[j] - 0.5) * 16 - lift * (0.55 + JAG[j + 3])]);
 }
+const clip = v => ({ clipPath: v, WebkitClipPath: v });
 const poly = pts => `polygon(${pts.map(([x, y]) => `${x.toFixed(1)}px ${y.toFixed(1)}px`).join(',')})`;
 const tvZoom = g => {
   const ox = g.l + g.w / 2;
@@ -104,14 +115,14 @@ const FX = {
     edge: 0.75,
     in: (p, g) => {
       const R = Math.hypot(Math.max(g.x, g.W - g.x), Math.max(g.y, g.H - g.y));
-      return { style: { clipPath: `circle(${lerp(g.r0 || 0, R, inout(p)).toFixed(1)}px at ${g.x.toFixed(1)}px ${g.y.toFixed(1)}px)` } };
+      return { style: clip(`circle(${lerp(g.r0 || 0, R, inout(p)).toFixed(1)}px at ${g.x.toFixed(1)}px ${g.y.toFixed(1)}px)`) };
     },
-    out: (p, g) => (g.zoom ? { style: { transform: `scale(${1 + g.zoom * inout(p) * inout(p)})`, transformOrigin: `${g.x}px ${g.y}px` } } : null),
+    out: (p, g) => (g.zoom && !g.calm ? { style: { transform: `scale(${1 + g.zoom * inout(p) * inout(p)})`, transformOrigin: `${g.x}px ${g.y}px` } } : null),
   },
   // torn up from the bottom, leaving a white paper edge
   tear: {
     edge: 0.85,
-    in: (p, g) => ({ style: { clipPath: poly([[0, g.H + 80], [g.W, g.H + 80], ...tearEdge(p, g).reverse()]) } }),
+    in: (p, g) => ({ style: clip(poly([[0, g.H + 80], [g.W, g.H + 80], ...tearEdge(p, g).reverse()])) }),
     out: (p, g) => ({ rim: poly([...tearEdge(p, g, 9), ...tearEdge(p, g, -1).reverse()]) }),
   },
   // the last scene shrinks into a photo print and drops away
@@ -144,7 +155,7 @@ const FX = {
   // wiped in from the right, like a train pulling in
   wipe: {
     edge: 0.5,
-    in: p => ({ style: { clipPath: `inset(0 0 0 ${((1 - inout(p)) * 100).toFixed(2)}%)` } }),
+    in: p => ({ style: clip(`inset(0 0 0 ${((1 - inout(p)) * 100).toFixed(2)}%)`) }),
     out: p => ({ style: { transform: `translate3d(${(-inout(p) * 16).toFixed(2)}%, 0, 0)` } }),
   },
   // into the TV: the next scene is on its screen, and the camera flies in
@@ -153,13 +164,12 @@ const FX = {
     in: (p, g) => {
       const { ox, oy, Z } = tvZoom(g);
       const z = lerp(1, Z, inout(p));
-      const l = ox - (ox - g.l) * Z;
-      const t = oy - (oy - g.t) * Z;
-      const r = ox + (g.l + g.w - ox) * Z;
-      const b = oy + (g.t + g.h - oy) * Z;
-      return { style: { transform: `scale(${z / Z})`, transformOrigin: `${ox}px ${oy}px`, clipPath: `inset(${t}px ${g.W - r}px ${g.H - b}px ${l}px round ${g.round * Z}px)` } };
+      const box = (e, k) => [ox - (ox - g.l) * k, oy - (oy - g.t) * k, ox + (g.l + g.w - ox) * k, oy + (g.t + g.h - oy) * k][e];
+      const shape = `inset(${box(1, z)}px ${g.W - box(2, z)}px ${g.H - box(3, z)}px ${box(0, z)}px round ${g.round * z}px)`;
+      return { style: clip(shape), inner: g.calm ? null : { transform: `scale(${z / Z})`, transformOrigin: `${ox}px ${oy}px` } };
     },
     out: (p, g) => {
+      if (g.calm) return null;
       const { ox, oy, Z } = tvZoom(g);
       return { style: { transform: `scale(${lerp(1, Z, inout(p))})`, transformOrigin: `${ox}px ${oy}px` } };
     },
@@ -269,7 +279,8 @@ function Beyond({ over, W }) {
         style={{
           fontSize: size * 0.72,
           bottom: `calc(env(safe-area-inset-bottom) + ${6 + size * 0.7}px)`,
-          clipPath: `inset(-20% ${(1 - seg(over, 0.2, 0.85)) * 100}% -20% -5%)`,
+          // written left to right; the margins leave room for the swashes, which reach past the letters
+          clipPath: `inset(-45% ${(1 - seg(over, 0.2, 0.85)) * 120 - 20}% -45% -20%)`,
           transform: `translate3d(-50%, ${(1 - e) * 40}%, 0) rotate(-4deg)`,
         }}
       >
@@ -292,6 +303,8 @@ export default function Story() {
   const soundState = useSound();
   const cities = useCities();
   const jumping = useRef(0);
+  const [bring, setBring] = useState(null);
+  const openBring = useCallback((city = '', campus = '') => setBring({ city, campus }), []);
 
   // One "screen" = the small viewport height (100svh), so iOS toolbars never move the floor or the story.
   useEffect(() => {
@@ -319,6 +332,46 @@ export default function Story() {
     const i = INDEX[id];
     return clamp(1 + (uu - TL[i].start) / (SCENES[i].enter?.T || 1));
   };
+
+  // Where you were: kept for this tab only, so a phone that reloads the page after a lock (iOS does, to
+  // save memory) puts you back in the same scene instead of at the top. A new visit starts at the top.
+  const unitRef = useRef(unit);
+  useEffect(() => {
+    unitRef.current = unit;
+  }, [unit]);
+  useEffect(() => {
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    let saved = 0;
+    try {
+      saved = Number(sessionStorage.getItem(KEEP)) || 0;
+    } catch {
+      /* private mode */
+    }
+    // two frames in, once the page has its full height
+    if (saved > 0) requestAnimationFrame(() => requestAnimationFrame(() => scrollTo(0, saved * unitRef.current)));
+    const keep = () => {
+      try {
+        sessionStorage.setItem(KEEP, String(Math.min(scrollY / unitRef.current, TOTAL)));
+      } catch {
+        /* private mode */
+      }
+    };
+    const onHide = () => document.visibilityState === 'hidden' && keep();
+    addEventListener('pagehide', keep);
+    document.addEventListener('visibilitychange', onHide);
+    return () => {
+      removeEventListener('pagehide', keep);
+      document.removeEventListener('visibilitychange', onHide);
+    };
+  }, []);
+
+  // a shared "add your voice" link (…#bring=Campus) opens the request, filled in
+  useEffect(() => {
+    if (!SHARED) return;
+    if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+    const t = setTimeout(() => openBring('', SHARED[1] ? decodeURIComponent(SHARED[1]) : ''), 1400);
+    return () => clearTimeout(t);
+  }, [openBring]);
 
   useEffect(() => {
     // for scripts/shots.mjs: where (in px) a scene is at story time s, and halfway through its arrival
@@ -444,7 +497,7 @@ export default function Story() {
         // fetch and decode ahead, a few at a time, so no picture decodes in the middle of a scroll
         setTimeout(() => {
           const i = new Image();
-          i.src = `/story/${n}.webp`;
+          i.src = `${import.meta.env.BASE_URL}story/${n}.webp`;
           i.decode?.().catch(() => {});
         }, j * 60);
       });
@@ -452,19 +505,25 @@ export default function Story() {
     return () => clearTimeout(t);
   }, []);
 
-  const ctx = useMemo(() => ({ W, H, land, jump, cities, reduced }), [W, H, land, jump, cities, reduced]);
-  const geo = enter => ({ W, H, land, ...(enter.at ? enter.at({ W, H, land }) : {}) });
-  const fx = (enter, dir, p) => (reduced ? (dir === 'in' ? { style: { opacity: p } } : null) : FX[enter.type][dir](p, geo(enter)));
+  const ctx = useMemo(() => ({ W, H, land, jump, cities, reduced, openBring }), [W, H, land, jump, cities, reduced, openBring]);
+  // With "reduce motion" on, scenes still change the same way (you drive them with your own scroll), but
+  // nothing zooms: no camera moves, no flying into the TV.
+  const geo = enter => ({ W, H, land, calm: reduced, ...(enter.at ? enter.at({ W, H, land }) : {}) });
+  const fx = (enter, dir, p) => FX[enter.type][dir](p, geo(enter));
 
   // the header takes the colours of whichever scene is behind it
   const nextUp = SCENES[idx + 1];
   const headInk = nextUp && enterP(nextUp.id) > (nextUp.enter.edge ?? FX[nextUp.enter.type].edge) ? nextUp.ink : SCENES[idx].ink;
-  const lift = over > 0 ? H * 0.46 * (1 - Math.pow(1 - over, 2.2)) : 0;
+  // past the end the page lifts; on phones by less, the word there is smaller
+  const lift = over > 0 ? H * (land ? 0.46 : 0.24) * (1 - Math.pow(1 - over, 2.2)) : 0;
 
   // the little line at the bottom: "scroll" at the start, then it fills while a scene holds
   const tc = TL[idx];
   const hp = tc.x0 != null ? clamp((uu - tc.start - tc.x0) / tc.span) : 0;
   const cueO = idx === 0 ? 1 - seg(u, 0.05, 0.3) : seg(hp, 0.04, 0.16) * (1 - seg(hp, 0.86, 1));
+  // it sits on the floor (or the wall, where there is no floor): grey on light colours, cream on dark
+  const under = SCENES[idx].F ? SCENES[idx].floor : SCENES[idx].wall;
+  const cueInk = light(under) > 0.6 ? 'rgba(22, 26, 58, 0.5)' : 'rgba(255, 252, 245, 0.75)';
 
   const pose = passportPose({ t: sAt, enter: enterP, W, H, land, gutter, safe });
 
@@ -472,7 +531,8 @@ export default function Story() {
     <>
       <div ref={probe} className="probe" aria-hidden="true" />
       <div className="track" style={{ height: (TOTAL + EXTRA) * unit + H }} />
-      <div className="theatre">
+      {/* behind the scenes, the colour of the one you are in: a frame not painted in time never flashes dark */}
+      <div className="theatre" style={{ background: over > 0 ? '#0b0820' : SCENES[idx].wall }}>
         {over > 0 ? <Beyond over={over} W={W} /> : null}
         {SCENES.map((sc, i) => {
           const t = TL[i];
@@ -492,7 +552,7 @@ export default function Story() {
           const z = (cam ? cam.z : 1) * push;
           const fin = pin < 1 ? fx(sc.enter, 'in', pin) : null;
           const fout = pout > 0 ? fx(nxt.enter, 'out', pout) : null;
-          const above = fout && !reduced && FX[nxt.enter.type].over;
+          const above = fout && FX[nxt.enter.type].over;
           const last = i === SCENES.length - 1 && lift > 0;
           return (
             <Stage.Provider key={sc.id} value={k}>
@@ -516,12 +576,14 @@ export default function Story() {
                     : null),
                 }}
               >
-                <div className="cam" style={z !== 1 ? { transformOrigin: `${(cam?.x ?? 0.5) * 100}% ${(cam?.y ?? 0.5) * 100}%`, transform: `scale(${z})` } : undefined}>
-                  <div className="wall" />
-                  {sc.F ? <div className="floor" /> : null}
-                  {sc.world ? sc.world(ss, k) : null}
+                <div className="scene__in" style={fin?.inner || undefined}>
+                  <div className="cam" style={z !== 1 ? { transformOrigin: `${(cam?.x ?? 0.5) * 100}% ${(cam?.y ?? 0.5) * 100}%`, transform: `scale(${z})` } : undefined}>
+                    <div className="wall" />
+                    {sc.F ? <div className="floor" /> : null}
+                    {sc.world ? sc.world(ss, k) : null}
+                  </div>
+                  {sc.ui ? sc.ui(ss, k) : null}
                 </div>
-                {sc.ui ? sc.ui(ss, k) : null}
                 {fin?.shade || fout?.shade ? <i className="fx-shade" style={{ opacity: (fin?.shade || 0) + (fout?.shade || 0) }} /> : null}
                 {fout?.rim ? <i className="fx-rim" style={{ clipPath: fout.rim }} /> : null}
               </section>
@@ -532,7 +594,7 @@ export default function Story() {
         <header className={`head ${headInk === CREAM ? 'is-light' : ''}`} style={{ '--ink': headInk }}>
           <a href="#top" className="head__brand" aria-label="Futuready by Hack2skill, back to the start" onClick={e => (e.preventDefault(), jump('title'))}>
             <span>Futuready</span>
-            <img src="/h2s-logo.png" alt="" width="48" height="18" />
+            <img src={`${import.meta.env.BASE_URL}h2s-logo.png`} alt="" width="48" height="18" />
           </a>
           <div className="head__actions">
             <button className="snd" data-sound-toggle="" data-state={soundState} aria-pressed={soundState === 'on'} aria-label="Sound" onClick={() => sound.toggle()}>
@@ -549,7 +611,7 @@ export default function Story() {
             </button>
           </div>
         </header>
-        <div className={`cue ${idx === 0 ? 'cue--start' : ''}`} style={{ opacity: cueO, '--ink': headInk }} aria-hidden="true">
+        <div className={`cue ${idx === 0 ? 'cue--start' : ''}`} style={{ opacity: cueO, color: cueInk }} aria-hidden="true">
           {idx === 0 ? <span>Scroll</span> : null}
           <i>
             <b style={idx === 0 ? undefined : { transform: `scaleY(${hp})` }} />
@@ -557,6 +619,7 @@ export default function Story() {
         </div>
         <div className="progress" style={{ transform: `scaleX(${clamp(u / TOTAL)})` }} aria-hidden="true" />
       </div>
+      <BringDialog open={!!bring} city={bring?.city} campus={bring?.campus} onClose={() => setBring(null)} />
     </>
   );
 }

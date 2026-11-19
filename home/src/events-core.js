@@ -1,5 +1,5 @@
 /*
-  Turns Hack2skill's public event list into the cities on the train.
+  Turns a list of Futuready page links (or Hack2skill's event list) into the cities on the train.
   Plain functions, shared by the page (src/events.js) and the build script (scripts/fetch-events.mjs).
 
   Hack2skill's list:  GET https://hack2skill.com/api/v1/innovator/public/event/list?page=1&records=100
@@ -47,23 +47,47 @@ export function sortCities(list) {
   return [...list].sort((a, b) => ORDER[a.status] - ORDER[b.status] || when(a) - when(b));
 }
 
-// Any list of { city, campus?, date?, start?, end?, status?, url } -> clean, sorted cities.
+// A Futuready page link -> its city and date: hack2skill.com/futuready/pune26102026 -> Pune, 26 Oct 2026.
+// Two-word cities use a hyphen: /futuready/navi-mumbai05012027.
+export function fromLink(link) {
+  const m = /\/futuready\/([a-z][a-z-]*?)-?(\d{2})(\d{2})(\d{4})\/?(?:[?#].*)?$/i.exec(String(link || ''));
+  if (!m) return null;
+  const [dd, mm, yyyy] = [m[2], m[3], m[4]].map(Number);
+  if (mm < 1 || mm > 12 || dd < 1 || dd > 31) return null;
+  const city = m[1]
+    .split('-')
+    .filter(Boolean)
+    .map(w => w[0].toUpperCase() + w.slice(1).toLowerCase())
+    .join(' ');
+  // the day ends at midnight in India
+  return { city, date: `${dd} ${MONTHS[mm - 1]} ${yyyy}`, end: new Date(Date.UTC(yyyy, mm - 1, dd, 18, 30)).toISOString() };
+}
+
+// Any list of links, or { link?, city?, campus?, date?, start?, end?, status? } -> clean, sorted cities.
 export function normalise(list, now = Date.now()) {
   if (!Array.isArray(list)) return [];
   const out = list
-    .filter(c => c && c.city)
+    .map(c => (typeof c === 'string' ? { link: c } : c))
     .map(c => {
-      const status = statusOf(c, now);
+      if (!c) return null;
+      const link = c.link || c.url || '';
+      const fromUrl = fromLink(link) || {};
+      const city = c.city || fromUrl.city;
+      if (!city) return null;
+      const end = c.end || fromUrl.end || '';
+      // a city with its own page is open until its day has passed; a name alone is "boarding soon"
+      const status = c.status || (end ? statusOf({ start: c.start, end }, now) : link ? 'open' : 'soon');
       return {
-        city: String(c.city).trim(),
+        city: String(city).trim(),
         campus: c.campus ? String(c.campus).trim() : '',
-        date: c.date || shortDate(status === 'soon' ? c.start : c.end || c.start),
+        date: c.date || fromUrl.date || shortDate(status === 'soon' ? c.start : end || c.start),
         start: c.start || '',
-        end: c.end || '',
+        end,
         status,
-        url: c.url || '#',
+        url: link,
       };
-    });
+    })
+    .filter(Boolean);
   return sortCities(out);
 }
 

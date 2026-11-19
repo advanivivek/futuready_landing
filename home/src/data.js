@@ -2,36 +2,46 @@
    SETTINGS: everything a non-developer may need to change.
    ============================================================ */
 
-// Where the cities on the train come from. Nothing here needs code changes when a city is added.
-//   On hack2skill.com the page reads Hack2skill's live event list directly.
-//   Anywhere else, `npm run events` (also run before every build) saves that list as public/events.json.
-//   Name each event on Hack2skill like "Futuready Builders Lab: Pune" so it is picked up.
-export const EVENTS = {
-  hack2skillApi: 'https://hack2skill.com/api/v1/innovator/public/event/list?page=1&records=100',
-  match: 'futuready', // events whose title or link contains this word go on the train
-  file: '/events.json',
-};
-
-// Used until (or unless) the live list arrives. status is worked out from the dates when left out:
-// 'past' (it happened), 'open' (registrations open), 'soon' (announced, not open yet).
+// ---- The cities on the train ----
+// Paste each city's Futuready page link. The city and the date are read from the link itself:
+//   https://hack2skill.com/futuready/pune26102026  ->  Pune, 26 Oct 2026
+// (two-word cities: /futuready/navi-mumbai05012027). Until its day has passed a city shows "Departs" and its
+// carriage opens its page; afterwards "Landed". A city with no page yet: just { city: 'Name' } (boarding soon).
 export const CITIES = [
-  { city: 'Pune', campus: 'Trinity Academy of Engineering', date: '26 Oct 2026', status: 'past', url: './pune/' },
-  { city: 'Mumbai', status: 'soon', url: './mumbai/' },
-  { city: 'Ahmedabad', status: 'soon', url: './ahmedabad/' },
-  { city: 'Jaipur', status: 'soon', url: './jaipur/' },
-  { city: 'Delhi', status: 'soon', url: './delhi/' },
+  { link: 'https://hack2skill.com/futuready/pune26102026', campus: 'Trinity Academy of Engineering' },
+  { city: 'Mumbai' },
+  { city: 'Ahmedabad' },
+  { city: 'Jaipur' },
+  { city: 'Delhi' },
 ];
 
-// The last scene: "Didn't find your city? Attend Virtual, or bring it to your campus."
+// Optional, later: one link that lists every Futuready city (see START-HERE.md, "Ask the Hack2skill team").
+// When it is set, the train updates itself and the list above is only a fallback.
+export const CITIES_FEED = '';
+
+// ---- The last scene: "Didn't find your city? Attend Virtual, or bring it to your campus." ----
 export const VIRTUAL_URL = './virtual/';
 export const SUPPORT = 'support@hack2skill.com';
-export const BRING_URL = 'mailto:support@hack2skill.com?subject=' + encodeURIComponent('Bring Futuready to my college');
+// Where "Bring it to your campus" requests go: the web app link of the Google Sheet script
+// (scripts/bring-campus.gs, see START-HERE.md). Until it is set, a request opens an email instead.
+export const BRING_FORM_URL = '';
+
+// ---- Sharing ----
+// The site's own address, for share links and previews. Leave '' to use the address it is opened at.
+export const SITE_URL = '';
+export const SHARE_TEXT = 'Found something before everyone else: Futuready, a free campus builder lab by Hack2skill. Are you ready for the future?';
+
+// ---- The TV in the lab ----
+// Its screen plays these pictures in turn. Replace any file in public/tv/ with your own (same name),
+// or change the list. Landscape pictures (16:9 or 4:3) look best.
+export const TV_SCREENS = ['tv/1.jpg', 'tv/2.jpg', 'tv/3.jpg', 'tv/4.jpg'];
 
 // Meet your trainer. The photos are cut-outs in public/story (vivek-*.webp); tap him to change the pose.
 // The labels stick to the photo like label-maker tape, in this order.
 export const TRAINER = {
   name: 'Vivek Advani',
-  url: 'https://www.linkedin.com/in/vivekadvani',
+  linkedin: 'https://www.linkedin.com/in/vivekadvani',
+  instagram: 'https://instagram.com/vivekadvani',
   labels: ['DevRel · Hack2skill', 'Architect', 'Builds AI products', 'Loves Math', 'Dancer', 'Plays music', 'Cares about Humanity'],
 };
 

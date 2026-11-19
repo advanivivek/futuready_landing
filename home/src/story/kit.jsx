@@ -50,9 +50,18 @@ const sfxFor = src => (/bot-/.test(src) ? 'robot' : /bug/.test(src) ? 'squeak' :
 */
 export function Cut({ src, alt = '', x, h, d = 0.06, z = 2, dx = 0, dy = 0, r = 0, sc = 1, o = 1, flip = false, shadow = true, wiggle = 'hop', sfx, priority, className = '', style, onClick, children }) {
   const { W, H, land, F } = useStage();
+  const down = useRef(null);
   const height = pick(h, land) * H;
   const left = pick(x, land) * W + dx;
   const bottom = (F - pick(d, land)) * H - dy;
+  const live = onClick || wiggle;
+  // A tap is a press and release in nearly the same place, so every quick touch counts on a phone (a click
+  // can get lost to a tiny finger movement), and a scroll that starts on a character never pokes it.
+  const tap = e => {
+    if (onClick) onClick(e);
+    else poke(e);
+    sound.play(sfx || sfxFor(src));
+  };
   return (
     <div
       className={`cut ${className}`}
@@ -65,15 +74,17 @@ export function Cut({ src, alt = '', x, h, d = 0.06, z = 2, dx = 0, dy = 0, r = 
         transform: `translate3d(${left.toFixed(2)}px, ${(-bottom).toFixed(2)}px, 0) translateX(-50%) rotate(${r}deg) scale(${flip ? -sc : sc}, ${sc})`,
         ...style,
       }}
-      onClick={
-        onClick || wiggle
+      onPointerDown={live ? e => (down.current = { x: e.clientX, y: e.clientY, t: e.timeStamp }) : undefined}
+      onPointerUp={
+        live
           ? e => {
-              if (onClick) onClick(e);
-              else poke(e);
-              sound.play(sfx || sfxFor(src));
+              const p = down.current;
+              down.current = null;
+              if (p && Math.hypot(e.clientX - p.x, e.clientY - p.y) < 14 && e.timeStamp - p.t < 700) tap(e);
             }
           : undefined
       }
+      onPointerCancel={live ? () => (down.current = null) : undefined}
       onAnimationEnd={e => e.currentTarget.classList.remove('is-poked')}
     >
       {shadow ? <i className="cut__shadow" aria-hidden="true" /> : null}

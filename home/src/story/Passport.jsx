@@ -116,7 +116,7 @@ export function Book({ width, x, y, scale = 1, rot = 0, open = 1, opacity = 1, g
       {rubber ? (
         <img
           className="rubber"
-          src="/story/stamp.webp"
+          src={`${import.meta.env.BASE_URL}story/stamp.webp`}
           alt=""
           aria-hidden="true"
           style={{ left: `${slotAt(rubber.i).x * 100}%`, top: `${slotAt(rubber.i).y * 100}%`, opacity: rubber.o, transform: `translate(-50%, ${-100 + rubber.lift * -60}%)` }}

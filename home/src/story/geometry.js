@@ -104,14 +104,12 @@ export function diskPath(cx, cy, R, turn) {
   return out.join('');
 }
 
-// banknote-style wavy lines, for the back of the passport scene (a 1000 x 1000 box, stretched)
-export const GUILLOCHE = [0, 1].map(set =>
-  Array.from({ length: 24 }, (_, k) => {
+// banknote-style lines, for the back of the passport scene (a 1000 x 1000 box, stretched): two even sets of
+// waves, half a wave apart, so they weave into a calm rope pattern
+export const GUILLOCHE = [0, Math.PI].map(shift =>
+  Array.from({ length: 28 }, (_, k) => {
     const pts = [];
-    for (let x = -20; x <= 1020; x += 10) {
-      const y = 20 + k * 42 + (set ? -1 : 1) * (24 * Math.sin(x / 85 + k * 0.5) + 12 * Math.sin(x / 33 - k * 0.8));
-      pts.push(`${x} ${y.toFixed(1)}`);
-    }
+    for (let x = -20; x <= 1020; x += 8) pts.push(`${x} ${(18 + k * 36 + 13 * Math.sin((x / 250) * TAU + k * 0.42 + shift)).toFixed(1)}`);
     return 'M' + pts.join('L');
   }).join('')
 );

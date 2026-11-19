@@ -382,26 +382,64 @@ const SFX = {
 const GAP = { tick: 0.028, whoosh: 0.3, chug: 0.1, flap: 0.2, robot: 0.12, paper: 0.08, settle: 0.6 };
 
 /* ---------- switching on and off ---------- */
+// The phone locks, another app plays, iOS "interrupts" the audio: the context stops running, sometimes for
+// good. Whenever it is not running while sound is wanted, the speaker shows "waiting", and the next tap
+// anywhere brings it back, with a brand new context if the old one will not wake up.
+function watch(c) {
+  c.onstatechange = () => {
+    if (c !== ctx) return;
+    if (c.state === 'running' && pref() !== 'off') setState('on');
+    else if (c.state !== 'running' && state === 'on' && !document.hidden) setState('armed');
+  };
+}
+
 function onVisibility() {
   if (!ctx) return;
-  if (document.hidden) ctx.suspend();
-  else if (state === 'on') ctx.resume();
+  if (document.hidden) {
+    ctx.suspend().catch(() => {});
+  } else if (pref() !== 'off') {
+    // allowed on most browsers without a tap; if not, the next tap does it (see gesture)
+    ctx.resume().then(
+      () => ctx.state !== 'running' && setState('armed'),
+      () => setState('armed')
+    );
+  }
+}
+
+// forget a context that will not run, so the next enable() builds a fresh one inside the tap
+function reset() {
+  const old = ctx;
+  ctx = null;
+  music = null;
+  if (clock) clearInterval(clock);
+  clock = 0;
+  try {
+    old?.close();
+  } catch {
+    /* already closed */
+  }
 }
 
 async function enable() {
-  if (state === 'on') return true;
+  if (ctx && ctx.state === 'running' && state === 'on') return true;
+  // a context that is not running may never run again (iOS after a lock): start from a fresh one
+  if (ctx && ctx.state !== 'running') reset();
   if (!boot()) return false;
-  try {
-    await ctx.resume();
-  } catch {
+  watch(ctx);
+  const c = ctx;
+  // resume is called right here, inside the tap; a wake that never answers counts as a no
+  const woke = await Promise.race([c.resume().then(() => true, () => false), new Promise(r => setTimeout(() => r(false), 700))]);
+  if (c !== ctx) return false;
+  if (!woke || c.state !== 'running') {
+    reset();
+    setState('armed');
     return false;
   }
-  if (ctx.state !== 'running') return false;
   remember('on');
-  detachGesture();
   startMusic();
-  musicOut.gain.cancelScheduledValues(ctx.currentTime);
-  musicOut.gain.setTargetAtTime(MUSIC_LEVEL, ctx.currentTime, 1.4);
+  musicOut.gain.cancelScheduledValues(c.currentTime);
+  musicOut.gain.setValueAtTime(0, c.currentTime);
+  musicOut.gain.setTargetAtTime(MUSIC_LEVEL, c.currentTime, 1.4);
   if (!clock) clock = setInterval(tickMusic, 250);
   setState('on');
   return true;
@@ -409,26 +447,22 @@ async function enable() {
 
 function disable() {
   remember('off');
-  detachGesture();
   setState('off');
   if (!ctx) return;
   musicOut.gain.setTargetAtTime(0, ctx.currentTime, 0.12);
-  setTimeout(() => state !== 'on' && ctx.suspend(), 600);
+  const c = ctx;
+  setTimeout(() => state !== 'on' && c.suspend().catch(() => {}), 600);
 }
 
-// the first tap anywhere (except on the speaker itself, which has its own say) starts the sound
+// every tap (except on the speaker itself, which has its own say) starts the sound, or brings it back
 const GESTURES = ['pointerdown', 'touchend', 'keydown', 'click'];
 const gesture = e => {
+  if (pref() === 'off') return;
+  if (ctx && ctx.state === 'running' && state === 'on') return;
   if (e.target?.closest?.('[data-sound-toggle]')) return;
   if (e.type === 'keydown' && (e.key === 'Escape' || e.metaKey || e.ctrlKey)) return;
   enable();
 };
-function attachGesture() {
-  GESTURES.forEach(n => addEventListener(n, gesture, { capture: true, passive: true }));
-}
-function detachGesture() {
-  GESTURES.forEach(n => removeEventListener(n, gesture, { capture: true }));
-}
 
 export const sound = {
   get state() {
@@ -440,7 +474,7 @@ export const sound = {
   enable,
   disable,
   toggle() {
-    if (state === 'on') disable();
+    if (state === 'on' && ctx?.state === 'running') disable();
     else enable();
   },
   play(name, delay = 0) {
@@ -464,8 +498,10 @@ export const sound = {
 
 if (typeof window !== 'undefined') {
   state = pref() === 'off' ? 'off' : 'armed';
-  if (state === 'armed') attachGesture();
+  GESTURES.forEach(n => addEventListener(n, gesture, { capture: true, passive: true }));
   document.addEventListener('visibilitychange', onVisibility);
+  // coming back from the back-forward cache
+  addEventListener('pageshow', e => e.persisted && onVisibility());
 }
 
 /* For checking levels without speakers: renders a few seconds of music (and an effect) offline and
