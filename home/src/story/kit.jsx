@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { sound } from './sound';
 
 /* ---------- timing ---------- */
@@ -32,20 +32,23 @@ export const Stage = createContext({ W: 390, H: 760, land: false, F: 0.24 });
 export const useStage = () => useContext(Stage);
 export const pick = (v, land) => (Array.isArray(v) ? v[land ? 1 : 0] : v);
 
-const poke = e => {
+export const poke = e => {
   const el = e.currentTarget;
   el.classList.remove('is-poked');
   void el.offsetWidth;
   el.classList.add('is-poked');
 };
 
+// what a cut-out says when you tap it
+const sfxFor = src => (/bot-/.test(src) ? 'robot' : /bug/.test(src) ? 'squeak' : /\/tv\./.test(src) ? 'tv' : /squad/.test(src) ? 'cheer' : 'paper');
+
 /*
   A paper cut-out standing on the floor.
   x: centre, as a fraction of the stage width.   h: height, as a fraction of the stage height.
   d: how far forward on the floor (0 = on the wall line).   dx/dy: offsets in px.
-  Any of x, h, d can be [portrait, landscape].
+  Any of x, h, d can be [portrait, landscape].   sfx: the sound it makes when tapped (guessed from src).
 */
-export function Cut({ src, alt = '', x, h, d = 0.06, z = 2, dx = 0, dy = 0, r = 0, sc = 1, o = 1, flip = false, shadow = true, wiggle = 'hop', priority, className = '', style, onClick, children }) {
+export function Cut({ src, alt = '', x, h, d = 0.06, z = 2, dx = 0, dy = 0, r = 0, sc = 1, o = 1, flip = false, shadow = true, wiggle = 'hop', sfx, priority, className = '', style, onClick, children }) {
   const { W, H, land, F } = useStage();
   const height = pick(h, land) * H;
   const left = pick(x, land) * W + dx;
@@ -55,15 +58,22 @@ export function Cut({ src, alt = '', x, h, d = 0.06, z = 2, dx = 0, dy = 0, r = 
       className={`cut ${className}`}
       data-wiggle={wiggle}
       style={{
-        left,
-        bottom,
         height,
         zIndex: z,
         opacity: o,
-        transform: `translateX(-50%) rotate(${r}deg) scale(${flip ? -sc : sc}, ${sc})`,
+        // placed with transforms only, so moving it never re-lays-out the page
+        transform: `translate3d(${left.toFixed(2)}px, ${(-bottom).toFixed(2)}px, 0) translateX(-50%) rotate(${r}deg) scale(${flip ? -sc : sc}, ${sc})`,
         ...style,
       }}
-      onClick={onClick || (wiggle ? poke : undefined)}
+      onClick={
+        onClick || wiggle
+          ? e => {
+              if (onClick) onClick(e);
+              else poke(e);
+              sound.play(sfx || sfxFor(src));
+            }
+          : undefined
+      }
       onAnimationEnd={e => e.currentTarget.classList.remove('is-poked')}
     >
       {shadow ? <i className="cut__shadow" aria-hidden="true" /> : null}
@@ -90,6 +100,56 @@ export function Typed({ text, p, className = '' }) {
         {text.slice(n)}
       </span>
     </span>
+  );
+}
+
+/* Several lines, each kept on its own row exactly as written, typed one after another. */
+export function Rows({ rows, p, className = 'line' }) {
+  const total = rows.reduce((a, r) => a + r.length, 0);
+  let at = 0;
+  return rows.map((r, i) => {
+    const a = at / total;
+    at += r.length;
+    return <Typed key={i} text={r} p={seg(p, a, at / total)} className={`${className} row`} />;
+  });
+}
+
+/*
+  The words of a scene. With fit, rows written on separate lines stay on one line each: the type shrinks
+  (down to 70%) until the longest row fits the screen, and only below that do rows wrap (balanced).
+*/
+export function Lines({ children, className = '', fit = false, style }) {
+  const ref = useRef(null);
+  useLayoutEffect(() => {
+    if (!fit) return;
+    const el = ref.current;
+    let width = 0;
+    const measure = force => {
+      const w = el.clientWidth;
+      if (!w || (w === width && !force)) return;
+      width = w;
+      el.style.setProperty('--fit', '1');
+      delete el.dataset.wrap;
+      let max = 0;
+      el.querySelectorAll('.row').forEach(r => (max = Math.max(max, r.offsetWidth)));
+      const k = max ? Math.min(1, w / max) : 1;
+      el.style.setProperty('--fit', String(Math.max(0.7, k * 0.99)));
+      if (k < 0.7) el.dataset.wrap = '';
+    };
+    measure(true);
+    let alive = true;
+    document.fonts?.ready.then(() => alive && measure(true));
+    const ro = new ResizeObserver(() => measure(false));
+    ro.observe(el);
+    return () => {
+      alive = false;
+      ro.disconnect();
+    };
+  }, [fit]);
+  return (
+    <div ref={ref} className={`lines ${fit ? 'lines--fit' : ''} ${className}`} style={style}>
+      {children}
+    </div>
   );
 }
 

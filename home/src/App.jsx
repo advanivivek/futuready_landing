@@ -10,7 +10,7 @@ export default function App() {
     let lenis;
     let raf = 0;
     import('lenis').then(({ default: Lenis }) => {
-      lenis = new Lenis({ lerp: 0.09, wheelMultiplier: 0.85 });
+      lenis = new Lenis({ lerp: 0.085, wheelMultiplier: 0.8, touchMultiplier: 1 });
       window.__lenis = lenis;
       const loop = t => {
         lenis.raf(t);

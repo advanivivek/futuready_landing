@@ -1,15 +1,22 @@
-import { arc, back, Cut, inout, lerp, Note, out, seg, Typed } from './kit';
-import { BRING_URL, LEVELS, SUPPORT, VOICES_FULL } from '../data';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { arc, back, Cut, inout, lerp, Lines, Note, out, pick, poke, Rows, seg, Typed } from './kit';
+import { sound } from './sound';
+import { diskPath, GUILLOCHE, kleinPath, SOLIDS, solidPath } from './geometry';
+import { BRING_URL, LEVELS, SUPPORT, TRAINER, VIRTUAL_URL, VOICES_FULL } from '../data';
 
 /*
   Every scene:
-    len    how many screens of scrolling it lasts
-    wall, floor, F (floor height), ink (text colour)
+    wall, floor, F (floor height, 0 for none), ink (text colour)
+    rest   when everything is on the scene (s, in screens). The scroll then gets heavy for a moment, so the
+           scene can be looked at before it moves on. Scenes without rest have a fixed len.
+    after  how much happens after that pause, before the next scene comes in (default 0.12)
+    enter  how this scene arrives over the last one: { type, T (screens), at (where, for iris and tv) }
     cam    (s, k) => { z, x, y }  zoom and where it zooms into (fractions of the stage)
     cues   [[s, sound], ...]      sounds as you scroll forward past s
     world  (s, k) => the set: people, robots, props (moves with the camera)
     ui     (s, k) => the words (stay sharp and still)
-  s is how far into the scene you are, in screens.
+  s is how far into the scene you are, in screens. k has W, H, land, F, the cities, jump, and
+  after0 (when the pause ends).
 */
 
 const A = n => `/story/${n}.webp`;
@@ -17,6 +24,7 @@ const CREAM = '#efe6d2';
 const INK = '#161a3a';
 const BLUE = '#3463af';
 const INDIGO = '#2f3a96';
+const NIGHT = '#232c6e';
 
 function Letter({ k, s, color }) {
   const rise = out(seg(s, 0, 0.55));
@@ -29,8 +37,6 @@ function Letter({ k, s, color }) {
   );
 }
 
-const Lines = ({ children, className = '' }) => <div className={`lines ${className}`}>{children}</div>;
-
 function Floaters({ items, s, on, x, y, spread = 30, rise, speed = 0.9, className }) {
   return items.map((g, j) => {
     const f = (((s * speed + j / items.length) % 1) + 1) % 1;
@@ -40,10 +46,8 @@ function Floaters({ items, s, on, x, y, spread = 30, rise, speed = 0.9, classNam
         className={`floater ${className || ''}`}
         aria-hidden="true"
         style={{
-          left: x + Math.sin(j * 2.3) * spread,
-          bottom: y + f * rise,
           opacity: on * Math.sin(f * Math.PI),
-          transform: `translateX(-50%) rotate(${Math.sin(j) * 14}deg) scale(${0.8 + f * 0.4})`,
+          transform: `translate3d(${(x + Math.sin(j * 2.3) * spread).toFixed(1)}px, ${(-(y + f * rise)).toFixed(1)}px, 0) translateX(-50%) rotate(${Math.sin(j) * 14}deg) scale(${0.8 + f * 0.4})`,
         }}
       >
         {g}
@@ -52,77 +56,399 @@ function Floaters({ items, s, on, x, y, spread = 30, rise, speed = 0.9, classNam
   });
 }
 
-function LevelLabel({ i, s }) {
+function LevelLines({ i, s, a, b }) {
   const lv = LEVELS[i];
   return (
-    <p className="level-label" style={{ opacity: seg(s, 0.05, 0.3) }}>
-      <b style={{ background: lv.color }}>{lv.k}</b> Level {i + 1} · {lv.name}
-    </p>
+    <Lines fit className="lines--level">
+      <p className="level-label" style={{ opacity: seg(s, 0.04, 0.25) }}>
+        <i style={{ background: lv.color }} aria-hidden="true" />
+        Level {i + 1} • {lv.name}
+      </p>
+      <Rows rows={a} p={seg(s, 0.15, 0.62)} />
+      <div className="learn">
+        <Rows rows={b} p={seg(s, 0.72, 1.16)} />
+      </div>
+    </Lines>
   );
 }
 
 const enterL = (s, a, b, W) => (1 - out(seg(s, a, b))) * -W * 0.6;
 const enterR = (s, a, b, W) => (1 - out(seg(s, a, b))) * W * 0.6;
 
-const coachTag = c => (c.status === 'past' ? `✓ ${c.date}` : c.status === 'open' ? 'Open' : 'Soon');
-const stationTag = c =>
-  c.status === 'past' ? `Landed ${c.date}${c.campus ? ` · ${c.campus}` : ''}` : c.status === 'open' ? `Registrations open${c.date ? ` till ${c.date}` : ''}` : 'Boarding soon';
+/* ---------- the opening: where her phone is, so 2031 can open out of it ---------- */
+const HERO = { F: 0.24, girl: { x: [0.27, 0.58], h: [0.37, 0.58], d: 0.08 }, cam: { z: 1.07, x: 0.5, y: 0.72 } };
+function heroPhone({ W, H, land }) {
+  const g = HERO.girl;
+  const h = pick(g.h, land) * H;
+  const top = H - (HERO.F - g.d) * H - h;
+  const p = { x: pick(g.x, land) * W - W * 0.03, y: top + 0.225 * h };
+  const o = { x: HERO.cam.x * W, y: HERO.cam.y * H };
+  return { x: o.x + (p.x - o.x) * HERO.cam.z, y: o.y + (p.y - o.y) * HERO.cam.z, r0: 0, zoom: 2.4 };
+}
 
+/* ---------- "you?": its dot drops down a dotted line and opens the next scene ---------- */
+const YOU_F = 0.24;
+const dotEnd = ({ W, H }) => ({ x: W * 0.5, y: H * (1 - YOU_F + 0.075), r: Math.max(9, Math.min(W, H) * 0.028) });
+
+// where the dot of a "?" sits in a font, measured once from a canvas
+const glyphs = {};
+function questionDot(font, size) {
+  const key = `${font}|${size}`;
+  if (glyphs[key]) return glyphs[key];
+  const w = Math.ceil(size * 1.2);
+  const h = Math.ceil(size * 1.6);
+  const c = document.createElement('canvas');
+  c.width = w;
+  c.height = h;
+  const x = c.getContext('2d', { willReadFrequently: true });
+  x.font = font;
+  const base = Math.round(size * 1.2);
+  x.fillText('?', 0, base);
+  const ascent = x.measureText('?').fontBoundingBoxAscent ?? size * 0.95;
+  const d = x.getImageData(0, 0, w, h).data;
+  const ink = y => {
+    let a = w;
+    let b = -1;
+    for (let i = 0; i < w; i++) {
+      if (d[(y * w + i) * 4 + 3] > 110) {
+        a = Math.min(a, i);
+        b = i;
+      }
+    }
+    return b >= 0 ? [a, b] : null;
+  };
+  let y = h - 1;
+  while (y > 0 && !ink(y)) y--;
+  const bottom = y;
+  let l = w;
+  let r = 0;
+  for (let row = ink(y); y > 0 && row; row = ink(--y)) {
+    l = Math.min(l, row[0]);
+    r = Math.max(r, row[1]);
+  }
+  const res = { cx: (l + r + 1) / 2, cy: (y + 1 + bottom + 1) / 2 - base, r: (bottom - y) / 2, gap: y + 1 - base, ascent };
+  glyphs[key] = res;
+  return res;
+}
+
+function You({ s, k }) {
+  const wrap = useRef(null);
+  const word = useRef(null);
+  const q = useRef(null);
+  const [m, setM] = useState(null);
+  useLayoutEffect(() => {
+    const measure = () => {
+      const el = q.current;
+      const you = word.current;
+      if (!el || !you) return;
+      const cs = getComputedStyle(el);
+      const size = parseFloat(cs.fontSize);
+      const g = questionDot(`${cs.fontWeight} ${size}px ${cs.fontFamily}`, size);
+      // the word's place in the scene, ignoring its pop-in scale
+      let ox = 0;
+      let oy = 0;
+      for (let n = you; n && !n.classList.contains('scene'); n = n.offsetParent) {
+        ox += n.offsetLeft;
+        oy += n.offsetTop;
+      }
+      // the crowd photo fills the word like background-size: cover at 40% 45%; the dot takes its piece with it
+      const bw = you.offsetWidth;
+      const bh = you.offsetHeight;
+      const sc = Math.max(bw / 1400, bh / 934);
+      setM({ x: el.offsetLeft + g.cx, y: el.offsetTop + g.ascent + g.cy, r: g.r, ox, oy, bg: { w: 1400 * sc, h: 934 * sc, x: (bw - 1400 * sc) * 0.4, y: (bh - 934 * sc) * 0.45 } });
+    };
+    measure();
+    let alive = true;
+    document.fonts?.ready.then(() => alive && measure());
+    addEventListener('resize', measure);
+    return () => {
+      alive = false;
+      removeEventListener('resize', measure);
+    };
+  }, [k.W, k.H]);
+
+  const pop = seg(s, 0.5, 0.7);
+  const t = inout(seg(s, k.after0, k.after0 + 0.5));
+  const end = dotEnd(k);
+  let path = null;
+  if (m && t > 0) {
+    const p0 = { x: m.ox + m.x, y: m.oy + m.y };
+    const p1 = { x: p0.x - k.W * 0.34, y: p0.y + k.H * 0.06 };
+    const p2 = { x: end.x, y: end.y - k.H * 0.32 };
+    const at = u => {
+      const v = 1 - u;
+      return {
+        x: v * v * v * p0.x + 3 * v * v * u * p1.x + 3 * v * u * u * p2.x + u * u * u * end.x,
+        y: v * v * v * p0.y + 3 * v * v * u * p1.y + 3 * v * u * u * p2.y + u * u * u * end.y,
+      };
+    };
+    const n = 18;
+    path = { head: at(t), r: lerp(m.r, end.r, seg(t, 0.75, 1)), ink: seg(t, 0.05, 0.45), trail: Array.from({ length: Math.floor(t * n) }, (_, j) => at((j + 0.5) / n)) };
+  }
+  // once the dot has left, the word keeps a hole where it was
+  const hole = path ? `radial-gradient(circle at ${m.x}px ${m.y}px, transparent ${m.r + 1.5}px, #000 ${m.r + 2}px)` : undefined;
+  return (
+    <>
+      <Lines className="lines--you">
+        <Typed text="So what’s left for" p={seg(s, 0.1, 0.5)} className="line" />
+        <span ref={wrap} className="you-wrap" aria-hidden="true" style={{ opacity: pop, transform: `scale(${lerp(0.6, 1, back(seg(s, 0.5, 1.0)))})` }}>
+          <span ref={word} className="you" style={{ WebkitMaskImage: hole, maskImage: hole }}>
+            you<span ref={q}>?</span>
+          </span>
+        </span>
+        <span className="sr-only">you?</span>
+      </Lines>
+      {path ? (
+        <div className="trail" aria-hidden="true">
+          {path.trail.map((p, j) => (
+            <i key={j} style={{ transform: `translate3d(${p.x}px, ${p.y}px, 0)` }} />
+          ))}
+          <i
+            className="qdot"
+            style={{
+              width: path.r * 2,
+              height: path.r * 2,
+              transform: `translate3d(${path.head.x}px, ${path.head.y}px, 0)`,
+              backgroundSize: `${m.bg.w}px ${m.bg.h}px`,
+              backgroundPosition: `${m.bg.x - (m.x - path.r)}px ${m.bg.y - (m.y - path.r)}px`,
+              boxShadow: `inset 0 0 0 ${path.r + 1}px rgba(35, 44, 110, ${path.ink})`,
+            }}
+          />
+        </div>
+      ) : null}
+    </>
+  );
+}
+
+/* ---------- the trainer ---------- */
+// standing poses only (tap him for the next). k: how much taller the picture is than he is (a chair, a raised foot),
+// so he is the same size in every one. a: width / height of the picture.
+const POSES = [
+  { src: 'vivek-stand', a: 313 / 1021, k: 1 },
+  { src: 'vivek-walk', a: 343 / 1022, k: 1 },
+  { src: 'vivek-dance', a: 443 / 1022, k: 1.03 },
+  { src: 'vivek-kick', a: 692 / 986, k: 1.05 },
+  { src: 'vivek-step', a: 287 / 1002, k: 1.3 },
+  { src: 'vivek-chair', a: 715 / 1022, k: 1.33 },
+  { src: 'vivek-lean', a: 341 / 1010, k: 1.06 },
+];
+const POSE_H = [0.45, 0.56];
+const POSE_D = [0.11, 0.06];
+// cream, red, blue and yellow label tape (cream and yellow take dark letters)
+const TAPE = ['#fffcf5', '#c8312f', '#1a6fc0', '#f2b230'];
+
+// where the drawings sit on the wall: [x, y, size] as fractions of the stage width / height, [portrait, landscape]
+const ART = {
+  disk: [[0.5, 0.57, 0.44], [0.66, 0.55, 0.22]],
+  ico: [[0.85, 0.4, 0.085], [0.88, 0.3, 0.05]],
+  dodeca: [[0.15, 0.45, 0.085], [0.44, 0.5, 0.045]],
+  klein: [[0.16, 0.7, 0.13], [0.2, 0.68, 0.075]],
+  cube: [[0.87, 0.68, 0.06], [0.9, 0.68, 0.032]],
+  tetra: [[0.1, 0.9, 0.05], [0.07, 0.88, 0.03]],
+  octa: [[0.9, 0.9, 0.05], [0.95, 0.88, 0.03]],
+};
+
+function Geometry({ s, k }) {
+  const { W, H, land } = k;
+  const a = s * 0.9;
+  const at = id => {
+    const [x, y, z] = ART[id][land ? 1 : 0];
+    return [x * W, y * H, z * W];
+  };
+  const [dx, dy, dr] = at('disk');
+  const solids = ['ico', 'dodeca', 'cube', 'tetra', 'octa'].map((id, i) => {
+    const [x, y, z] = at(id);
+    return solidPath(SOLIDS[id], x, y, z, 0.5 + a * (0.6 + i * 0.1), a * (0.8 - i * 0.07) + i);
+  });
+  const [kx, ky, kz] = at('klein');
+  return (
+    <svg className="geo" viewBox={`0 0 ${W} ${H}`} aria-hidden="true">
+      <circle cx={dx} cy={dy} r={dr} className="geo__disk" />
+      <path d={diskPath(dx, dy, dr, s * 0.3)} className="geo__disk" />
+      <path d={solids.join('')} className="geo__solid" />
+      <path d={kleinPath(kx, ky, kz, 0.35, a * 0.7)} className="geo__klein" />
+    </svg>
+  );
+}
+
+function Trainer({ s, k }) {
+  const { W, H, land, F } = k;
+  const [n, setN] = useState(0);
+  const x = land ? 0.66 : 0.5;
+  const rise = out(seg(s, 0.15, 0.6));
+  const fig = POSES[n];
+  const h = pick(POSE_H, land) * fig.k * H;
+  const w = h * fig.a;
+  const cx = x * W;
+  const top = H - (F - pick(POSE_D, land)) * H - h;
+  const next = e => {
+    poke(e);
+    setN(i => (i + 1) % POSES.length);
+  };
+  // the labels run down both sides of him, alternating, between the words above and the floor
+  const labels = TRAINER.labels;
+  const maxW = land ? 240 : 132;
+  const bandTop = Math.max(top + 0.05 * h, H * (land ? 0.3 : 0.37));
+  const bandBot = H * (1 - F) - (land ? 34 : 26);
+  const step = (bandBot - bandTop) / Math.max(1, labels.length - 1);
+  return (
+    <>
+      <Geometry s={s} k={k} />
+      {POSES.map((p, i) => (
+        <Cut
+          key={p.src}
+          src={A(p.src)}
+          alt={i === n ? 'Vivek Advani, your trainer. Tap for another photo.' : ''}
+          x={x}
+          h={POSE_H.map(v => v * p.k)}
+          d={POSE_D}
+          dy={(1 - rise) * -H * 0.2}
+          o={i === n ? rise : 0}
+          z={i === n ? 3 : 2}
+          className="pose"
+          sfx="shutter"
+          onClick={next}
+          style={{ pointerEvents: i === n ? 'auto' : 'none' }}
+        />
+      ))}
+      {labels.map((txt, j) => {
+        const side = j % 2 ? 1 : -1;
+        const edge = side < 0 ? Math.max(cx - w * 0.28, 16 + maxW) : Math.min(cx + w * 0.28, W - 16 - maxW);
+        const a = 0.55 + j * 0.09;
+        return (
+          <span
+            key={txt}
+            className={`tape ${j % 4 === 0 || j % 4 === 3 ? 'tape--light' : ''}`}
+            style={{
+              top: bandTop + j * step,
+              [side < 0 ? 'right' : 'left']: side < 0 ? W - edge : edge,
+              maxWidth: maxW,
+              background: TAPE[j % 4],
+              opacity: seg(s, a, a + 0.05),
+              transform: `translateY(-50%) scale(${back(seg(s, a, a + 0.18))}) rotate(${[-3, 2.5, -2, 3, -2.5, 2][j % 6]}deg)`,
+            }}
+          >
+            {txt}
+          </span>
+        );
+      })}
+    </>
+  );
+}
+
+/* ---------- the station board ---------- */
+const coachTag = c => (c.status === 'past' ? `✓ ${c.date}` : c.status === 'open' ? 'Open' : 'Soon');
+const stationTag = c => (c.status === 'past' ? `Landed${c.campus ? ` · ${c.campus}` : ''}` : c.status === 'open' ? 'Registrations open' : 'Boarding soon');
+const MONTH = /^(\d{1,2})\s+([A-Za-z]{3})/;
+// the board: the day above, the month below (or -- / TBA before a date is set)
+function boardRows(c) {
+  const m = MONTH.exec(c.date || '');
+  if (m) return [m[1].padStart(2, '0'), m[2].toUpperCase()];
+  return ['--', c.status === 'open' ? 'NOW' : 'TBA'];
+}
+
+function Flaps({ c, o }) {
+  const rows = boardRows(c);
+  const key = rows.join(' ');
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) first.current = false;
+    else sound.play('flap');
+  }, [key]);
+  return (
+    <div className="flaps" style={{ opacity: o }} aria-label={c.date ? `${c.status === 'past' ? 'Landed' : 'Departs'} ${c.date}` : stationTag(c)} role="text">
+      <small aria-hidden="true">{c.status === 'past' ? 'Landed' : 'Departs'}</small>
+      {rows.map((r, j) => (
+        <div key={j} aria-hidden="true">
+          {[...r].map((ch, i) => (
+            <span key={`${i}${ch}`} className="flap" style={{ animationDelay: `${(j * 2 + i) * 50}ms` }}>
+              {ch}
+            </span>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// the room left of the station board, and the city's name as big as it can be in it
+function stationRoom({ W, land }) {
+  const wide = land && W >= 760;
+  const gutter = wide ? Math.max(48, W * 0.04) : 28;
+  const flap = wide ? Math.min(Math.max(W * 0.036, 28.8), 57.6) : Math.min(Math.max(W * 0.07, 24), 41.6);
+  return W - 2 * gutter - (3 * (flap * 1.05 + 3) + 14) - 20;
+}
+function stationSize(city, k) {
+  const base = k.land && k.W >= 760 ? Math.min(Math.max(k.W * 0.064, 48), 102) : Math.min(Math.max(k.W * 0.13, 41.6), 96);
+  return Math.min(base, stationRoom(k) / (city.length * 0.74));
+}
+
+/* ---------- the goodbye: three of them, centred together ---------- */
+const END = [
+  { src: 'girl-phone', a: 280 / 866, h: [0.4, 0.5], d: 0.1, alt: 'The two friends and a robot, waving goodbye' },
+  { src: 'boy-wave', a: 338 / 782, h: [0.4, 0.5], d: 0.09, alt: '' },
+  { src: 'bot-wave', a: 410 / 802, h: [0.3, 0.36], d: 0.1, alt: '' },
+];
+function endRow({ W, H, land }) {
+  const ws = END.map(p => p.a * pick(p.h, land) * H);
+  const gap = -0.04 * Math.min(ws[0], ws[1]);
+  const total = ws.reduce((a, b) => a + b, 0) + gap * 2;
+  let left = (land ? 0.68 : 0.5) * W - total / 2;
+  return ws.map(w => {
+    const c = left + w / 2;
+    left += w + gap;
+    return c / W;
+  });
+}
+
+/* ---------- the scenes ---------- */
 export const SCENES = [
   /* 0. the question */
   {
     id: 'title',
-    len: 2.0,
+    len: 1.9,
     wall: BLUE,
     floor: CREAM,
-    F: 0.24,
+    F: HERO.F,
     ink: CREAM,
-    cam: s => ({ z: 1 + 0.07 * inout(seg(s, 0, 1.4)), x: 0.62, y: 0.72 }),
+    cam: s => ({ z: 1 + (HERO.cam.z - 1) * inout(seg(s, 0, 1.4)), x: HERO.cam.x, y: HERO.cam.y }),
     world: (s, { W, land }) => {
       const go = seg(s, 0.2, 1.2);
       return (
         <>
-          <Cut src={A('girl-phone')} alt="A student in a mustard hoodie looks at her phone" x={[0.54, 0.6]} h={[0.44, 0.58]} d={0.08} dx={-go * W * 0.04} priority="high" className="rise" style={{ '--d': '0.3s' }} />
-          <Cut src={A('boy-laptop')} alt="Her friend types on a laptop" x={[0.85, 0.75]} h={[0.42, 0.56]} d={0.05} dx={go * W * 0.03} className="rise" style={{ '--d': '0.45s' }} />
-          <Cut src={A('bot-stand')} alt="A tin robot peeks in" x={[1.06, 0.92]} h={[0.24, 0.3]} d={0.02} dx={-out(seg(s, 0.25, 0.9)) * W * (land ? 0.04 : 0.12)} r={-6 + 6 * seg(s, 0.25, 0.9)} />
+          <Cut src={A('girl-phone')} alt="A student in a mustard hoodie looks at her phone" x={HERO.girl.x} h={HERO.girl.h} d={HERO.girl.d} dx={-go * W * 0.03} priority="high" className="rise" style={{ '--d': '0.3s' }} />
+          <Cut src={A('boy-laptop')} alt="Her friend types on a laptop" x={[0.58, 0.73]} h={[0.355, 0.56]} d={0.05} dx={go * W * 0.03} className="rise" style={{ '--d': '0.45s' }} />
+          <Cut src={A('bot-stand')} alt="A tin robot peeks in" x={[0.85, 0.88]} h={[0.2, 0.3]} d={0.03} dx={(1 - out(seg(s, 0.05, 0.7))) * W * (land ? 0.08 : 0.18)} r={-8 + 8 * seg(s, 0.05, 0.7)} />
         </>
       );
     },
-    ui: (s, { F, H }) => {
-      const go = seg(s, 0.2, 1.1);
-      return (
-        <>
-          <div className="title" style={{ transform: `translateY(${-go * 40}px)`, opacity: 1 - seg(s, 0.7, 1.1) }}>
-            <h1 className="display">
-              <span className="rise" style={{ '--d': '0.1s' }}>
-                Are you ready
-              </span>
-              <span className="rise" style={{ '--d': '0.22s' }}>
-                for the <em>future?</em>
-              </span>
-            </h1>
-            <div className="notes rise" style={{ '--d': '0.5s' }}>
-              <p>› A Hack2skill campus series</p>
-              <p>› Two hours. Phones out. Squads up.</p>
-              <p>› Now touring India</p>
-            </div>
-          </div>
-          <div className="scroll-hint" style={{ opacity: 1 - seg(s, 0, 0.25), bottom: F * H * 0.38 }} aria-hidden="true">
-            Scroll <span>↓</span>
-          </div>
-        </>
-      );
-    },
+    ui: s => (
+      <div className="title" style={{ transform: `translateY(${-seg(s, 0.2, 1.0) * 40}px)`, opacity: 1 - seg(s, 0.6, 1.0) }}>
+        <h1 className="display">
+          <span className="rise" style={{ '--d': '0.1s' }}>
+            Are you ready
+          </span>
+          <span className="rise" style={{ '--d': '0.22s' }}>
+            for the <em>future?</em>
+          </span>
+        </h1>
+        <div className="notes rise" style={{ '--d': '0.5s' }}>
+          <p>› A Hack2skill campus bootcamp</p>
+          <p>› Now touring India</p>
+        </div>
+      </div>
+    ),
   },
 
-  /* 1. 2031: starts on one robot's keyboard, pulls back to a room of them */
+  /* 1. 2031: opens out of her phone, on one robot's keyboard, then pulls back to a room of them */
   {
     id: 'y2031',
-    len: 2.6,
+    rest: 1.4,
     wall: CREAM,
     floor: BLUE,
     F: 0.26,
     ink: INK,
+    enter: { type: 'iris', T: 0.9, at: heroPhone },
     cues: [
       [0.45, 'boop'],
       [0.62, 'boop'],
@@ -157,14 +483,15 @@ export const SCENES = [
     ),
   },
 
-  /* 2. the robot catches its own bug, in a cage */
+  /* 2. the robot catches its own bug, in a cage. Comes in like torn paper. */
   {
     id: 'bugs',
-    len: 2.8,
+    rest: 1.55,
     wall: '#f2b230',
     floor: INDIGO,
     F: 0.26,
     ink: INK,
+    enter: { type: 'tear', T: 0.8 },
     cues: [
       [0.98, 'boing'],
       [1.22, 'clank'],
@@ -198,7 +525,7 @@ export const SCENES = [
             r={caught ? 0 : Math.sin(s * 6) * 1.2}
           />
           {!caught ? (
-            <Cut src={A('bug')} alt="A ladybug" x={bx / W} h={g.bugH / H} d={0} dy={F * H - by} z={4} sc={lerp(1, 0.5, j)} r={lerp(32 + Math.sin(s * 24) * 8 * (1 - j), 360, out(j))} shadow={j < 0.1} wiggle="" />
+            <Cut src={A('bug')} alt="A ladybug" x={bx / W} h={g.bugH / H} d={0} dy={F * H - by} z={4} sc={lerp(1, 0.5, j)} r={lerp(32 + Math.sin(s * 24) * 8 * (1 - j), 360, out(j))} shadow={j < 0.1} />
           ) : null}
           {pop > 0 ? <i className="burst" aria-hidden="true" style={{ left: g.closedCageX, bottom: g.closedCageY, opacity: pop, transform: `translate(-50%, 50%) scale(${0.6 + pop})` }} /> : null}
         </>
@@ -212,47 +539,46 @@ export const SCENES = [
     ),
   },
 
-  /* 3. so what's left for you */
+  /* 3. so what's left for you? The bug scene shrinks away like a photo; the "?" drops its dot. */
   {
     id: 'you',
-    len: 2.8,
+    rest: 1.05,
+    after: 0.55,
     wall: '#a6d8ee',
     floor: CREAM,
-    F: 0.24,
+    F: YOU_F,
     ink: INK,
+    enter: { type: 'shrink', T: 0.9 },
     cues: [[0.55, 'pop']],
     // starts close on the two of them, pulls back to the word they are looking at
     cam: s => ({ z: lerp(1.7, 1, inout(seg(s, 0.1, 1.1))), x: 0.52, y: 0.82 }),
+    push: false,
     world: () => (
       <>
-        <Cut src={A('boy-sit')} alt="Her friend sits on the floor, looking up" x={[0.3, 0.46]} h={[0.27, 0.36]} d={0.1} />
-        <Cut src={A('girl-sit')} alt="She sits beside him, looking up too" x={[0.72, 0.66]} h={[0.26, 0.35]} d={0.08} flip />
+        <Cut src={A('boy-sit')} alt="Her friend sits on the floor, looking up" x={[0.22, 0.38]} h={[0.25, 0.36]} d={0.1} />
+        <Cut src={A('girl-sit')} alt="She sits beside him, looking up too" x={[0.79, 0.64]} h={[0.24, 0.35]} d={0.08} flip />
       </>
     ),
-    ui: s => (
-      <Lines className="lines--you">
-        <Typed text="So what’s left for" p={seg(s, 0.1, 0.5)} className="line" />
-        <span className="you" aria-hidden="true" style={{ opacity: seg(s, 0.5, 0.7), transform: `scale(${lerp(0.6, 1, back(seg(s, 0.5, 1.0)))})` }}>
-          you?
-        </span>
-        <Note o={seg(s, 1.4, 1.65)}>Plenty. Let’s find it.</Note>
-      </Lines>
-    ),
+    ui: (s, k) => <You s={s} k={k} />,
   },
 
-  /* 4. five things */
+  /* 4. what Futuready is. Opens out of the dot; the passport drops in and opens. */
   {
-    id: 'five',
-    len: 2.2,
-    wall: '#232c6e',
-    floor: INDIGO,
-    F: 0.22,
+    id: 'intro',
+    rest: 1.5,
+    wall: NIGHT,
+    floor: NIGHT,
+    F: 0,
     ink: CREAM,
-    cues: [[0.32, 'whoosh']],
+    enter: { type: 'iris', T: 0.8, at: k => ({ ...dotEnd(k), r0: dotEnd(k).r, zoom: 0 }) },
+    cues: [
+      [0.62, 'boop'],
+      [1.0, 'page'],
+    ],
     ui: s => (
-      <Lines>
-        <Typed text="Five things no machine can do for you." p={seg(s, 0.1, 0.85)} className="line" />
-        <Note o={seg(s, 0.95, 1.2)}>Clear a level, earn a stamp.</Note>
+      <Lines fit>
+        <Rows rows={['Futuready is an', 'interactive bootcamp', 'that teaches you', 'exactly that.']} p={seg(s, 0.1, 0.85)} />
+        <Note o={seg(s, 0.88, 1.08)}>through five levels that spell R.E.A.D.Y.</Note>
       </Lines>
     ),
   },
@@ -260,137 +586,118 @@ export const SCENES = [
   /* 5. R */
   {
     id: 'R',
-    len: 2.5,
+    rest: 1.62,
     wall: '#f2a7b8',
     floor: INDIGO,
     F: 0.24,
     ink: INK,
     level: 0,
-    cues: [[0.35, 'boop']],
+    enter: { type: 'slide', T: 0.7 },
+    cues: [[0.4, 'boop']],
     cam: s => ({ z: lerp(1.14, 1, out(seg(s, 0, 1.2))), x: 0.3, y: 0.75 }),
     world: (s, { W }) => (
       <>
         <Letter k="R" s={s} color="#e98ca2" />
-        <Cut src={A('girl-list')} alt="She holds up a handwritten list" x={[0.3, 0.42]} h={[0.44, 0.56]} d={0.08} dx={enterL(s, 0, 0.6, W)} />
-        <Cut src={A('bot-paper')} alt="A robot holds the same list, confused" x={[0.76, 0.66]} h={[0.3, 0.38]} d={0.06} dx={enterR(s, 0.3, 0.9, W)} r={Math.sin(s * 9) * 7 * seg(s, 0.95, 1.2)} />
+        <Cut src={A('girl-list')} alt="She holds up a handwritten list" x={[0.3, 0.42]} h={[0.4, 0.56]} d={0.08} dx={enterL(s, 0, 0.6, W)} />
+        <Cut src={A('bot-paper')} alt="A robot holds the same list, confused" x={[0.76, 0.66]} h={[0.3, 0.38]} d={0.06} dx={enterR(s, 0.3, 0.9, W)} r={Math.sin(s * 9) * 7 * seg(s, 0.62, 0.9)} />
       </>
     ),
-    ui: s => (
-      <Lines>
-        <LevelLabel i={0} s={s} />
-        <Typed text="Machines do exactly what you say." p={seg(s, 0.2, 0.75)} className="line" />
-        <Typed text="So say exactly what you mean." p={seg(s, 0.9, 1.4)} className="line" />
-      </Lines>
-    ),
+    ui: s => <LevelLines i={0} s={s} a={['AI does literally', 'what you say.']} b={['Learn the art', 'of spec writing.']} />,
   },
 
-  /* 6. E: the camera leans in to the bug she finds */
+  /* 6. E: the camera leans in to the bug she finds. The last page turns over. */
   {
     id: 'E',
-    len: 2.5,
+    rest: 1.62,
     wall: '#9ed6c0',
     floor: BLUE,
     F: 0.24,
     ink: INK,
     level: 1,
-    cues: [[1.02, 'pop']],
-    cam: (s, { land, F }) => ({ z: 1 + 0.38 * inout(seg(s, 1.0, 1.4)), x: land ? 0.66 : 0.74, y: 1 - F - 0.12 }),
+    enter: { type: 'page', T: 0.8 },
+    cues: [[0.64, 'pop']],
+    cam: (s, { land }) => ({ z: 1 + 0.24 * inout(seg(s, 0.62, 1.05)), x: land ? 0.66 : 0.76, y: 0.5 }),
     world: (s, { W, H, land }) => (
       <>
         <Letter k="E" s={s} color="#86c8ae" />
-        <Cut src={A('girl-lens')} alt="She inspects the robot's work with a magnifying glass" x={[0.36, 0.46]} h={[0.42, 0.54]} d={0.08} dx={enterL(s, 0, 0.6, W)} />
+        <Cut src={A('girl-lens')} alt="She inspects the robot's work with a magnifying glass" x={[0.34, 0.46]} h={[0.37, 0.54]} d={0.08} dx={enterL(s, 0, 0.6, W)} />
         <Cut src={A('bot-type')} alt="A robot typing on a laptop" x={[0.76, 0.66]} h={[0.24, 0.3]} d={0.06} dx={enterR(s, 0.25, 0.85, W)} />
-        <Cut src={A('bug')} alt="A bug, found" x={land ? 0.69 : 0.79} h={[0.06, 0.075]} d={0.06} dy={-(land ? 0.17 : 0.13) * H} z={4} sc={back(seg(s, 1.0, 1.25))} o={seg(s, 1.0, 1.05)} shadow={false} r={20} />
+        <Cut src={A('bug')} alt="A bug, found" x={land ? 0.69 : 0.79} h={[0.06, 0.075]} d={0.06} dy={-(land ? 0.17 : 0.13) * H} z={4} sc={back(seg(s, 0.62, 0.86))} o={seg(s, 0.62, 0.66)} shadow={false} r={20} />
       </>
     ),
-    ui: s => (
-      <Lines>
-        <LevelLabel i={1} s={s} />
-        <Typed text="It looks right." p={seg(s, 0.2, 0.55)} className="line" />
-        <Typed text="Is it right?" p={seg(s, 0.9, 1.15)} className="line" />
-      </Lines>
-    ),
+    ui: s => <LevelLines i={1} s={s} a={['If it looks right,', 'Is it really right?']} b={['Learn to evaluate how', 'Anthropic engineers do.']} />,
   },
 
   /* 7. A: he brings the plan, the blocks follow it */
   {
     id: 'A',
-    len: 2.5,
+    rest: 1.62,
     wall: '#f2b230',
     floor: '#c9562e',
     F: 0.24,
     ink: INK,
     level: 2,
+    enter: { type: 'page', T: 0.8 },
     cues: [[0.5, 'boop']],
     cam: s => ({ z: lerp(1.18, 1, out(seg(s, 0, 1.1))), x: 0.6, y: 0.8 }),
     world: (s, { W }) => {
-      const build = inout(seg(s, 0.35, 1.45));
+      const build = inout(seg(s, 0.3, 1.2));
       const walking = 1 - seg(s, 0.55, 0.65);
       return (
         <>
           <Letter k="A" s={s} color="#e3a21c" />
-          <Cut src={A('boy-plan')} alt="Her friend walks in carrying the blueprint" x={[0.26, 0.36]} h={[0.44, 0.56]} d={0.08} dx={enterL(s, 0, 0.6, W)} dy={-Math.abs(Math.sin(s * 14)) * 5 * walking} />
-          <Cut src={A('blocks')} alt="A tower of wooden blocks being built" x={[0.62, 0.56]} h={[0.44, 0.56]} d={0.05} style={{ clipPath: `inset(${(1 - build) * 100}% -20% -10% -20%)` }} wiggle="" />
+          <Cut src={A('boy-plan')} alt="Her friend walks in carrying the blueprint" x={[0.26, 0.36]} h={[0.4, 0.56]} d={0.08} dx={enterL(s, 0, 0.6, W)} dy={-Math.abs(Math.sin(s * 14)) * 5 * walking} />
+          <Cut src={A('blocks')} alt="A tower of wooden blocks being built" x={[0.62, 0.56]} h={[0.39, 0.56]} d={0.05} style={{ clipPath: `inset(${(1 - build) * 100}% -20% -10% -20%)` }} wiggle="" />
           <Cut src={A('bot-block')} alt="A robot carrying a block" x={[0.86, 0.72]} h={[0.27, 0.34]} d={0.1} dx={enterR(s, 0.2, 1.0, W) * 0.8} dy={-Math.abs(Math.sin(s * 16)) * 6 * (1 - seg(s, 0.9, 1.0))} />
         </>
       );
     },
-    ui: s => (
-      <Lines>
-        <LevelLabel i={2} s={s} />
-        <Typed text="Anyone can stack blocks." p={seg(s, 0.2, 0.7)} className="line" />
-        <Typed text="You decide where they go." p={seg(s, 0.9, 1.4)} className="line" />
-      </Lines>
-    ),
+    ui: s => <LevelLines i={2} s={s} a={['Anyone can', 'stack blocks.']} b={['Learn to architect', 'scalable AI systems.']} />,
   },
 
-  /* 8. D: a band that never sleeps */
+  /* 8. D: a band that never sleeps (tap them: trumpet, drum, hi-hat) */
   {
     id: 'D',
-    len: 2.6,
+    rest: 1.62,
     wall: '#c3b5f2',
     floor: INDIGO,
     F: 0.24,
     ink: INK,
     level: 3,
-    cues: [[1.0, 'jingle']],
-    cam: s => ({ z: 1 + 0.014 * Math.abs(Math.sin(s * 11)) * seg(s, 0.95, 1.2), x: 0.5, y: 0.7 }),
+    enter: { type: 'page', T: 0.8 },
+    cues: [[0.64, 'jingle']],
+    cam: s => ({ z: 1 + 0.014 * Math.abs(Math.sin(s * 11)) * seg(s, 0.62, 0.85), x: 0.5, y: 0.7 }),
     world: (s, { W, H, land, F }) => {
-      const play = seg(s, 0.95, 1.2);
+      const play = seg(s, 0.62, 0.85);
       const beat = i => -Math.abs(Math.sin(s * 11 + i * 0.9)) * 10 * play;
       const band = land ? [0.6, 0.72, 0.84] : [0.6, 0.78, 0.94];
       return (
         <>
           <Letter k="D" s={s} color="#ae9deb" />
-          <Cut src={A('girl-baton')} alt="She conducts a band of robots with a baton" x={[0.24, 0.38]} h={[0.44, 0.56]} d={0.08} dx={enterL(s, 0, 0.6, W)} r={Math.sin(s * 11) * 2 * play} />
-          <Cut src={A('bot-horn')} alt="A robot playing a trumpet" x={band[0]} h={[0.26, 0.33]} d={0.07} dx={enterR(s, 0.25, 0.8, W) * 1.2} dy={beat(0)} flip />
-          <Cut src={A('bot-stand')} alt="" x={band[1]} h={[0.24, 0.31]} d={0.04} dx={enterR(s, 0.35, 0.9, W) * 1.2} dy={beat(1)} />
-          <Cut src={A('bot-type')} alt="" x={band[2]} h={[0.2, 0.25]} d={0.1} dx={enterR(s, 0.45, 1.0, W) * 1.2} dy={beat(2)} />
+          <Cut src={A('girl-baton')} alt="She conducts a band of robots with a baton" x={[0.24, 0.38]} h={[0.4, 0.56]} d={0.08} dx={enterL(s, 0, 0.6, W)} r={Math.sin(s * 11) * 2 * play} />
+          <Cut src={A('bot-horn')} alt="A robot playing a trumpet" x={band[0]} h={[0.26, 0.33]} d={0.07} dx={enterR(s, 0.25, 0.8, W) * 1.2} dy={beat(0)} flip sfx="horn" />
+          <Cut src={A('bot-stand')} alt="A robot keeping the beat" x={band[1]} h={[0.24, 0.31]} d={0.04} dx={enterR(s, 0.35, 0.9, W) * 1.2} dy={beat(1)} sfx="drum" />
+          <Cut src={A('bot-type')} alt="" x={band[2]} h={[0.2, 0.25]} d={0.1} dx={enterR(s, 0.45, 1.0, W) * 1.2} dy={beat(2)} sfx="hat" />
           <Floaters items={['♪', '♫', '♪', '♬']} s={s} on={play} x={band[0] * W - (land ? 0.06 : 0.09) * H} y={(F - 0.07) * H + 0.2 * H} rise={H * 0.22} spread={26} speed={1.1} className="music" />
         </>
       );
     },
-    ui: s => (
-      <Lines>
-        <LevelLabel i={3} s={s} />
-        <Typed text="You don’t code alone anymore." p={seg(s, 0.2, 0.7)} className="line" />
-        <Typed text="You lead a team that never sleeps." p={seg(s, 0.9, 1.45)} className="line" />
-      </Lines>
-    ),
+    ui: s => <LevelLines i={3} s={s} a={['Nobody codes', 'alone anymore.']} b={['Learn to direct', 'a team of AI Agents']} />,
   },
 
-  /* 9. Y: a slow push into the spotlight */
+  /* 9. Y: lights up from above, then a slow push into the spotlight */
   {
     id: 'Y',
-    len: 2.5,
+    rest: 1.62,
     wall: '#151a45',
     floor: '#0e1232',
     F: 0.24,
     ink: CREAM,
     level: 4,
-    cam: s => ({ z: lerp(1, 1.16, inout(seg(s, 0.4, 1.9))), x: 0.5, y: 0.5 }),
+    enter: { type: 'iris', T: 0.9, edge: 0.3, at: ({ W }) => ({ x: W / 2, y: 0, r0: 0, zoom: 0.25 }) },
+    cam: s => ({ z: lerp(1, 1.12, inout(seg(s, 0.3, 1.6))), x: 0.5, y: 0.5 }),
     world: s => {
-      const lit = out(seg(s, 0.6, 1.1));
+      const lit = out(seg(s, 0.45, 0.95));
       return (
         <>
           <Letter k="Y" s={s} color="#1f2660" />
@@ -400,95 +707,132 @@ export const SCENES = [
       );
     },
     ui: s => (
-      <Lines>
-        <LevelLabel i={4} s={s} />
-        <Typed text="And the last level" p={seg(s, 0.2, 0.6)} className="line" />
-        <Typed text="is you." p={seg(s, 0.9, 1.15)} className="line line--big" />
-        <Note o={seg(s, 1.25, 1.5)}>The part nobody can automate.</Note>
+      <Lines className="lines--level">
+        <p className="level-label" style={{ opacity: seg(s, 0.04, 0.25) }}>
+          <i style={{ background: LEVELS[4].color }} aria-hidden="true" />
+          Level 5 • You
+        </p>
+        <Typed text="And the last level" p={seg(s, 0.15, 0.5)} className="line" />
+        <Typed text="is you" p={seg(s, 0.6, 0.85)} className="line line--big" />
+        <Note o={seg(s, 0.95, 1.15)}>the unique part that nobody can steal</Note>
       </Lines>
     ),
   },
 
-  /* 10. the passport (it flies in from the corner; see Story) */
+  /* 10. the passport comes back, full of stamps. Torn open from the dark. */
   {
     id: 'pass',
-    len: 2.2,
+    rest: 1.0,
     wall: CREAM,
-    floor: BLUE,
-    F: 0.2,
+    floor: CREAM,
+    F: 0,
     ink: INK,
-    cues: [[0.72, 'chime']],
-    ui: (s, { onPass }) => (
+    enter: { type: 'tear', T: 0.8 },
+    cues: [[0.62, 'chime']],
+    world: s => (
+      <svg className="guilloche" viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true" style={{ transform: `translate3d(${-s * 18}px, 0, 0)` }}>
+        <path d={GUILLOCHE[0]} />
+        <path d={GUILLOCHE[1]} />
+      </svg>
+    ),
+    ui: (s, { jump }) => (
       <>
-        <Lines>
-          <Typed text="Five stamps. One passport." p={seg(s, 0.1, 0.55)} className="line" />
+        <Lines fit>
+          <Rows rows={['On completing Futuready,', 'you get an e-passport.']} p={seg(s, 0.1, 0.7)} />
         </Lines>
-        <div className="pass-cta" style={{ opacity: seg(s, 0.75, 0.95), pointerEvents: s > 0.8 ? 'auto' : 'none' }}>
-          <button className="pill pill--ink" onClick={onPass}>
-            Make it yours
+        <div className="pass-cta" style={{ opacity: seg(s, 0.72, 0.92), pointerEvents: s > 0.8 ? 'auto' : 'none' }}>
+          <button className="pill pill--ink pill--big" onClick={() => jump('train', 1.0)}>
+            Attend Futuready
           </button>
-          <p className="note">› Collect a new stamp every episode.</p>
+          <p className="note">› Free to attend</p>
         </div>
       </>
     ),
   },
 
-  /* 11. the lab: ends by leaning into the TV */
+  /* 11. the lab */
   {
     id: 'lab',
-    len: 2.8,
+    rest: 1.45,
     wall: BLUE,
     floor: CREAM,
     F: 0.24,
     ink: CREAM,
+    push: false,
+    enter: { type: 'slide', T: 0.7 },
     cues: [[0.15, 'tv']],
-    cam: (s, { land }) => ({ z: 1 + 0.32 * inout(seg(s, 1.55, 2.1)), x: land ? 0.4 : 0.32, y: land ? 0.6 : 0.64 }),
+    cam: (s, { land }) => ({ z: lerp(1.1, 1, out(seg(s, 0, 0.9))), x: land ? 0.4 : 0.34, y: 0.7 }),
     world: (s, { W }) => {
       const screens = ['tv-04-tools-stage', 'tv-07-bug1-reveal-stage', 'tv-08-podium-stage', 'tv-words-feel'];
-      const i = Math.min(3, Math.floor(seg(s, 0.2, 2.0) * 4));
+      const i = Math.min(3, Math.floor(seg(s, 0.2, 1.6) * 4));
       return (
         <>
-          <Cut src={A('tv')} alt="A vintage TV showing the real Builders Lab screens" x={[0.34, 0.42]} h={[0.27, 0.42]} d={0.07} dy={(1 - back(seg(s, 0.1, 0.55))) * -60} o={seg(s, 0.1, 0.25)} wiggle="">
+          <Cut src={A('tv')} alt="A vintage TV showing the real Builders Lab screens" x={LAB_TV.x} h={LAB_TV.h} d={LAB_TV.d} dy={(1 - back(seg(s, 0.1, 0.55))) * -60} o={seg(s, 0.1, 0.25)}>
             <div className="tv-screen">
               {screens.map((n, j) => (
                 <img key={n} src={A(n)} alt="" style={{ opacity: j === i ? 1 : 0 }} />
               ))}
             </div>
           </Cut>
-          <Cut src={A('squad')} alt="A squad of four students cheering at their phones" x={[0.74, 0.7]} h={[0.4, 0.52]} d={0.1} dx={enterR(s, 0.6, 1.2, W) * 1.2} />
+          <Cut src={A('squad')} alt="A squad of four students cheering at their phones" x={[0.74, 0.7]} h={[0.4, 0.52]} d={0.1} dx={enterR(s, 0.9, 1.4, W) * 1.2} />
         </>
       );
     },
     ui: s => (
-      <Lines>
-        <Typed text="So we turned it into a game." p={seg(s, 0.1, 0.6)} className="line" />
-        <Typed text="Phones out. Squads up." p={seg(s, 0.9, 1.35)} className="line" />
-        <Note o={seg(s, 1.45, 1.7)}>5 levels · 1 leaderboard · 0 lectures</Note>
+      <Lines fit>
+        <Rows rows={['Futuready is not a lecture.', 'It is highly interactive.']} p={seg(s, 0.1, 0.65)} />
+        <div className="learn">
+          <Rows rows={['Students participate in', 'realtime via phones.']} p={seg(s, 0.8, 1.35)} />
+        </div>
       </Lines>
     ),
   },
 
-  /* 12. voices */
+  /* 12. meet your trainer: comes out of the TV */
+  {
+    id: 'trainer',
+    rest: 1.3,
+    wall: '#1d1236',
+    floor: '#2c2058',
+    F: 0.18,
+    ink: CREAM,
+    enter: { type: 'tv', T: 1.0, at: tvScreen },
+    cues: [[0.3, 'shutter']],
+    cam: s => ({ z: lerp(1.12, 1, out(seg(s, 0, 0.9))), x: 0.5, y: 0.6 }),
+    world: (s, k) => <Trainer s={s} k={k} />,
+    ui: s => (
+      <Lines className="lines--trainer">
+        <Typed text="Meet your trainer" p={seg(s, 0.1, 0.4)} className="line" />
+        <h2 className="trainer-name" style={{ opacity: seg(s, 0.38, 0.55), transform: `translateY(${(1 - out(seg(s, 0.38, 0.6))) * 16}px)` }}>
+          {TRAINER.name}
+        </h2>
+        <a className="trainer-link" href={TRAINER.url} target="_blank" rel="noopener noreferrer" style={{ opacity: seg(s, 1.0, 1.15), pointerEvents: s > 1.0 ? 'auto' : 'none' }}>
+          LinkedIn ↗
+        </a>
+      </Lines>
+    ),
+  },
+
+  /* 13. what attendees say. The trainer's photo is tossed aside like a print. */
   {
     id: 'voices',
-    len: 3.4,
+    rest: 1.45,
     wall: CREAM,
-    floor: '#f2b230',
-    F: 0.2,
+    floor: CREAM,
+    F: 0,
     ink: INK,
-    world: (s, { land, W }) =>
-      land ? <Cut src={A('boy-thumb')} alt="Her friend gives a thumbs up" x={0.92} h={0.5} d={0.06} dx={enterR(s, 1.6, 2.1, W) * 0.5} /> : null,
+    enter: { type: 'shrink', T: 0.9 },
     ui: (s, { land }) => (
       <>
         <Lines>
-          <Typed text="Pune played first." p={seg(s, 0.1, 0.45)} className="line" />
-          <Note o={seg(s, 0.45, 0.65)}>26 Oct 2026 · Trinity Academy of Engineering</Note>
+          <Typed text="What Futuready attendees say" p={seg(s, 0.1, 0.5)} className="line" />
         </Lines>
         <div className={`notes-wall ${land ? 'is-land' : ''}`}>
           {VOICES_FULL.map((v, i) => {
-            const drop = back(seg(s, 0.55 + i * 0.45, 0.9 + i * 0.45));
+            const a = 0.45 + i * 0.3;
+            const drop = back(seg(s, a, a + 0.32));
             return (
-              <figure key={v.name} className="paper" style={{ '--r': `${[-4, 3, -2][i]}deg`, opacity: seg(s, 0.55 + i * 0.45, 0.65 + i * 0.45), transform: `translateY(${(1 - drop) * -60}px) rotate(var(--r))` }}>
+              <figure key={v.name} className="paper" style={{ '--r': `${[-2.5, 2, -1.5][i]}deg`, opacity: seg(s, a, a + 0.08), transform: `translateY(${(1 - drop) * -50}px) rotate(var(--r))` }}>
                 <blockquote>“{v.quote}”</blockquote>
                 <figcaption>
                   {v.name}
@@ -502,15 +846,16 @@ export const SCENES = [
     ),
   },
 
-  /* 13. the train: one carriage per city, straight from the event list */
+  /* 14. the train: one carriage per city, straight from the event list. Arrives from the right. */
   {
     id: 'train',
-    len: 4.4,
+    rest: 3.65,
     wall: '#a6d8ee',
     floor: '#2f7a4e',
     F: 0.22,
     ink: INK,
-    cues: [[0.32, 'whistle'], ...Array.from({ length: 14 }, (_, i) => [0.5 + i * 0.19, 'chug'])],
+    enter: { type: 'wipe', T: 0.8 },
+    cues: [[0.32, 'whistle'], ...Array.from({ length: 14 }, (_, i) => [0.5 + i * 0.19, 'chug']), [2.8, 'ding']],
     cam: s => ({ z: lerp(1.08, 1, out(seg(s, 0, 1.2))), x: 0.5, y: 0.75 }),
     world: (s, k) => {
       const { H, cities } = k;
@@ -524,7 +869,7 @@ export const SCENES = [
             <img className="train__engine" src={A('engine')} alt="A vintage tin toy train" style={{ height: t.eh, width: t.ew }} draggable={false} />
             <Floaters items={['', '', '', '']} s={s * 1.4} on={t.moving ? 1 : 0.4} x={t.ew * 0.13} y={t.eh * 0.95} rise={H * 0.16} spread={10} className="smoke" />
             {cities.map((c, i) => (
-              <a key={c.city + i} className={`coach ${i === t.near ? 'is-near' : ''}`} href={c.url} style={{ height: t.ch, width: t.cw, marginLeft: t.gap }} aria-label={`${c.city}: ${stationTag(c)}`}>
+              <a key={c.city + i} className={`coach ${i === t.near ? 'is-near' : ''}`} href={c.url} style={{ height: t.ch, width: t.cw, marginLeft: t.gap }} aria-label={`Attend in ${c.city}: ${stationTag(c)}${c.date ? `, ${c.date}` : ''}`}>
                 <img src={A('coach')} alt="" draggable={false} />
                 <span className="coach__board">
                   <b>{c.city}</b>
@@ -533,59 +878,59 @@ export const SCENES = [
               </a>
             ))}
           </div>
-          <Cut src={A('girl-walk')} alt="She walks to the platform with her suitcase" x={lerp(-0.25, k.land ? 0.18 : 0.2, out(walk))} h={[0.38, 0.48]} d={0.1} z={5} o={walk > 0 ? 1 : 0} />
-          <Cut src={A('boy-run')} alt="Her friend runs to catch the train" x={lerp(-0.3, k.land ? 0.36 : 0.62, out(run))} h={[0.36, 0.46]} d={0.04} z={5} o={run > 0 ? 1 : 0} />
+          <Cut src={A('girl-walk')} alt="She walks to the platform with her suitcase" x={lerp(-0.25, k.land ? 0.18 : 0.2, out(walk))} h={[0.36, 0.46]} d={0.1} z={5} o={walk > 0 ? 1 : 0} />
+          <Cut src={A('boy-run')} alt="Her friend runs to catch the train" x={lerp(-0.3, k.land ? 0.36 : 0.64, out(run))} h={[0.33, 0.43]} d={0.13} z={6} o={run > 0 ? 1 : 0} />
         </>
       );
     },
     ui: (s, k) => {
       const c = k.cities[trainGeometry(s, k).near] || k.cities[0];
+      const late = seg(s, 2.85, 3.05);
+      const hint = seg(s, 0.6, 0.8);
       return (
-        <Lines>
-          <Typed text="Next stop:" p={seg(s, 0.1, 0.35)} className="line" />
-          <div className="station" style={{ opacity: seg(s, 0.35, 0.55) }} aria-live="polite">
-            {c.city}
-            <small>{stationTag(c)}</small>
-          </div>
-          <Note o={seg(s, 0.6, 0.8)}>Tap a carriage to board.</Note>
-        </Lines>
+        <>
+          <Lines className="lines--train">
+            <Typed text="Attend in:" p={seg(s, 0.1, 0.3)} className="line" />
+            <div className="station" style={{ opacity: seg(s, 0.3, 0.5), fontSize: stationSize(c.city, k) }} aria-live="polite">
+              {c.city}
+              <small style={{ maxWidth: stationRoom(k) }}>{stationTag(c)}</small>
+            </div>
+          </Lines>
+          <Flaps c={c} o={seg(s, 0.35, 0.55)} />
+          <p className="train-hint" aria-hidden={late > 0.5}>
+            <span style={{ opacity: hint * (1 - late) }}>Tap a carriage to attend</span>
+            <span style={{ opacity: late }}>Don’t miss the deadline.</span>
+          </p>
+        </>
       );
     },
   },
 
-  /* 14. see you on the platform */
+  /* 15. didn't find your city? */
   {
     id: 'end',
-    len: 1.6,
+    len: 0.9,
     wall: BLUE,
     floor: CREAM,
     F: 0.26,
     ink: CREAM,
+    enter: { type: 'slide', T: 0.7 },
     cues: [[0.2, 'pop']],
-    cam: s => ({ z: lerp(1.14, 1, out(seg(s, 0, 0.9))), x: 0.55, y: 0.8 }),
-    world: s => (
-      <>
-        <Cut src={A('girl-phone')} alt="The two friends and a robot, side by side" x={[0.3, 0.5]} h={[0.4, 0.5]} d={0.1} dx={(1 - out(seg(s, 0, 0.5))) * -80} />
-        <Cut src={A('boy-wave')} alt="" x={[0.56, 0.62]} h={[0.4, 0.5]} d={0.09} dx={(1 - out(seg(s, 0.05, 0.55))) * 60} />
-        <Cut src={A('bot-wave')} alt="" x={[0.84, 0.76]} h={[0.3, 0.36]} d={0.1} dx={(1 - out(seg(s, 0.1, 0.6))) * 80} />
-      </>
-    ),
-    ui: (s, { jump, land }) => (
+    cam: s => ({ z: lerp(1.14, 1, out(seg(s, 0, 0.9))), x: 0.5, y: 0.8 }),
+    world: (s, k) => {
+      const xs = endRow(k);
+      return END.map((p, i) => <Cut key={p.src} src={A(p.src)} alt={p.alt} x={xs[i]} h={p.h} d={p.d} dx={(1 - out(seg(s, i * 0.05, 0.5 + i * 0.05))) * [-80, 60, 80][i]} />);
+    },
+    ui: (s, { land }) => (
       <>
         <div className="title title--end" style={{ opacity: seg(s, 0, 0.35) }}>
-          <h2 className="display">
-            See you on
-            <br />
-            the <em>platform.</em>
-          </h2>
-          <div className="end-cta">
-            <button className="pill" onClick={() => jump('train', 1.6)}>
-              Find your city
-            </button>
-            <a className="pill pill--ghost" href={BRING_URL}>
-              Bring it to your campus
-            </a>
-          </div>
+          <h2 className="display">Didn’t find your city?</h2>
+          <p className="end-line">
+            <a href={VIRTUAL_URL}>Attend Virtual</a>
+          </p>
+          <a className="end-bring" href={BRING_URL}>
+            or bring it to your campus
+          </a>
         </div>
         <footer className="foot" style={{ opacity: seg(s, 0.3, 0.6) }}>
           <img src="/h2s-logo.png" alt="Hack2skill" width="48" height="18" />
@@ -596,6 +941,16 @@ export const SCENES = [
     ),
   },
 ];
+
+/* the TV in the lab, and the rectangle of its screen (for the zoom into it) */
+const LAB_TV = { x: [0.34, 0.42], h: [0.27, 0.42], d: 0.07, F: 0.24, a: 320 / 308 };
+function tvScreen({ W, H, land }) {
+  const h = pick(LAB_TV.h, land) * H;
+  const w = h * LAB_TV.a;
+  const left = pick(LAB_TV.x, land) * W - w / 2;
+  const top = H - (LAB_TV.F - LAB_TV.d) * H - h;
+  return { l: left + 0.135 * w, t: top + 0.135 * h, w: 0.53 * w, h: 0.43 * h, round: 0.1 * w };
+}
 
 /* where the robot, its cage and the bug sit in the catch scene */
 function catchGeometry({ W, H, land, F }) {
@@ -645,3 +1000,4 @@ function trainGeometry(s, { W, H, land, F, cities }) {
   const moving = move > 0 && move < 1;
   return { ch, cw, eh, ew, gap, X, near, moving, shake: moving ? Math.sin(s * 90) : 0, railY: (F - 0.07) * H };
 }
+

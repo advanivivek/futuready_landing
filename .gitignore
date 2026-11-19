@@ -1,1 +1,26 @@
+# ---- never uploaded: personal files, notes and readmes ----
+.DS_Store
+.claude/
+**/.claude/
+*.pdf
+index_backup.html
+testimonials.html
+README.md
+**/README.md
+TODO*
+**/TODO*
+todo*
+**/todo*
+NOTES*
+**/NOTES*
+*.local.md
+.env
+.env.*
+
+# the trainer's original photos (the site uses the cut-outs in home/public/story)
+home/public/vivek/
+
+# ---- generated ----
+node_modules/
+dist/
 shots

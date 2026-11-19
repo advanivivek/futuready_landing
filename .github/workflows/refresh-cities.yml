@@ -1,0 +1,20 @@
+name: Refresh the cities
+
+# Rebuilds the Futuready main page on Vercel every morning, so new Futuready events on Hack2skill
+# show up on the train. Needs one repository secret, VERCEL_DEPLOY_HOOK
+# (Vercel > the project > Settings > Git > Deploy Hooks). Until it is added, this does nothing.
+on:
+  schedule:
+    - cron: '30 0 * * *' # 06:00 in India
+  workflow_dispatch:
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ask Vercel to rebuild
+        env:
+          HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$HOOK" ]; then echo "Add the VERCEL_DEPLOY_HOOK secret to turn this on."; exit 0; fi
+          curl -fsS -X POST "$HOOK"
