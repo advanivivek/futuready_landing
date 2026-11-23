@@ -60,6 +60,7 @@ code{background:var(--cream);padding:1px 6px;border-radius:6px}
       <div class="seg" id="kind"><button type="button" data-k="campus">Campus</button><button type="button" data-k="virtual">Virtual</button></div>
       <div class="two campus"><label>City<input name="city"></label><label>Campus<input name="campus"></label></div>
       <div class="two"><label class="campus">Date<input name="date" type="date"></label><label>Cover greeting (cursive)<input name="hello" placeholder="the city"></label></div>
+      <label>FUTUREADY next to the H2S logo on the cover<select name="brand"><option value="">Yes</option><option value="off">No</option></select></label>
       <div class="two campus"><label>Starts<input name="start" placeholder="12:45 PM"></label><label>Ends<input name="end" placeholder="3:30 PM"></label></div>
     </fieldset>
     <fieldset><legend>Words at the top</legend>
@@ -160,11 +161,16 @@ async function paint() {
     e.stripW = 420; e.stripH = Math.round((420 * h) / w);
   }
   const secs = sections(e);
-  $('#text').innerHTML = secs.map((s, i) => `<div class="card"><h3>${i + 1}. ${s.title} <small>→ ${s.where}</small></h3><div class="btns"><button class="btn y" data-copy="${i}">Copy HTML</button><button class="btn ghost" data-look="${i}">Show / hide a rough look</button></div><div class="look" hidden>${s.html}</div></div>`).join('') +
+  $('#text').innerHTML = secs.map((s, i) => `<div class="card"><h3>${i + 1}. ${s.title} <small>→ ${s.where}</small></h3><div class="btns"><button class="btn y" data-copy="${i}">Copy HTML</button>${(s.parts || []).map(([label], j) => `<button class="btn" data-rich="${i}:${j}">Copy ${label}</button>`).join('')}<button class="btn ghost" data-look="${i}">Show / hide a rough look</button></div><div class="look" hidden>${s.html}</div></div>`).join('') +
     `<div class="card"><h3>How to paste</h3><small>Open the section in Live Edit → <b>Insert → Source Code</b> → paste → <b>Embed</b> → <b>Save</b>. It replaces what was there.</small></div>`;
   $('#text').onclick = ev => {
-    const c = ev.target.dataset.copy, l = ev.target.dataset.look;
+    const c = ev.target.dataset.copy, l = ev.target.dataset.look, r = ev.target.dataset.rich;
     if (c !== undefined) copy(secs[c].html, `${secs[c].title}: copied`);
+    // copied as formatted text, so a plain paste (Cmd+V) into a column keeps the sizes and colours
+    if (r !== undefined) {
+      const [a, b] = r.split(':'), [label, html] = secs[a].parts[b];
+      navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([html], { type: 'text/html' }), 'text/plain': new Blob([label], { type: 'text/plain' }) })]).then(() => toast(`${label}: copied`));
+    }
     if (l !== undefined) { const box = ev.target.closest('.card').querySelector('.look'); box.hidden = !box.hidden; }
   };
   const q = faqs(e);
@@ -181,7 +187,7 @@ async function paint() {
     `<b>Pictures:</b> download the three from tab 1. In <a href="${x.liveEdit}" target="_blank">Live Edit</a> → Event Overview → Banner: Desktop gets the wide cover, Mobile gets the square one. <b>Press Save after each one.</b> If a slot already has a picture, delete it with the bin and add a new one.`,
     `<b>Thumbnail:</b> Live Edit → Initiative Settings → logo → upload → Crop → Save.`,
     !x.virtual && `<b>Partner logos:</b> open About → Insert → Image → Add File → the strip from tab 1 → Insert. Copy its link: right-click the picture in the preview → Copy image address. Paste it into the form (Partner → Logo strip link). Then do step 5 for About.`,
-    `<b>Sections:</b> tab 2. Paste each into its section (Insert → Source Code → Embed → Save).`,
+    `<b>Sections:</b> tab 2. Paste each into its section (Insert → Source Code → Embed → Save). Skip <b>Meet your trainer</b>: the clone already has it.`,
     isNew && `<b>Manage Sections:</b> hide Challenges, Jury, Mentor and Partner (the clone turns them on) → Save.`,
     isNew && `<b>Initiative Settings:</b> organisation = <code>${e.campus || 'the campus'}</code>; mode = ${x.virtual ? 'Virtual' : 'In Person'} → Save.`,
     `<b>FAQs:</b> tab 3, into Live Edit → FAQs.`,

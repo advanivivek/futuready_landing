@@ -3,10 +3,13 @@
 // With no feed set, it does nothing and the page uses the CITIES list in src/data.js.
 import { rm, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { CITIES_FEED } from '../src/data.js';
-import { fromHack2skill, normalise } from '../src/events-core.js';
+import { CITIES, CITIES_FEED, VIRTUAL_URL } from '../src/data.js';
+import { fromHack2skill, mergeCities, normalise } from '../src/events-core.js';
 
 const out = fileURLToPath(new URL('../public/events.json', import.meta.url));
+// every city (the feed plus the CITIES list), for the "Other cities" strip on each Hack2skill page (public/cities/)
+const all = fileURLToPath(new URL('../public/cities.json', import.meta.url));
+let feed = [];
 if (!CITIES_FEED) {
   await rm(out, { force: true });
   console.log('events: no CITIES_FEED set, using the CITIES list in src/data.js');
@@ -16,6 +19,7 @@ if (!CITIES_FEED) {
     if (!res.ok) throw new Error(`the feed answered ${res.status}`);
     const json = await res.json();
     const cities = Array.isArray(json) ? normalise(json) : Array.isArray(json?.cities) ? normalise(json.cities) : fromHack2skill(json);
+    feed = cities;
     if (!cities.length) console.log('events: the feed has no cities yet, using the CITIES list in src/data.js');
     else {
       await writeFile(out, JSON.stringify(cities, null, 2) + '\n');
@@ -26,3 +30,4 @@ if (!CITIES_FEED) {
     console.log(`events: could not read the feed (${e.message}), using what we have`);
   }
 }
+await writeFile(all, JSON.stringify({ cities: mergeCities(feed, CITIES), virtual: VIRTUAL_URL }) + '\n');

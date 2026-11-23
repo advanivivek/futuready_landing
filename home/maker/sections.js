@@ -8,6 +8,8 @@
   Paste each block with: Live Edit > the section > Insert > Source Code > paste > Embed > Save.
 */
 
+import { SITE_URL } from '../src/data.js';
+
 export const INK = '#161a3a', BLUE = '#3463af', GOLD = '#f2b230', PAPER = '#fffcf5', CREAM = '#efe6d2';
 export const TINTS = ['#fdeef1', '#eaf6f0', '#fff4dc', '#efeafc'];
 
@@ -79,18 +81,21 @@ const cell = (bg, inner, span) => `<td${span ? ` colspan="${span}"` : ''} style=
 const button = (href, label, span, bg = GOLD, fg = INK) => cell(bg, p(`<a href="${href}">${s(label, 20, 800, fg)}</a>`, true), span);
 // a clear break between sections
 const END = '<p><br></p><hr><p><br></p>';
+const GAP = '<p><br></p>';
 
 export function sections(e, hosted = HOSTED) {
   const x = derive(e);
+  // the small lines are about as long as each other, so the four tiles come out even and the row is as wide as
+  // the "What you will learn" table (Hack2skill sizes tables to their words; phones wrap them as usual)
   const tiles = x.virtual
-    ? [['When', 'Every few weeks', 'dates by email'], ['Where', 'Online', 'from anywhere'], ['Cost', 'Free', 'register once'], ['Format', 'Hands-on', 'phone + AI']]
-    : [['When', x.dateShort.replace(/ \d{4}$/, ''), `${e.start} – ${e.end}`], ['Where', e.campus, e.city], ['Cost', 'Free', 'for students'], ['Format', 'Hands-on', 'phone + AI']];
+    ? [['When', 'Every few weeks', 'dates come by email'], ['Where', 'Online', 'join from anywhere'], ['Cost', 'Free', 'register just once'], ['Format', 'Hands-on', 'on your phone + AI']]
+    : [['When', x.dateShort.replace(/ \d{4}$/, ''), `${e.start} – ${e.end}`], ['Where', e.campus, e.city], ['Cost', 'Free', 'for every student'], ['Format', 'Hands-on', 'on your phone + AI']];
   const tile = ([k, v, d], i) => cell(TINTS[i], p(s(k.toUpperCase(), 12, 800, BLUE)) + p(s(v, 17, 800)) + p(s(d, 14)));
   const strip = (e.stripUrl || '').trim();
   const partner = x.virtual || !e.partnerLabel
     ? ''
-    : p(s(`${e.partnerLabel}: `, 15, 800, BLUE) + s(e.campus, 15, 800)) +
-      (strip ? `<p><img src="${esc(strip)}" alt="${esc(e.campus)}" width="${e.stripW || 420}" height="${e.stripH || 60}"></p>` : '');
+    : GAP + p(s(`${e.partnerLabel}: `, 15, 800, BLUE) + s(e.campus, 15, 800)) +
+      (strip ? GAP + `<p><img src="${esc(strip)}" alt="${esc(e.campus)}" width="${e.stripW || 420}" height="${e.stripH || 60}"></p>` : '');
 
   const about =
     p(s(e.hook, 24, 800)) +
@@ -113,11 +118,12 @@ export function sections(e, hosted = HOSTED) {
     (x.virtual ? '' : p(s(`${x.dateLong} · ${e.campus}, ${e.city}`, 17, 800, BLUE))) +
     `<table><tbody>${rows}</tbody></table>` + (e.note ? p(s(e.note, 15)) : '') + END;
 
-  // photo on top, outside any table: H2S rescales pictures inside table cells unpredictably, but keeps this size
-  const trainer =
-    `<p><img src="${hosted.portrait}" alt="${TRAINER.name}" width="136" height="170"></p>` +
-    p(s(TRAINER.name, 28, 800)) + p(s(TRAINER.bio, 18)) +
-    p(`<a href="${TRAINER.linkedin}">${pill('LinkedIn ↗', BLUE, PAPER, 17)}</a>&nbsp;&nbsp;&nbsp;<a href="${TRAINER.instagram}">${pill('Instagram ↗', GOLD, INK, 17)}</a>`) + END;
+  // Photo left, words right, the way the old Pune page had it. Only Hack2skill's own Column Layout does this (a
+  // pasted layout is flattened, and a table rescales the photo on save), so the two parts are pasted into its columns.
+  const photo = `<p><img src="${hosted.portrait}" alt="${TRAINER.name}" width="136" height="170"></p>`;
+  const words = p(s(TRAINER.name, 28, 800)) + p(s(TRAINER.bio, 18)) +
+    p(`<a href="${TRAINER.linkedin}">${pill('LinkedIn ↗', BLUE, PAPER, 17)}</a>&nbsp;&nbsp;&nbsp;<a href="${TRAINER.instagram}">${pill('Instagram ↗', GOLD, INK, 17)}</a>`);
+  const trainer = photo + words + END;
 
   const facts = x.virtual ? ['Free', 'Online', 'Register once, join any session'] : ['Free', x.dateShort, `${e.start} – ${e.end}`, `${e.campus}, ${e.city}`];
   const voices =
@@ -130,9 +136,22 @@ export function sections(e, hosted = HOSTED) {
     { key: 'about', title: 'About', where: 'Live Edit → About', html: about },
     { key: 'learn', title: 'What you will learn', where: 'Custom section "What you will learn"', html: learn },
     { key: 'schedule', title: x.virtual ? 'How a session goes' : 'Schedule', where: `Custom section "${x.virtual ? 'How a session goes' : 'Schedule'}"`, html: schedule },
-    { key: 'trainer', title: 'Meet your trainer', where: 'Custom section "Meet your trainer"', html: trainer },
+    {
+      key: 'trainer',
+      title: 'Meet your trainer',
+      where: 'A cloned page already has it: leave it. To build it again: empty the section, Insert → Column Layout → 2 columns (25% - 75%) → Insert, click in the left column and paste the Photo, click in the right column and paste the Words, Save',
+      html: trainer,
+      parts: [['Photo', photo], ['Words', words]],
+    },
     { key: 'voices', title: 'What students say', where: 'Custom section "What students say"', html: voices },
-  ];
+    // the other cities, live: a little page on the main site (public/cities/) that lists what Hack2skill has published
+    SITE_URL && {
+      key: 'cities',
+      title: 'Other cities',
+      where: 'New custom section "Other cities" → Insert → Embed Iframe (not Source Code) → paste → Embed → Save',
+      html: `<iframe src="${SITE_URL.replace(/\/?$/, '/')}cities/index.html?not=${x.slug}" width="100%" height="230" style="border:0" title="Other Futuready cities"></iframe>`,
+    },
+  ].filter(Boolean);
 }
 
 export function faqs(e) {

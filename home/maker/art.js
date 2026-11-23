@@ -32,13 +32,18 @@ function noise() {
   return (grain = c);
 }
 
-// the cream floor: plain, with a fine concrete grain and a soft shadow where it meets the wall
-function floor(ctx, W, y, H, k) {
+// the cream floor: plain, with a fine concrete grain and a soft shadow where it meets the wall.
+// `grain` is how strong the grain is (the small thumbnail needs less, or it reads as a road)
+function floor(ctx, W, y, H, k, grain = 2) {
   ctx.fillStyle = CREAM;
   ctx.fillRect(0, y, W, H - y);
+  ctx.save();
   ctx.fillStyle = ctx.createPattern(noise(), 'repeat');
-  ctx.fillRect(0, y, W, H - y);
-  ctx.fillRect(0, y, W, H - y);
+  for (let g = grain; g > 0; g--) {
+    ctx.globalAlpha = Math.min(1, g);
+    ctx.fillRect(0, y, W, H - y);
+  }
+  ctx.restore();
   const sh = ctx.createLinearGradient(0, y, 0, y + 30 * k);
   sh.addColorStop(0, 'rgba(22,26,58,.16)');
   sh.addColorStop(1, 'rgba(22,26,58,0)');
@@ -121,9 +126,29 @@ function script(ctx, text, x, y, size, color, align = 'left') {
   ctx.fillText(text, x, y);
 }
 
-async function logo(ctx, x, cy, h) {
-  const i = await load('/h2s-logo.png'), w = (i.width / i.height) * h;
+// the H2S logo, and (unless turned off) a thin rule and FUTUREADY, its capitals exactly as tall as the logo
+// (shrunk to fit in maxW, so it never runs into the characters)
+async function logo(ctx, x, cy, h, brand = true, maxW = Infinity) {
+  const i = await load('/h2s-logo.png'), r = i.width / i.height;
+  ctx.font = '700 100px Syncopate';
+  ctx.letterSpacing = '8px';
+  const m = ctx.measureText('FUTUREADY'), per = (r + 1.15) + m.width / m.actualBoundingBoxAscent; // width per unit of height
+  ctx.letterSpacing = '0px';
+  if (brand) h = Math.min(h, maxW / per);
+  const w = r * h;
   ctx.drawImage(i, x, cy - h / 2, w, h);
+  if (!brand) return;
+  const size = (100 * h) / m.actualBoundingBoxAscent;
+  const gap = h * 0.55;
+  ctx.fillStyle = 'rgba(22,26,58,.3)';
+  ctx.fillRect(x + w + gap, cy - h / 2, Math.max(2, h * 0.05), h);
+  ctx.font = `700 ${size}px Syncopate`;
+  ctx.letterSpacing = `${size * 0.08}px`;
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillStyle = INK;
+  ctx.fillText('FUTUREADY', x + w + gap * 2, cy + h / 2);
+  ctx.letterSpacing = '0px';
 }
 
 function boardFor(e) {
@@ -151,7 +176,7 @@ export async function cover(canvas, e, wide) {
     await cut(ctx, '/story/girl-phone.webp', 1080, 578, 400, k);
     await cut(ctx, '/story/boy-laptop.webp', 1262, 590, 382, k);
     await cut(ctx, '/story/bot-wave.webp', 1500, 584, 232, k);
-    await logo(ctx, 90, fy + (H - fy) / 2, 54);
+    await logo(ctx, 90, fy + (H - fy) / 2, 40, e.brand !== 'off');
   } else {
     script(ctx, hello, 68, 200, 120, PAPER);
     words(ctx, [['are you', PAPER]], 72, 350, 100);
@@ -161,7 +186,7 @@ export async function cover(canvas, e, wide) {
     await cut(ctx, '/story/girl-phone.webp', 548, 1024, 372, k);
     await cut(ctx, '/story/boy-laptop.webp', 735, 1040, 356, k);
     await cut(ctx, '/story/bot-wave.webp', 920, 1034, 218, k);
-    await logo(ctx, 72, fy + (H - fy) / 2, 62);
+    await logo(ctx, 72, fy + (H - fy) / 2, 48, e.brand !== 'off', 440);
   }
 }
 
@@ -171,7 +196,7 @@ export async function thumb(canvas, e) {
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = BLUE;
   ctx.fillRect(0, 0, W, W);
-  floor(ctx, W, 430, W, 0.6);
+  floor(ctx, W, 430, W, 0.6, 0.45);
   ctx.textBaseline = 'alphabetic';
   ctx.font = '700 50px Syncopate';
   ctx.letterSpacing = '5px';
@@ -184,8 +209,8 @@ export async function thumb(canvas, e) {
   const word = x.virtual ? 'Virtual' : e.city || x.hello;
   while (ctx.measureText(word).width > 520 && size > 60) ctx.font = `400 ${(size -= 4)}px "Great Vibes"`;
   script(ctx, word, W / 2, 238, size, GOLD, 'center');
-  await cut(ctx, '/story/girl-phone.webp', 176, 568, 232, 0.6);
-  await cut(ctx, '/story/bot-wave.webp', 316, 562, 150, 0.6);
+  await cut(ctx, '/story/girl-phone.webp', 182, 580, 300, 0.6);
+  await cut(ctx, '/story/bot-wave.webp', 318, 574, 196, 0.6);
 }
 
 // partner logos side by side on a clear background (one logo works too)

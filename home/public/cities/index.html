@@ -1,0 +1,49 @@
+<!doctype html>
+<!-- The other Futuready cities, for an "Embed Iframe" on each Hack2skill page: /cities/index.html?not=<this page slug>.
+     Reads ../cities.json, which every build writes from Hack2skill's event list (scripts/fetch-events.mjs). -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Other Futuready cities</title>
+<style>
+@font-face{font-family:Unbounded;src:url(../fonts/unbounded.woff2) format('woff2');font-weight:700;font-display:swap}
+@font-face{font-family:'Great Vibes';src:url(../fonts/great-vibes.woff2) format('woff2');font-display:swap}
+:root{--ink:#161a3a;--blue:#3463af;--gold:#f2b230;--paper:#fffcf5;--cream:#efe6d2}
+*{box-sizing:border-box}
+html,body{margin:0;background:transparent;font:15px/1.4 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:var(--ink)}
+.row{display:flex;gap:14px;overflow-x:auto;padding:4px 2px 14px;scroll-snap-type:x mandatory;scrollbar-width:thin}
+a.card{flex:0 0 220px;scroll-snap-align:start;display:flex;flex-direction:column;gap:4px;padding:16px 18px;border-radius:16px;background:var(--paper);border:1px solid var(--cream);color:inherit;text-decoration:none;transition:transform .15s}
+a.card:hover{transform:translateY(-2px)}
+a.card:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.pill{align-self:flex-start;font-size:12px;font-weight:800;padding:3px 10px;border-radius:999px;background:var(--cream)}
+.open .pill,a.card.virtual .pill{background:var(--gold);color:var(--ink)}
+.city{font:400 38px/1.1 'Great Vibes',cursive;color:var(--blue);margin-top:4px}
+.campus{font-weight:700}
+.date{color:#555b7a;font-size:14px}
+.go{margin-top:auto;padding-top:8px;font:700 13px Unbounded,system-ui,sans-serif;color:var(--blue)}
+a.card.virtual{background:var(--blue);border-color:var(--blue);color:var(--paper)}
+a.card.virtual .city,a.card.virtual .go{color:var(--gold)}
+a.card.virtual .date{color:var(--cream)}
+@media (prefers-reduced-motion:reduce){a.card{transition:none}}
+</style>
+</head>
+<body>
+<div class="row" id="row"></div>
+<script>
+const not = new URLSearchParams(location.search).get('not') || '';
+const esc = t => String(t || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const card = (c, cls, label) => `<a class="card ${cls}" href="${esc(c.url)}" target="_top"><span class="pill">${label}</span><span class="city">${esc(c.city)}</span><span class="campus">${esc(c.campus)}</span><span class="date">${esc(c.date)}</span><span class="go">${cls === 'open' || cls === 'virtual' ? 'Register free →' : 'See the page →'}</span></a>`;
+fetch('../cities.json', { cache: 'no-cache' })
+  .then(r => (r.ok ? r.json() : { cities: [] }))
+  .catch(() => ({ cities: [] }))
+  .then(({ cities = [], virtual }) => {
+    const live = cities.filter(c => c.status !== 'past' && c.url && !(not && c.url.includes(not)));
+    let html = live.map(c => card(c, c.status, c.status === 'open' ? 'Registrations open' : 'Coming soon')).join('');
+    if (virtual && !virtual.includes(not || '\u0000')) html += card({ url: virtual, city: 'Virtual', campus: 'Online, from anywhere', date: 'Every few weeks' }, 'virtual', 'Live online');
+    document.getElementById('row').innerHTML = html;
+  });
+</script>
+</body>
+</html>
