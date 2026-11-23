@@ -83,9 +83,9 @@ const END = '<p><br></p><hr><p><br></p>';
 export function sections(e, hosted = HOSTED) {
   const x = derive(e);
   const tiles = x.virtual
-    ? [['When', 'Every few weeks', 'dates by email'], ['Where', 'Online', 'from anywhere'], ['Cost', 'Free', 'register once'], ['Format', 'Hands-on', 'on your phone, with AI']]
-    : [['When', x.dateShort, `${e.start} – ${e.end}`], ['Where', e.campus, e.city], ['Cost', 'Free', 'for college students'], ['Format', 'Hands-on', 'on your phone, with AI']];
-  const tile = ([k, v, d], i) => cell(TINTS[i], p(s(k.toUpperCase(), 12, 800, BLUE)) + p(s(v, 18, 800)) + p(s(d, 14)));
+    ? [['When', 'Every few weeks', 'dates by email'], ['Where', 'Online', 'from anywhere'], ['Cost', 'Free', 'register once'], ['Format', 'Hands-on', 'phone + AI']]
+    : [['When', x.dateShort.replace(/ \d{4}$/, ''), `${e.start} – ${e.end}`], ['Where', e.campus, e.city], ['Cost', 'Free', 'for students'], ['Format', 'Hands-on', 'phone + AI']];
+  const tile = ([k, v, d], i) => cell(TINTS[i], p(s(k.toUpperCase(), 12, 800, BLUE)) + p(s(v, 17, 800)) + p(s(d, 14)));
   const strip = (e.stripUrl || '').trim();
   const partner = x.virtual || !e.partnerLabel
     ? ''
@@ -95,17 +95,16 @@ export function sections(e, hosted = HOSTED) {
   const about =
     p(s(e.hook, 24, 800)) +
     p(s(e.sub, 17)) +
-    `<table><tbody><tr>${tile(tiles[0], 0)}${tile(tiles[1], 1)}</tr><tr>${tile(tiles[2], 2)}${tile(tiles[3], 3)}</tr>` +
-    `<tr>${cell(CREAM, `<p><img src="${hosted.passport}" alt="An open Futuready passport with all five stamps" width="180" height="139"></p>`)}` +
-    `${cell(CREAM, p(s('Clear five levels, take home your ', 17, 800) + s('e-passport.', 17, 800, BLUE)) + p(s('Signed, stamped, yours to show off.', 14)))}</tr>` +
-    `<tr>${button(x.reg, 'Register free  →', 2)}</tr></tbody></table>` +
+    `<table><tbody><tr>${tiles.map(tile).join('')}</tr><tr>${button(x.reg, 'Register free  →', 4)}</tr></tbody></table>` +
     partner + END;
 
   const levels = LEVELS.map(([k, what, hook, wall]) =>
-    `<tr>${cell(wall, p(s(k, 34, 800), true))}${cell(PAPER, p(s(what, 18, 800)) + p(s(hook, 15, 0, BLUE)))}</tr>`).join('');
+    `<tr>${cell(wall, p(s(k, 40, 800), true))}${cell(PAPER, p(s(what, 19, 800)) + p(s(hook, 16, 0, BLUE)))}</tr>`).join('');
   const learn =
     `<table><tbody><tr>${cell(CREAM, p(s('Five levels. Clear one, earn a stamp.', 17, 800)), 2)}</tr>${levels}` +
-    `<tr>${cell(BLUE, p(s('Y', 34, 800, GOLD), true))}${cell(BLUE, p(s('And the last level ', 18, 800, PAPER) + s('is you.', 18, 800, GOLD)) + p(s('The unique part that nobody can steal.', 15, 0, CREAM)))}</tr>` +
+    `<tr>${cell(BLUE, p(s('Y', 40, 800, GOLD), true))}${cell(BLUE, p(s('And the last level ', 19, 800, PAPER) + s('is you.', 19, 800, GOLD)) + p(s('The unique part that nobody can steal.', 16, 0, CREAM)))}</tr>` +
+    `<tr>${cell(CREAM, `<p><img src="${hosted.passport}" alt="An open Futuready passport with all five stamps" width="200" height="154"></p>`)}` +
+    `${cell(CREAM, p(s('Clear all five, and you take home your ', 19, 800) + s('e-passport.', 19, 800, BLUE)) + p(s('Signed, stamped, yours to show off.', 15)))}</tr>` +
     `</tbody></table>` + END;
 
   const rows = (e.schedule || []).filter(r => r.time || r.title).map(r =>
@@ -114,21 +113,21 @@ export function sections(e, hosted = HOSTED) {
     (x.virtual ? '' : p(s(`${x.dateLong} · ${e.campus}, ${e.city}`, 17, 800, BLUE))) +
     `<table><tbody>${rows}</tbody></table>` + (e.note ? p(s(e.note, 15)) : '') + END;
 
+  // photo on top, outside any table: H2S rescales pictures inside table cells unpredictably, but keeps this size
   const trainer =
-    `<table><tbody><tr>${cell(PAPER, `<p><img src="${hosted.portrait}" alt="${TRAINER.name}" width="170" height="213"></p>`)}` +
-    cell(PAPER, p(s(TRAINER.name, 24, 800)) + p(s(TRAINER.bio, 16)) +
-      p(`<a href="${TRAINER.linkedin}">${pill('LinkedIn ↗', BLUE, PAPER, 16)}</a>&nbsp;&nbsp;&nbsp;<a href="${TRAINER.instagram}">${pill('Instagram ↗', GOLD, INK, 16)}</a>`)) +
-    `</tr></tbody></table>` + END;
+    `<p><img src="${hosted.portrait}" alt="${TRAINER.name}" width="136" height="170"></p>` +
+    p(s(TRAINER.name, 28, 800)) + p(s(TRAINER.bio, 18)) +
+    p(`<a href="${TRAINER.linkedin}">${pill('LinkedIn ↗', BLUE, PAPER, 17)}</a>&nbsp;&nbsp;&nbsp;<a href="${TRAINER.instagram}">${pill('Instagram ↗', GOLD, INK, 17)}</a>`) + END;
 
   const facts = x.virtual ? ['Free', 'Online', 'Register once, join any session'] : ['Free', x.dateShort, `${e.start} – ${e.end}`, `${e.campus}, ${e.city}`];
   const voices =
     `<table><tbody>` +
-    QUOTES.map(([q, n, r], i) => `<tr>${cell(TINTS[i], p(s(`“${q}”`, 18, 600)) + p(s(n, 15, 800, BLUE) + s(`  ·  ${r}`, 15)))}</tr>`).join('') +
+    QUOTES.map(([q, n, r], i) => `<tr>${cell(TINTS[i], p(s(`“${q}”`, 22, 700)) + p(s(n, 15, 800, BLUE) + s(`  ·  ${r}`, 15)))}</tr>`).join('') +
     `<tr>${cell(PAPER, p(facts.map((f, i) => pill(f, [CREAM, '#eaf6f0', '#fff4dc', '#efeafc'][i % 4])).join('&nbsp;&nbsp;'), true))}</tr>` +
     `<tr>${button(x.reg, 'Register free  →')}</tr></tbody></table>` + END;
 
   return [
-    { key: 'about', title: 'About', where: 'Live Edit → About (its title is hidden: a single invisible character)', html: about },
+    { key: 'about', title: 'About', where: 'Live Edit → About', html: about },
     { key: 'learn', title: 'What you will learn', where: 'Custom section "What you will learn"', html: learn },
     { key: 'schedule', title: x.virtual ? 'How a session goes' : 'Schedule', where: `Custom section "${x.virtual ? 'How a session goes' : 'Schedule'}"`, html: schedule },
     { key: 'trainer', title: 'Meet your trainer', where: 'Custom section "Meet your trainer"', html: trainer },

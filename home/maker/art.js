@@ -26,38 +26,24 @@ function noise() {
   for (let i = 0; i < d.data.length; i += 4) {
     const v = Math.random() < 0.5 ? 0 : 255;
     d.data[i] = d.data[i + 1] = d.data[i + 2] = v;
-    d.data[i + 3] = Math.random() * 18;
+    d.data[i + 3] = Math.random() * 22;
   }
   g.putImageData(d, 0, 0);
   return (grain = c);
 }
 
-// the cream floor, now with boards, grain and a soft shadow where it meets the wall
+// the cream floor: plain, with a fine concrete grain and a soft shadow where it meets the wall
 function floor(ctx, W, y, H, k) {
   ctx.fillStyle = CREAM;
   ctx.fillRect(0, y, W, H - y);
-  const rows = 3, rh = (H - y) / rows;
-  for (let r = 0; r < rows; r++) {
-    const top = y + r * rh;
-    ctx.fillStyle = r % 2 ? 'rgba(160,128,80,.06)' : 'rgba(255,255,255,.10)';
-    ctx.fillRect(0, top, W, rh);
-    ctx.fillStyle = 'rgba(120,92,52,.22)';
-    ctx.fillRect(0, top, W, 2 * k);
-    ctx.fillStyle = 'rgba(255,255,255,.45)';
-    ctx.fillRect(0, top + 2 * k, W, 1.5 * k);
-    const step = 260 * k, off = (r * 97 * k) % step;
-    for (let x = off; x < W; x += step) {
-      ctx.fillStyle = 'rgba(120,92,52,.16)';
-      ctx.fillRect(x, top + 2 * k, 2 * k, rh - 2 * k);
-    }
-  }
   ctx.fillStyle = ctx.createPattern(noise(), 'repeat');
   ctx.fillRect(0, y, W, H - y);
-  const sh = ctx.createLinearGradient(0, y, 0, y + 34 * k);
-  sh.addColorStop(0, 'rgba(22,26,58,.22)');
+  ctx.fillRect(0, y, W, H - y);
+  const sh = ctx.createLinearGradient(0, y, 0, y + 30 * k);
+  sh.addColorStop(0, 'rgba(22,26,58,.16)');
   sh.addColorStop(1, 'rgba(22,26,58,0)');
   ctx.fillStyle = sh;
-  ctx.fillRect(0, y, W, 34 * k);
+  ctx.fillRect(0, y, W, 30 * k);
 }
 
 async function cut(ctx, src, x, bottom, h, k) {
@@ -158,7 +144,7 @@ export async function cover(canvas, e, wide) {
   const [label, rows] = boardFor(e);
   ctx.textBaseline = 'alphabetic';
   if (wide) {
-    script(ctx, hello, 86, 168, 132, PAPER);
+    script(ctx, hello, 88, 160, 104, PAPER);
     words(ctx, [['are you ready', PAPER]], 90, 300, 92);
     words(ctx, [['for the ', PAPER], ['future?', GOLD]], 90, 405, 92);
     board(ctx, label, rows, 1716, 52, 60);
@@ -167,7 +153,7 @@ export async function cover(canvas, e, wide) {
     await cut(ctx, '/story/bot-wave.webp', 1500, 584, 232, k);
     await logo(ctx, 90, fy + (H - fy) / 2, 54);
   } else {
-    script(ctx, hello, 66, 214, 150, PAPER);
+    script(ctx, hello, 68, 200, 120, PAPER);
     words(ctx, [['are you', PAPER]], 72, 350, 100);
     words(ctx, [['ready for', PAPER]], 72, 462, 100);
     words(ctx, [['the ', PAPER], ['future?', GOLD]], 72, 574, 100);
@@ -193,7 +179,7 @@ export async function thumb(canvas, e) {
   ctx.fillStyle = PAPER;
   ctx.fillText('FUTUREADY', W / 2 + 2.5, 112);
   ctx.letterSpacing = '0px';
-  let size = 122;
+  let size = 104;
   ctx.font = `400 ${size}px "Great Vibes"`;
   const word = x.virtual ? 'Virtual' : e.city || x.hello;
   while (ctx.measureText(word).width > 520 && size > 60) ctx.font = `400 ${(size -= 4)}px "Great Vibes"`;
