@@ -1,0 +1,238 @@
+// Futuready page maker: the pictures (wide cover, square cover, thumbnail, partner-logo strip), drawn on a canvas
+// with the main page's own fonts and cut-outs, so what you see is exactly what you download.
+import { derive } from './sections.js';
+
+const BLUE = '#3463af', GOLD = '#f2b230', CREAM = '#efe6d2', PAPER = '#fffcf5', INK = '#161a3a';
+const img = {};
+const load = src => (img[src] ||= new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = src; }));
+
+export async function ready() {
+  const fonts = [
+    ['Great Vibes', '/fonts/great-vibes.woff2', '400'],
+    ['Unbounded', '/fonts/unbounded.woff2', '700'],
+    ['Syncopate', '/fonts/syncopate-700.woff2', '700'],
+    ['Geist Mono', '/fonts/geist-mono.woff2', '700'],
+  ];
+  await Promise.all(fonts.map(async ([f, u, w]) => document.fonts.add(await new FontFace(f, `url(${u})`, { weight: w }).load())));
+  await Promise.all(['/story/girl-phone.webp', '/story/boy-laptop.webp', '/story/bot-wave.webp', '/h2s-logo.png'].map(load));
+}
+
+let grain;
+function noise() {
+  if (grain) return grain;
+  const c = document.createElement('canvas');
+  c.width = c.height = 160;
+  const g = c.getContext('2d'), d = g.createImageData(160, 160);
+  for (let i = 0; i < d.data.length; i += 4) {
+    const v = Math.random() < 0.5 ? 0 : 255;
+    d.data[i] = d.data[i + 1] = d.data[i + 2] = v;
+    d.data[i + 3] = Math.random() * 18;
+  }
+  g.putImageData(d, 0, 0);
+  return (grain = c);
+}
+
+// the cream floor, now with boards, grain and a soft shadow where it meets the wall
+function floor(ctx, W, y, H, k) {
+  ctx.fillStyle = CREAM;
+  ctx.fillRect(0, y, W, H - y);
+  const rows = 3, rh = (H - y) / rows;
+  for (let r = 0; r < rows; r++) {
+    const top = y + r * rh;
+    ctx.fillStyle = r % 2 ? 'rgba(160,128,80,.06)' : 'rgba(255,255,255,.10)';
+    ctx.fillRect(0, top, W, rh);
+    ctx.fillStyle = 'rgba(120,92,52,.22)';
+    ctx.fillRect(0, top, W, 2 * k);
+    ctx.fillStyle = 'rgba(255,255,255,.45)';
+    ctx.fillRect(0, top + 2 * k, W, 1.5 * k);
+    const step = 260 * k, off = (r * 97 * k) % step;
+    for (let x = off; x < W; x += step) {
+      ctx.fillStyle = 'rgba(120,92,52,.16)';
+      ctx.fillRect(x, top + 2 * k, 2 * k, rh - 2 * k);
+    }
+  }
+  ctx.fillStyle = ctx.createPattern(noise(), 'repeat');
+  ctx.fillRect(0, y, W, H - y);
+  const sh = ctx.createLinearGradient(0, y, 0, y + 34 * k);
+  sh.addColorStop(0, 'rgba(22,26,58,.22)');
+  sh.addColorStop(1, 'rgba(22,26,58,0)');
+  ctx.fillStyle = sh;
+  ctx.fillRect(0, y, W, 34 * k);
+}
+
+async function cut(ctx, src, x, bottom, h, k) {
+  const i = await load(src), w = (i.width / i.height) * h;
+  ctx.save();
+  ctx.shadowColor = 'rgba(10,12,30,.24)';
+  ctx.shadowBlur = 22 * k;
+  ctx.shadowOffsetY = 10 * k;
+  ctx.drawImage(i, x, bottom - h, w, h);
+  ctx.restore();
+}
+
+function rr(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.roundRect(x, y, w, h, r);
+}
+
+// the split-flap board: a label and rows of letters, right-aligned at `right`
+function board(ctx, label, rows, right, top, f) {
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'alphabetic';
+  ctx.font = `700 ${f * 0.34}px "Geist Mono"`;
+  ctx.letterSpacing = `${f * 0.06}px`;
+  ctx.fillStyle = PAPER;
+  ctx.fillText(label.toUpperCase(), right, top + f * 0.34);
+  ctx.letterSpacing = '0px';
+  let y = top + f * 0.55;
+  for (const row of rows) {
+    const cw = f * 0.78, chh = f * 1.08, gap = f * 0.08, pad = f * 0.1;
+    const w = row.length * cw + (row.length - 1) * gap + pad * 2, x = right - w;
+    ctx.save();
+    ctx.shadowColor = 'rgba(10,12,30,.3)';
+    ctx.shadowBlur = f * 0.3;
+    ctx.shadowOffsetY = f * 0.15;
+    ctx.fillStyle = INK;
+    rr(ctx, x, y, w, chh + pad * 2, f * 0.16);
+    ctx.fill();
+    ctx.restore();
+    [...row].forEach((ch, i) => {
+      const cx = x + pad + i * (cw + gap), cy = y + pad;
+      const g = ctx.createLinearGradient(0, cy, 0, cy + chh);
+      g.addColorStop(0.5, '#2a2f5c');
+      g.addColorStop(0.5, '#242952');
+      ctx.fillStyle = g;
+      rr(ctx, cx, cy, cw, chh, f * 0.08);
+      ctx.fill();
+      ctx.fillStyle = PAPER;
+      ctx.font = `700 ${f}px "Geist Mono"`;
+      ctx.textAlign = 'center';
+      ctx.fillText(ch, cx + cw / 2, cy + chh * 0.79);
+      ctx.fillStyle = 'rgba(0,0,0,.55)';
+      ctx.fillRect(cx, cy + chh / 2 - 1, cw, 2);
+    });
+    ctx.textAlign = 'right';
+    y += chh + pad * 2 + f * 0.14;
+  }
+}
+
+function words(ctx, parts, x, y, size) {
+  ctx.font = `700 ${size}px Unbounded`;
+  ctx.letterSpacing = `${-size * 0.045}px`;
+  ctx.textAlign = 'left';
+  for (const [t, c] of parts) {
+    ctx.fillStyle = c;
+    ctx.fillText(t, x, y);
+    x += ctx.measureText(t).width;
+  }
+  ctx.letterSpacing = '0px';
+}
+
+function script(ctx, text, x, y, size, color, align = 'left') {
+  ctx.font = `400 ${size}px "Great Vibes"`;
+  ctx.textAlign = align;
+  ctx.fillStyle = color;
+  ctx.fillText(text, x, y);
+}
+
+async function logo(ctx, x, cy, h) {
+  const i = await load('/h2s-logo.png'), w = (i.width / i.height) * h;
+  ctx.drawImage(i, x, cy - h / 2, w, h);
+}
+
+function boardFor(e) {
+  const x = derive(e);
+  return x.virtual ? ['Virtual', ['LIVE', 'ONLINE']] : [x.weekday || 'Date', [x.day, x.mon]];
+}
+
+export async function cover(canvas, e, wide) {
+  const x = derive(e), [W, H] = wide ? [1800, 600] : [1080, 1080];
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext('2d'), k = wide ? 1 : 1.2;
+  ctx.fillStyle = BLUE;
+  ctx.fillRect(0, 0, W, H);
+  const fy = wide ? 468 : 830;
+  floor(ctx, W, fy, H, k);
+  const hello = x.hello ? `${x.hello},` : '';
+  const [label, rows] = boardFor(e);
+  ctx.textBaseline = 'alphabetic';
+  if (wide) {
+    script(ctx, hello, 86, 168, 132, PAPER);
+    words(ctx, [['are you ready', PAPER]], 90, 300, 92);
+    words(ctx, [['for the ', PAPER], ['future?', GOLD]], 90, 405, 92);
+    board(ctx, label, rows, 1716, 52, 60);
+    await cut(ctx, '/story/girl-phone.webp', 1080, 578, 400, k);
+    await cut(ctx, '/story/boy-laptop.webp', 1262, 590, 382, k);
+    await cut(ctx, '/story/bot-wave.webp', 1500, 584, 232, k);
+    await logo(ctx, 90, fy + (H - fy) / 2, 54);
+  } else {
+    script(ctx, hello, 66, 214, 150, PAPER);
+    words(ctx, [['are you', PAPER]], 72, 350, 100);
+    words(ctx, [['ready for', PAPER]], 72, 462, 100);
+    words(ctx, [['the ', PAPER], ['future?', GOLD]], 72, 574, 100);
+    board(ctx, label, rows, 1010, 48, 66);
+    await cut(ctx, '/story/girl-phone.webp', 548, 1024, 372, k);
+    await cut(ctx, '/story/boy-laptop.webp', 735, 1040, 356, k);
+    await cut(ctx, '/story/bot-wave.webp', 920, 1034, 218, k);
+    await logo(ctx, 72, fy + (H - fy) / 2, 62);
+  }
+}
+
+export async function thumb(canvas, e) {
+  const x = derive(e), W = 600;
+  canvas.width = canvas.height = W;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = BLUE;
+  ctx.fillRect(0, 0, W, W);
+  floor(ctx, W, 430, W, 0.6);
+  ctx.textBaseline = 'alphabetic';
+  ctx.font = '700 50px Syncopate';
+  ctx.letterSpacing = '5px';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = PAPER;
+  ctx.fillText('FUTUREADY', W / 2 + 2.5, 112);
+  ctx.letterSpacing = '0px';
+  let size = 122;
+  ctx.font = `400 ${size}px "Great Vibes"`;
+  const word = x.virtual ? 'Virtual' : e.city || x.hello;
+  while (ctx.measureText(word).width > 520 && size > 60) ctx.font = `400 ${(size -= 4)}px "Great Vibes"`;
+  script(ctx, word, W / 2, 238, size, GOLD, 'center');
+  await cut(ctx, '/story/girl-phone.webp', 176, 568, 232, 0.6);
+  await cut(ctx, '/story/bot-wave.webp', 316, 562, 150, 0.6);
+}
+
+// partner logos side by side on a clear background (one logo works too)
+function trim(i) {
+  const c = document.createElement('canvas');
+  c.width = i.width;
+  c.height = i.height;
+  const g = c.getContext('2d');
+  g.drawImage(i, 0, 0);
+  const d = g.getImageData(0, 0, c.width, c.height).data;
+  let x0 = c.width, y0 = c.height, x1 = 0, y1 = 0;
+  for (let y = 0; y < c.height; y++)
+    for (let x = 0; x < c.width; x++) {
+      const p = (y * c.width + x) * 4;
+      const ink = d[p + 3] > 12 && !(d[p] > 245 && d[p + 1] > 245 && d[p + 2] > 245);
+      if (ink) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    }
+  if (x1 <= x0 || y1 <= y0) return c;
+  const o = document.createElement('canvas');
+  o.width = x1 - x0 + 1;
+  o.height = y1 - y0 + 1;
+  o.getContext('2d').drawImage(c, x0, y0, o.width, o.height, 0, 0, o.width, o.height);
+  return o;
+}
+
+export async function strip(canvas, files) {
+  const pics = (await Promise.all(files.map(f => load(URL.createObjectURL(f))))).map(trim);
+  const h = 120, gap = 80;
+  const ws = pics.map(i => (i.width / i.height) * h);
+  canvas.width = Math.max(1, Math.round(ws.reduce((a, b) => a + b, 0) + gap * (pics.length - 1)));
+  canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  let x = 0;
+  pics.forEach((i, n) => { ctx.drawImage(i, x, 0, ws[n], h); x += ws[n] + gap; });
+  return { w: canvas.width, h };
+}

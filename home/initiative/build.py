@@ -1,12 +1,8 @@
 """
-Futuready pages on Hack2skill: the designed look of each section, from one template.
+The designed look of the Futuready sections (the visual source for the passport picture and the old previews).
 
-    python3 home/initiative/build.py          -> writes home/initiative/out/<page>/NN-<section>.html
-                                                  and a local preview: home/initiative/out/<page>/preview.html
-
-These designed sections are the visual source. Hack2skill's editor drops stylesheets, so they are not pasted
-as they are: shoot.mjs turns their pictures (passport, trainer, last call) into images, and h2s.py writes the
-text you paste into the page. To make a new city: copy a PAGES entry, change its details, run both again.
+The live pages are made with the page maker instead: npm --prefix home run maker  (home/maker/).
+Hack2skill's editor drops stylesheets, so these designed sections are not pasted as they are.
 """
 import html
 import json

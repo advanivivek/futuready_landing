@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Futuready page maker</title>
+<link rel="icon" href="/favicon.svg">
+<style>
+@font-face{font-family:Geist;src:url(/fonts/geist.woff2)}
+@font-face{font-family:Unbounded;src:url(/fonts/unbounded.woff2);font-weight:700}
+:root{--blue:#3463af;--gold:#f2b230;--cream:#efe6d2;--paper:#fffcf5;--ink:#161a3a;--line:#e4dccb}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 Geist,system-ui,sans-serif}
+header{position:sticky;top:0;z-index:5;display:flex;gap:12px;align-items:center;padding:12px 20px;background:var(--blue);color:var(--paper)}
+header h1{margin:0 auto 0 0;font:700 18px Unbounded,sans-serif;letter-spacing:-.03em}
+header select,header button{font:inherit;padding:8px 12px;border-radius:999px;border:0}
+main{display:grid;grid-template-columns:minmax(300px,380px) 1fr;gap:20px;padding:20px;max-width:1500px;margin:0 auto}
+@media (max-width:900px){main{grid-template-columns:1fr}}
+form{display:grid;gap:12px;align-content:start}
+fieldset{border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:grid;gap:10px;background:#fff}
+legend{font-weight:700;padding:0 6px}
+label{display:grid;gap:4px;font-size:13px;font-weight:600}
+input,textarea,select{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--paper);width:100%}
+textarea{min-height:56px;resize:vertical}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.seg{display:flex;gap:6px}.seg button{flex:1;padding:8px;border-radius:10px;border:1px solid var(--line);background:var(--paper);font:inherit;cursor:pointer}
+.seg button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.row{display:grid;grid-template-columns:110px 1fr 28px;gap:6px}.row input{padding:6px 8px}
+.row .x,.add{border:0;background:none;cursor:pointer;font-size:18px;color:#a33}.add{color:var(--blue);font-size:14px;font-weight:700;justify-self:start}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tabs button{padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:#fff;font:inherit;font-weight:600;cursor:pointer}
+.tabs button.on{background:var(--gold);border-color:var(--gold)}
+.pane{display:none}.pane.on{display:grid;gap:16px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;gap:10px}
+.card h3{margin:0;font-size:15px}.card small{color:#5a5f86}
+canvas{width:100%;height:auto;border-radius:10px;background:#ddd}
+.pics{display:grid;grid-template-columns:2fr 1fr;gap:16px}.pics .wide{grid-column:1/-1}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.btn{padding:9px 14px;border-radius:999px;border:0;background:var(--ink);color:var(--paper);font:inherit;font-weight:700;cursor:pointer}
+.btn.y{background:var(--gold);color:var(--ink)}.btn.ghost{background:var(--cream);color:var(--ink)}
+.look{border:1px dashed var(--line);border-radius:10px;padding:12px;max-height:340px;overflow:auto;font-family:Nunito,system-ui,sans-serif}
+.look table{border-collapse:collapse}.look td{border:1px solid #bbb;padding:6px 8px;vertical-align:top}.look p{margin:0 0 4px}.look img{max-width:100%;height:auto}
+ol.steps{margin:0;padding-left:20px;display:grid;gap:8px}
+ol.steps a{color:var(--blue);font-weight:700}
+code{background:var(--cream);padding:1px 6px;border-radius:6px}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:999px;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.on{opacity:1}
+.faq{display:grid;grid-template-columns:1fr auto;gap:6px;align-items:start;border-top:1px solid var(--line);padding-top:8px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Futuready page maker</h1>
+  <select id="preset" aria-label="Event"></select>
+  <button id="fresh" type="button">+ New city</button>
+</header>
+<main>
+  <form id="f" autocomplete="off">
+    <fieldset><legend>Event</legend>
+      <div class="seg" id="kind"><button type="button" data-k="campus">Campus</button><button type="button" data-k="virtual">Virtual</button></div>
+      <div class="two campus"><label>City<input name="city"></label><label>Campus<input name="campus"></label></div>
+      <div class="two"><label class="campus">Date<input name="date" type="date"></label><label>Cover greeting (cursive)<input name="hello" placeholder="the city"></label></div>
+      <div class="two campus"><label>Starts<input name="start" placeholder="12:45 PM"></label><label>Ends<input name="end" placeholder="3:30 PM"></label></div>
+    </fieldset>
+    <fieldset><legend>Words at the top</legend>
+      <label>Headline<textarea name="hook"></textarea></label>
+      <label>Under it<textarea name="sub"></textarea></label>
+    </fieldset>
+    <fieldset class="campus"><legend>Partner</legend>
+      <label>Label<input name="partnerLabel" placeholder="Campus Organising Partner"></label>
+      <label>Logos (1 or 2, any size; they are trimmed and put on one line)<input id="logos" type="file" accept="image/*" multiple></label>
+      <label>Logo strip link, after you upload it (see Steps)<input name="stripUrl" placeholder="https://storage.googleapis.com/…"></label>
+    </fieldset>
+    <fieldset><legend>Schedule</legend>
+      <div id="rows"></div>
+      <button class="add" type="button" id="addRow">+ Add a row</button>
+      <label>Note under it<input name="note"></label>
+    </fieldset>
+  </form>
+
+  <section>
+    <div class="tabs" id="tabs">
+      <button data-t="pics" class="on">1 · Pictures</button><button data-t="text">2 · Page sections</button>
+      <button data-t="faq">3 · FAQs</button><button data-t="mail">4 · Email</button><button data-t="steps">5 · Steps</button>
+    </div>
+    <div class="pane on" id="pics">
+      <div class="pics">
+        <div class="card wide"><h3>Cover, wide <small>(Live Edit → Event Overview → Banner → Desktop)</small></h3><canvas id="cWide"></canvas>
+          <div class="btns"><button class="btn y" data-dl="cWide" data-name="cover-wide" data-type="image/jpeg">Download</button></div></div>
+        <div class="card"><h3>Cover, square <small>(Banner → Mobile)</small></h3><canvas id="cSquare"></canvas>
+          <div class="btns"><button class="btn y" data-dl="cSquare" data-name="cover-square" data-type="image/jpeg">Download</button></div></div>
+        <div class="card"><h3>Thumbnail <small>(Initiative Settings → logo)</small></h3><canvas id="cThumb"></canvas>
+          <div class="btns"><button class="btn y" data-dl="cThumb" data-name="thumbnail" data-type="image/png">Download</button></div></div>
+        <div class="card wide campus" id="stripCard"><h3>Partner logos on one line <small>(upload once, then paste its link in the form)</small></h3><canvas id="cStrip" style="background:#fff"></canvas>
+          <div class="btns"><button class="btn y" data-dl="cStrip" data-name="partner-logos" data-type="image/png">Download</button></div></div>
+      </div>
+    </div>
+    <div class="pane" id="text"></div>
+    <div class="pane" id="faq"><div class="card" id="faqList"></div></div>
+    <div class="pane" id="mail"><div class="card"><h3>Subject</h3><div id="subj"></div><div class="btns"><button class="btn" id="cpSubj">Copy subject</button></div>
+      <h3>Body (Embed HTML tab)</h3><div class="look" id="mailLook"></div><div class="btns"><button class="btn y" id="cpMail">Copy email HTML</button></div></div></div>
+    <div class="pane" id="steps"><div class="card"><ol class="steps" id="stepList"></ol></div></div>
+  </section>
+</main>
+<div class="toast" id="toast">Copied</div>
+
+<script type="module">
+import { derive, sections, faqs, email } from './sections.js';
+import { ready, cover, thumb, strip } from './art.js';
+import { PRESETS } from './presets.js';
+
+const store = { get: k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
+let all = { ...structuredClone(PRESETS), ...(store.get('fr-maker-events') || {}) };
+let key = store.get('fr-maker-current') || 'vadodara';
+if (!all[key]) key = 'vadodara';
+let logos = [];
+
+const $ = s => document.querySelector(s), f = $('#f');
+const toast = t => { $('#toast').textContent = t; $('#toast').classList.add('on'); setTimeout(() => $('#toast').classList.remove('on'), 1200); };
+const copy = async (t, what = 'Copied') => { await navigator.clipboard.writeText(t); toast(what); };
+
+function fillPresets() {
+  $('#preset').innerHTML = Object.entries(all).map(([k, e]) => `<option value="${k}" ${k === key ? 'selected' : ''}>${e.name}</option>`).join('');
+}
+function load() {
+  const e = all[key];
+  for (const el of f.elements) if (el.name) el.value = e[el.name] ?? '';
+  setKind(e.kind, false);
+  drawRows();
+}
+function read() {
+  const e = all[key];
+  for (const el of f.elements) if (el.name) e[el.name] = el.value;
+  e.schedule = [...document.querySelectorAll('#rows .row')].map(r => ({ time: r.children[0].value, title: r.children[1].value.split('|')[0].trim(), detail: (r.children[1].value.split('|')[1] || '').trim() }));
+  if (e.kind === 'campus' && e.city) e.name = `${e.campus || 'Campus'} · ${e.city}${e.date ? ' · ' + derive(e).dateShort.slice(5, -5) : ''}`;
+  store.set('fr-maker-events', all);
+  store.set('fr-maker-current', key);
+  return e;
+}
+function setKind(k, redraw = true) {
+  all[key].kind = k;
+  document.querySelectorAll('#kind button').forEach(b => b.classList.toggle('on', b.dataset.k === k));
+  document.querySelectorAll('.campus').forEach(el => (el.style.display = k === 'campus' ? '' : 'none'));
+  document.querySelectorAll('.virtual').forEach(el => (el.style.display = k === 'virtual' ? '' : 'none'));
+  if (redraw) render();
+}
+function drawRows() {
+  $('#rows').innerHTML = all[key].schedule.map(r => `<div class="row"><input value="${(r.time || '').replace(/"/g, '&quot;')}" placeholder="1:00 – 3:00 PM"><input value="${[r.title, r.detail].filter(Boolean).join(' | ').replace(/"/g, '&quot;')}" placeholder="What happens | a line about it"><button type="button" class="x" title="Remove">×</button></div>`).join('');
+}
+
+let t;
+function render() { clearTimeout(t); t = setTimeout(paint, 120); }
+async function paint() {
+  const e = read(), x = derive(e);
+  await cover($('#cWide'), e, true);
+  await cover($('#cSquare'), e, false);
+  await thumb($('#cThumb'), e);
+  if (logos.length) {
+    const { w, h } = await strip($('#cStrip'), logos);
+    e.stripW = 420; e.stripH = Math.round((420 * h) / w);
+  }
+  const secs = sections(e);
+  $('#text').innerHTML = secs.map((s, i) => `<div class="card"><h3>${i + 1}. ${s.title} <small>→ ${s.where}</small></h3><div class="btns"><button class="btn y" data-copy="${i}">Copy HTML</button><button class="btn ghost" data-look="${i}">Show / hide a rough look</button></div><div class="look" hidden>${s.html}</div></div>`).join('') +
+    `<div class="card"><h3>How to paste</h3><small>Open the section in Live Edit → <b>Insert → Source Code</b> → paste → <b>Embed</b> → <b>Save</b>. It replaces what was there.</small></div>`;
+  $('#text').onclick = ev => {
+    const c = ev.target.dataset.copy, l = ev.target.dataset.look;
+    if (c !== undefined) copy(secs[c].html, `${secs[c].title}: copied`);
+    if (l !== undefined) { const box = ev.target.closest('.card').querySelector('.look'); box.hidden = !box.hidden; }
+  };
+  const q = faqs(e);
+  $('#faqList').innerHTML = '<h3>Live Edit → FAQs. One question at a time.</h3>' + q.map(([a, b], i) => `<div class="faq"><div><b>${a}</b><br>${b}</div><div class="btns"><button class="btn ghost" data-q="${i}">Q</button><button class="btn" data-a="${i}">A</button></div></div>`).join('');
+  $('#faqList').onclick = ev => { const d = ev.target.dataset; if (d.q) copy(q[d.q][0], 'Question copied'); if (d.a) copy(q[d.a][1], 'Answer copied'); };
+  const m = email(e);
+  $('#subj').textContent = m.subject;
+  $('#mailLook').innerHTML = m.html;
+  $('#cpSubj').onclick = () => copy(m.subject, 'Subject copied');
+  $('#cpMail').onclick = () => copy(m.html, 'Email copied');
+  const isNew = !['vadodara', 'virtual'].includes(key);
+  $('#stepList').innerHTML = [
+    isNew && `<b>Make the page:</b> My Dashboard → Create New Initiative → <b>Clone from Initiative</b> → Clone the Parul page. Name: <code>${x.title}</code>. Thumbnail: the one from tab 1. Turn on <b>Copy Email Template</b>. URL: <code>${x.slug}</code> → Finish.`,
+    `<b>Pictures:</b> download the three from tab 1. In <a href="${x.liveEdit}" target="_blank">Live Edit</a> → Event Overview → Banner: Desktop gets the wide cover, Mobile gets the square one. <b>Press Save after each one.</b> If a slot already has a picture, delete it with the bin and add a new one.`,
+    `<b>Thumbnail:</b> Live Edit → Initiative Settings → logo → upload → Crop → Save.`,
+    !x.virtual && `<b>Partner logos:</b> open About → Insert → Image → Add File → the strip from tab 1 → Insert. Copy its link: right-click the picture in the preview → Copy image address. Paste it into the form (Partner → Logo strip link). Then do step 5 for About.`,
+    `<b>Sections:</b> tab 2. Paste each into its section (Insert → Source Code → Embed → Save).`,
+    isNew && `<b>Manage Sections:</b> hide Challenges, Jury, Mentor and Partner (the clone turns them on) → Save.`,
+    isNew && `<b>Initiative Settings:</b> organisation = <code>${e.campus || 'the campus'}</code>; mode = ${x.virtual ? 'Virtual' : 'In Person'} → Save.`,
+    `<b>FAQs:</b> tab 3, into Live Edit → FAQs.`,
+    `<b>Registration:</b> Control Panel → Timeline Management → Registration → Settings → End Date &amp; Time${x.virtual ? '' : ` = ${x.dateShort}, ${e.start}`} → Save. Then Communication → Configure → paste tab 4 (Embed HTML) → Update Email Content.`,
+    `<b>Check</b> the <a href="${x.preview}" target="_blank">preview</a> on your phone, then press <b>Publish</b>. Once Hack2skill approves it, the main page lists it by itself at its next daily refresh.`,
+  ].filter(Boolean).map(li => `<li>${li}</li>`).join('');
+}
+
+document.addEventListener('click', ev => {
+  const d = ev.target.dataset;
+  if (d.dl) $('#' + d.dl).toBlob(b => { const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `${derive(all[key]).slug}-${d.name}.${d.type === 'image/png' ? 'png' : 'jpg'}`; a.click(); }, d.type, 0.9);
+  if (d.t) { document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b === ev.target)); document.querySelectorAll('.pane').forEach(p => p.classList.toggle('on', p.id === d.t)); }
+  if (d.k) setKind(d.k);
+  if (ev.target.classList.contains('x')) { ev.target.parentElement.remove(); render(); }
+});
+$('#addRow').onclick = () => { all[key].schedule = read().schedule.concat({ time: '', title: '', detail: '' }); drawRows(); };
+f.addEventListener('input', render);
+$('#rows').addEventListener('input', render);
+$('#logos').onchange = ev => { logos = [...ev.target.files].slice(0, 2); render(); };
+$('#preset').onchange = ev => { key = ev.target.value; logos = []; load(); render(); };
+$('#fresh').onclick = () => {
+  const base = structuredClone(PRESETS.vadodara);
+  key = 'city-' + Date.now();
+  all[key] = { ...base, name: 'New city', city: '', campus: '', date: '', stripUrl: '', note: 'We will email you the hall before the day.' };
+  fillPresets(); load(); render();
+  f.elements.city.focus();
+};
+
+await ready();
+fillPresets();
+load();
+paint();
+</script>
+</body>
+</html>

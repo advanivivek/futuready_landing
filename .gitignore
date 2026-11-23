@@ -33,3 +33,5 @@ shots
 home/initiative/assets/banners/*.png
 home/initiative/assets/blocks/*.png
 home/initiative/assets/blocks/vivek-portrait.webp
+# pictures the page maker exported (regenerate any time; the partner strip holds partner logos)
+home/initiative/assets/made/

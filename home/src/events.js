@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { fromHack2skill, normalise } from './events-core';
+import { fromHack2skill, mergeCities, normalise } from './events-core';
 import { CITIES, CITIES_FEED } from './data';
 
 const getJSON = async url => {
@@ -29,7 +29,7 @@ export function useCities() {
         try {
           const list = fromFeed(await load());
           if (alive && list.length) {
-            setCities(list);
+            setCities(mergeCities(list, CITIES));
             return;
           }
         } catch {

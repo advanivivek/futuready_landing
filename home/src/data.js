@@ -17,9 +17,9 @@ export const CITIES = [
   { city: 'Delhi' },
 ];
 
-// Optional, later: one link that lists every Futuready city (see START-HERE.md, "Ask the Hack2skill team").
-// When it is set, the train updates itself and the list above is only a fallback.
-export const CITIES_FEED = '';
+// Hack2skill's public list of published events. Every build reads it (and a daily rebuild keeps it fresh), so a
+// Futuready page appears on the train as soon as it is published there. The CITIES list above is merged in.
+export const CITIES_FEED = 'https://hack2skill.com/api/v1/innovator/public/event/list?page=1&records=500';
 
 // ---- The last scene: "Didn't find your city? Attend Virtual, or bring it to your campus." ----
 export const VIRTUAL_URL = 'https://hack2skill.com/event/futuready-virtual';

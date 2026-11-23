@@ -96,20 +96,36 @@ export function normalise(list, now = Date.now()) {
 }
 
 // Hack2skill's event list -> cities. `match` picks the Futuready events (title or slug).
+// A page named futuready-<city>-<ddmmyyyy> gives its city and day from the link; the campus comes from the title
+// ("Futuready by H2S · Parul University, Vadodara" -> "Parul University"). The Virtual edition is left out.
 export function fromHack2skill(json, match = 'futuready', now = Date.now()) {
   const data = json?.data || {};
   const all = [...(data.flagshipEvents || []), ...(data.communityEvents || [])];
   const re = new RegExp(match, 'i');
-  // the Virtual edition has its own button, so it is not a city on the train
-  const picked = all.filter(ev => re.test(`${ev.title || ''} ${ev.eventUrl || ''}`) && !/virtual/i.test(`${ev.title || ''} ${ev.eventUrl || ''}`));
+  const picked = all.filter(ev => {
+    const text = `${ev.title || ''} ${ev.eventUrl || ''}`;
+    return re.test(text) && !/virtual/i.test(text);
+  });
   return normalise(
-    picked.map(ev => ({
-      city: cityFromTitle(ev.title, match),
-      start: ev.registrationStart,
-      end: ev.registrationEnd,
+    picked.map(ev => {
       // the same link rule as hack2skill.com's own event cards
-      url: (ev.customEventUrl || '').trim() || (ev.eventUrl ? `https://hack2skill.com/event/${ev.eventUrl.trim()}` : '#'),
-    })),
+      const url = (ev.customEventUrl || '').trim() || (ev.eventUrl ? `https://hack2skill.com/event/${ev.eventUrl.trim()}` : '#');
+      const slug = fromLink(url);
+      const place = String(ev.title || '').split(/\s*[·|:–—]\s*/).pop() || '';
+      const campus = place.includes(',') ? place.slice(0, place.lastIndexOf(',')).trim() : '';
+      return slug
+        ? { city: slug.city, campus, url }
+        : { city: cityFromTitle(ev.title, match), campus, start: ev.registrationStart, end: ev.registrationEnd, url };
+    }),
     now
   );
+}
+
+// The feed's cities first, then any city only in the hand-made list (Pune, "boarding soon" names).
+export function mergeCities(feed, manual, now = Date.now()) {
+  const mine = normalise(manual, now);
+  const key = c => (c.url || c.city).toLowerCase();
+  const seen = new Set(feed.map(key));
+  const cities = new Set(feed.map(c => c.city.toLowerCase()));
+  return sortCities([...feed, ...mine.filter(c => !seen.has(key(c)) && !(c.status === 'soon' && cities.has(c.city.toLowerCase())))]);
 }
