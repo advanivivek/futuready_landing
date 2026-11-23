@@ -16,7 +16,7 @@ export const TINTS = ['#fdeef1', '#eaf6f0', '#fff4dc', '#efeafc'];
 // pictures already on Hack2skill's own storage (uploaded through Live Edit)
 const H2S = 'https://storage.googleapis.com/vision-hack2skill-production/innovator/USER02555644/';
 export const HOSTED = {
-  portrait: H2S + '1795429431486-vivekportrait.webp',
+  portrait: H2S + '1795444779197-viveksquare.webp', // square, shown at 140 x 140 in the trainer card
   passport: H2S + '1795397394282-passport.webp',
   parulStrip: H2S + '1795438579788-vadodarapartnerlogos.webp', // Parul University + The PU AI Society, on one line
 };
@@ -120,7 +120,7 @@ export function sections(e, hosted = HOSTED) {
 
   // Photo left, words right, the way the old Pune page had it. Only Hack2skill's own Column Layout does this (a
   // pasted layout is flattened, and a table rescales the photo on save), so the two parts are pasted into its columns.
-  const photo = `<p><img src="${hosted.portrait}" alt="${TRAINER.name}" width="136" height="170"></p>`;
+  const photo = `<p><img src="${hosted.portrait}" alt="${TRAINER.name}" width="140" height="140"></p>`;
   const words = p(s(TRAINER.name, 28, 800)) + p(s(TRAINER.bio, 18)) +
     p(`<a href="${TRAINER.linkedin}">${pill('LinkedIn ↗', BLUE, PAPER, 17)}</a>&nbsp;&nbsp;&nbsp;<a href="${TRAINER.instagram}">${pill('Instagram ↗', GOLD, INK, 17)}</a>`);
   const trainer = photo + words + END;
