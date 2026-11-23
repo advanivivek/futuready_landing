@@ -1,0 +1,32 @@
+<!-- Futuready by H2S: What Futuready attendees say. HTML and CSS only. Made with home/initiative/build.py -->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@500..600&family=Syncopate:wght@700&family=Unbounded:wght@600..900&display=swap');
+
+.fr{--blue:#3463af;--marigold:#f2b230;--cream:#efe6d2;--paper:#fffcf5;--ink:#161a3a;--night:#1d1236;
+  container-type:inline-size;font:400 16px/1.5 'Geist',system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--ink);
+  -webkit-font-smoothing:antialiased;margin:0 0 8px;text-align:left}
+.fr *,.fr *::before,.fr *::after{box-sizing:border-box}
+.fr p,.fr h3,.fr h4,.fr ul,.fr ol,.fr figure,.fr blockquote{margin:0;padding:0}
+.fr ul,.fr ol{list-style:none}
+.fr img{display:block;max-width:none;height:auto}
+.fr a{color:inherit}
+.fr .fr-d{font-family:'Unbounded',system-ui,sans-serif;font-weight:700;letter-spacing:-.045em;line-height:1.02}
+.fr .fr-mono{font-family:'Geist Mono',ui-monospace,Menlo,monospace;font-weight:600;letter-spacing:.02em}
+.fr .fr-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 28px;border-radius:999px;
+  background:var(--ink);color:#fffcf5;font:600 16px/1 'Geist',system-ui,sans-serif;letter-spacing:-.01em;text-decoration:none;
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+.fr .fr-btn:hover{transform:translateY(-2px)}
+.fr .fr-btn:active{transform:scale(.96)}
+.fr .fr-btn--y{background:var(--marigold);color:var(--ink)}
+.fr .fr-cut{filter:drop-shadow(0 3px 2px rgba(10,12,30,.16)) drop-shadow(0 10px 14px rgba(10,12,30,.12))}
+.fr .fr-note{font:500 13px/1.5 'Geist Mono',ui-monospace,monospace;opacity:.8}
+
+.fr-voices .fr-wall{display:grid;gap:22px;padding:30px 18px 22px;border-radius:22px;background:var(--cream)}
+.fr-voices .fr-paper{position:relative;padding:18px 18px 15px;border-radius:4px;background:var(--paper);box-shadow:0 1px 0 rgba(0,0,0,.05),0 12px 26px rgba(10,12,30,.14);transform:rotate(var(--r))}
+.fr-voices .fr-paper::before{content:'';position:absolute;top:-9px;left:50%;width:64px;height:18px;transform:translateX(-50%) rotate(-3deg);background:rgba(242,178,48,.6)}
+.fr-voices blockquote{font:500 17px/1.42 'Geist',sans-serif;letter-spacing:-.012em;text-wrap:pretty}
+.fr-voices figcaption{margin-top:10px;font:650 14px/1.3 'Geist',sans-serif}
+.fr-voices figcaption span{display:block;margin-top:1px;font:400 12px/1.3 'Geist Mono',monospace;opacity:.7}
+@container (min-width:620px){ .fr-voices .fr-wall{grid-template-columns:repeat(3,1fr);padding:34px 26px 26px} }
+</style>
+<section class="fr fr-voices"><div class="fr-wall"><figure class="fr-paper" style="--r:-2.5deg"><blockquote>“One of those rare sessions where you don’t feel bored even for a second!”</blockquote><figcaption>Swapnaja Waghapure<span>MCA student</span></figcaption></figure><figure class="fr-paper" style="--r:2deg"><blockquote>“One more step towards becoming a builder rather than just a thinker.”</blockquote><figcaption>Durga Khadbade<span>Engineering student, TAE Pune</span></figcaption></figure><figure class="fr-paper" style="--r:-1.5deg"><blockquote>“Live interactive activities, multiple levels to progress through, and a team-based prompting challenge.”</blockquote><figcaption>Aditi Guddeti<span>IT engineering, GDG TAE</span></figcaption></figure></div></section>

@@ -21,6 +21,8 @@ export const shortDate = iso => {
 export function cityFromTitle(title, match = 'futuready') {
   const parts = String(title).split(/\s*[:|·–—]\s*|\s+-\s+|\s+@\s+|\s+in\s+/i).filter(Boolean);
   let city = parts.length > 1 ? parts[parts.length - 1] : String(title);
+  // "Parul University, Vadodara" -> "Vadodara"
+  if (city.includes(',')) city = city.split(',').pop();
   city = city
     .replace(new RegExp(match, 'ig'), '')
     .replace(/builders?\s*lab|bootcamp|episode\s*\d+|\b20\d\d\b/gi, '')
@@ -47,10 +49,12 @@ export function sortCities(list) {
   return [...list].sort((a, b) => ORDER[a.status] - ORDER[b.status] || when(a) - when(b));
 }
 
-// A Futuready page link -> its city and date: hack2skill.com/futuready/pune26102026 -> Pune, 26 Oct 2026.
-// Two-word cities use a hyphen: /futuready/navi-mumbai05012027.
+// A Futuready page link -> its city and date. Both kinds of link work:
+//   hack2skill.com/event/futuready-vadodara-07122026  (a Hack2skill initiative page) -> Vadodara, 7 Dec 2026
+//   hack2skill.com/futuready/pune26102026                                            -> Pune, 26 Oct 2026
+// Two-word cities use a hyphen: /event/futuready-navi-mumbai-05012027.
 export function fromLink(link) {
-  const m = /\/futuready\/([a-z][a-z-]*?)-?(\d{2})(\d{2})(\d{4})\/?(?:[?#].*)?$/i.exec(String(link || ''));
+  const m = /\/(?:event\/futuready-|futuready\/)([a-z][a-z-]*?)-?(\d{2})(\d{2})(\d{4})\/?(?:[?#].*)?$/i.exec(String(link || ''));
   if (!m) return null;
   const [dd, mm, yyyy] = [m[2], m[3], m[4]].map(Number);
   if (mm < 1 || mm > 12 || dd < 1 || dd > 31) return null;
@@ -96,7 +100,8 @@ export function fromHack2skill(json, match = 'futuready', now = Date.now()) {
   const data = json?.data || {};
   const all = [...(data.flagshipEvents || []), ...(data.communityEvents || [])];
   const re = new RegExp(match, 'i');
-  const picked = all.filter(ev => re.test(`${ev.title || ''} ${ev.eventUrl || ''}`));
+  // the Virtual edition has its own button, so it is not a city on the train
+  const picked = all.filter(ev => re.test(`${ev.title || ''} ${ev.eventUrl || ''}`) && !/virtual/i.test(`${ev.title || ''} ${ev.eventUrl || ''}`));
   return normalise(
     picked.map(ev => ({
       city: cityFromTitle(ev.title, match),

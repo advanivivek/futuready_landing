@@ -1,0 +1,9 @@
+Paste in this order (the file, then the section title on the page):
+
+00-about.html  ->  About
+01-learn.html  ->  What you will learn
+02-schedule.html  ->  Schedule
+03-trainer.html  ->  Meet your trainer
+04-voices.html  ->  What students say
+faqs.txt  ->  FAQs (built-in section, one question at a time)
+email-subject.txt + email.html  ->  Timeline > Registration > Communication > Configure > Embed HTML

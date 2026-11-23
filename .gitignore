@@ -18,6 +18,10 @@ NOTES*
 .env
 .env.*
 
+# Hack2skill's internal organizer training files and partner logos: never public
+home/Initiative-Templates/
+home/initiative/assets/partners/
+
 # the trainer's original photos (the site uses the cut-outs in home/public/story)
 home/public/vivek/
 
@@ -25,3 +29,7 @@ home/public/vivek/
 node_modules/
 dist/
 shots
+# Futuready initiative pages: big intermediate renders, and the trainer's personal photo (like home/public/vivek/)
+home/initiative/assets/banners/*.png
+home/initiative/assets/blocks/*.png
+home/initiative/assets/blocks/vivek-portrait.webp

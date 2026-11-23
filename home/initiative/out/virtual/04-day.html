@@ -1,0 +1,41 @@
+<!-- Futuready by H2S: The day. HTML and CSS only. Made with home/initiative/build.py -->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@500..600&family=Syncopate:wght@700&family=Unbounded:wght@600..900&display=swap');
+
+.fr{--blue:#3463af;--marigold:#f2b230;--cream:#efe6d2;--paper:#fffcf5;--ink:#161a3a;--night:#1d1236;
+  container-type:inline-size;font:400 16px/1.5 'Geist',system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--ink);
+  -webkit-font-smoothing:antialiased;margin:0 0 8px;text-align:left}
+.fr *,.fr *::before,.fr *::after{box-sizing:border-box}
+.fr p,.fr h3,.fr h4,.fr ul,.fr ol,.fr figure,.fr blockquote{margin:0;padding:0}
+.fr ul,.fr ol{list-style:none}
+.fr img{display:block;max-width:none;height:auto}
+.fr a{color:inherit}
+.fr .fr-d{font-family:'Unbounded',system-ui,sans-serif;font-weight:700;letter-spacing:-.045em;line-height:1.02}
+.fr .fr-mono{font-family:'Geist Mono',ui-monospace,Menlo,monospace;font-weight:600;letter-spacing:.02em}
+.fr .fr-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 28px;border-radius:999px;
+  background:var(--ink);color:#fffcf5;font:600 16px/1 'Geist',system-ui,sans-serif;letter-spacing:-.01em;text-decoration:none;
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+.fr .fr-btn:hover{transform:translateY(-2px)}
+.fr .fr-btn:active{transform:scale(.96)}
+.fr .fr-btn--y{background:var(--marigold);color:var(--ink)}
+.fr .fr-cut{filter:drop-shadow(0 3px 2px rgba(10,12,30,.16)) drop-shadow(0 10px 14px rgba(10,12,30,.12))}
+.fr .fr-note{font:500 13px/1.5 'Geist Mono',ui-monospace,monospace;opacity:.8}
+
+.fr-day .fr-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.fr-day h3{font-size:clamp(22px,5cqw,30px)}
+.fr-day .fr-head p{margin-top:8px;opacity:.8;max-width:34ch}
+.fr-day .fr-steps{margin-top:20px;display:grid;gap:0;border-left:2px dashed rgba(22,26,58,.2);margin-left:8px}
+.fr-day .fr-step{position:relative;padding:0 0 20px 24px}
+.fr-day .fr-step::before{content:'';position:absolute;left:-8px;top:4px;width:14px;height:14px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 4px #fff}
+.fr-day .fr-step:last-child{padding-bottom:0}
+.fr-day .fr-step:last-child::before{background:var(--marigold)}
+.fr-day .fr-step small{font-size:12px;opacity:.65}
+.fr-day .fr-step strong{display:block;margin-top:2px;font:600 18px/1.25 'Geist',sans-serif;letter-spacing:-.02em}
+.fr-day .fr-step span{display:block;margin-top:2px;opacity:.8}
+</style>
+<section class="fr fr-day">
+  <div class="fr-head">
+    <div><h3 class="fr-d">How a session goes</h3><p>Next session: date soon · Online, from anywhere</p></div>
+  </div>
+  <ol class="fr-steps"><li class="fr-step"><small class="fr-mono">5 min</small><strong>Join and say hi</strong><span>Open the link, scan the QR code. Your name lights up the shared screen.</span></li><li class="fr-step"><small class="fr-mono">15 min</small><strong>Warm up and the big question</strong><span>Fast games, honest polls, and the question of the day.</span></li><li class="fr-step"><small class="fr-mono">45 min</small><strong>Levels R, E, A, D</strong><span>The Literal Bot, the Bug Hunt, System Test and your AI team.</span></li><li class="fr-step"><small class="fr-mono">40 min</small><strong>Boss level Y</strong><span>Spec it, build it with AI, then break it, on your own or with friends on the call.</span></li><li class="fr-step"><small class="fr-mono">10 min</small><strong>Your e-passport</strong><span>The last stamp, your signed passport, and when the next session is.</span></li></ol>
+</section>

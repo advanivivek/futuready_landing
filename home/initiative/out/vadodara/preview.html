@@ -1,0 +1,421 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>body{margin:0;background:#fff;font-family:Nunito,system-ui,sans-serif}.col{max-width:730px;margin:0 auto;padding:24px 16px 60px}
+.h2s-title{font:700 24px/1.2 Nunito,system-ui,sans-serif;color:#0f172a;margin:44px 0 16px}</style></head>
+<body><div class="col"><h2 class="h2s-title">About</h2><!-- Futuready by H2S: About. HTML and CSS only. Made with home/initiative/build.py -->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@500..600&family=Syncopate:wght@700&family=Unbounded:wght@600..900&display=swap');
+
+.fr{--blue:#3463af;--marigold:#f2b230;--cream:#efe6d2;--paper:#fffcf5;--ink:#161a3a;--night:#1d1236;
+  container-type:inline-size;font:400 16px/1.5 'Geist',system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--ink);
+  -webkit-font-smoothing:antialiased;margin:0 0 8px;text-align:left}
+.fr *,.fr *::before,.fr *::after{box-sizing:border-box}
+.fr p,.fr h3,.fr h4,.fr ul,.fr ol,.fr figure,.fr blockquote{margin:0;padding:0}
+.fr ul,.fr ol{list-style:none}
+.fr img{display:block;max-width:none;height:auto}
+.fr a{color:inherit}
+.fr .fr-d{font-family:'Unbounded',system-ui,sans-serif;font-weight:700;letter-spacing:-.045em;line-height:1.02}
+.fr .fr-mono{font-family:'Geist Mono',ui-monospace,Menlo,monospace;font-weight:600;letter-spacing:.02em}
+.fr .fr-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 28px;border-radius:999px;
+  background:var(--ink);color:#fffcf5;font:600 16px/1 'Geist',system-ui,sans-serif;letter-spacing:-.01em;text-decoration:none;
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+.fr .fr-btn:hover{transform:translateY(-2px)}
+.fr .fr-btn:active{transform:scale(.96)}
+.fr .fr-btn--y{background:var(--marigold);color:var(--ink)}
+.fr .fr-cut{filter:drop-shadow(0 3px 2px rgba(10,12,30,.16)) drop-shadow(0 10px 14px rgba(10,12,30,.12))}
+.fr .fr-note{font:500 13px/1.5 'Geist Mono',ui-monospace,monospace;opacity:.8}
+
+.fr .fr-flaps{display:grid;justify-items:end;gap:5px;font-family:'Geist Mono',ui-monospace,monospace}
+.fr .fr-flaps small{font-size:11px;letter-spacing:.16em;text-transform:uppercase;opacity:.85}
+.fr .fr-flaprow{display:flex;gap:3px;padding:4px;border-radius:7px;background:#161a3a;box-shadow:0 10px 20px rgba(10,12,30,.25)}
+.fr .fr-flaprow b{position:relative;width:1.05em;height:1.45em;display:grid;place-items:center;border-radius:3px;
+  background:linear-gradient(to bottom,#2a2f5c 50%,#242952 50%);color:#fffcf5;font-size:26px;font-weight:700;line-height:1}
+.fr .fr-flaprow b::after{content:'';position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(0,0,0,.55)}
+.fr .fr-flaps--big .fr-flaprow b{font-size:clamp(28px,7cqw,44px)}
+
+.fr-about .fr-card{position:relative;overflow:hidden;border-radius:22px;background:var(--blue);color:var(--cream);padding:26px 24px 0}
+.fr-about .fr-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.fr-about .fr-eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.9}
+.fr-about .fr-brand{display:block;margin-top:8px;font:700 clamp(15px,3.2cqw,20px)/1 'Syncopate',sans-serif;letter-spacing:.08em}
+.fr-about h3{margin-top:18px;font-size:clamp(28px,6.4cqw,46px);color:var(--cream);max-width:13ch}
+.fr-about h3 em{font-style:normal;color:var(--marigold)}
+.fr-about .fr-facts{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.fr-about .fr-facts li{padding:7px 12px;border-radius:999px;background:rgba(255,252,245,.14);font:500 13px/1.2 'Geist Mono',monospace}
+.fr-about .fr-cta{margin-top:20px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px}
+.fr-about .fr-cta .fr-note{color:var(--cream)}
+.fr-about .fr-stage{position:relative;height:250px;margin:14px -24px 0}
+.fr-about .fr-floor{position:absolute;left:0;right:0;bottom:0;height:74px;background:var(--cream)}
+.fr-about .fr-stage img{position:absolute;bottom:22px}
+.fr-about .fr-girl{left:calc(50% - 150px);height:205px}
+.fr-about .fr-boy{left:calc(50% - 40px);height:196px;bottom:30px!important}
+.fr-about .fr-bot{left:calc(50% + 82px);height:118px}
+.fr-about .fr-sun{position:absolute;right:28px;top:-20px;width:54px;height:54px;border-radius:50%;background:var(--marigold)}
+.fr-about .fr-lines{margin-top:22px}
+.fr-about .fr-big{font:600 clamp(20px,4.4cqw,26px)/1.18 'Geist',sans-serif;letter-spacing:-.03em}
+.fr-about .fr-lines p+p{margin-top:10px;font-size:16px;opacity:.85;max-width:52ch}
+.fr-about .fr-partner{margin-top:22px;padding:18px 20px;border-radius:18px;background:var(--paper);box-shadow:0 1px 0 rgba(0,0,0,.05),0 10px 24px rgba(10,12,30,.08)}
+.fr-about .fr-label{font-size:11px;letter-spacing:.16em;text-transform:uppercase;opacity:.7}
+.fr-about .fr-logos{display:flex;flex-wrap:wrap;align-items:center;gap:14px 30px;margin-top:12px}
+.fr-about .fr-logos img{height:42px;width:auto}
+.fr-about .fr-logos img+img{height:38px}
+@container (min-width:620px){
+  .fr-about .fr-card{padding:34px 34px 0;min-height:360px}
+  .fr-about .fr-copy{max-width:57%}
+  .fr-about h3{font-size:clamp(28px,5cqw,40px);max-width:12ch}
+  .fr-about .fr-stage{position:absolute;right:0;bottom:0;width:41%;height:100%;margin:0}
+  .fr-about .fr-girl{left:2%;height:212px}
+  .fr-about .fr-boy{left:36%;height:202px}
+  .fr-about .fr-bot{left:70%;height:116px}
+  .fr-about .fr-floor{height:64px}
+  .fr-about .fr-sun{display:none}
+  .fr-about .fr-top .fr-flaps{position:absolute;right:30px;top:28px;z-index:2}
+}
+</style>
+<section class="fr fr-about">
+  <div class="fr-card">
+    <div class="fr-top">
+      <div class="fr-copy">
+        <p class="fr-mono fr-eyebrow">Campus edition</p>
+        <span class="fr-brand" aria-label="Futuready by H2S">FUTUREADY</span>
+        <h3 class="fr-d">Are you ready for the <em>future?</em></h3>
+        <ul class="fr-facts">
+          <li>Mon, 7 Dec 2026</li>
+          <li>Parul University, Vadodara</li>
+          <li>In person · 2 hours · Free</li>
+        </ul>
+        <div class="fr-cta"><a class="fr-btn fr-btn--y" href="https://hack2skill.com/event/futuready-vadodara-07122026/registration">Register free</a><span class="fr-note">Takes a minute.</span></div>
+      </div>
+      <div class="fr-flaps" role="img" aria-label="Arrives: Mon, 7 Dec 2026"><small class="fr-mono">Arrives</small><span class="fr-flaprow"><b>0</b><b>7</b></span><span class="fr-flaprow"><b>D</b><b>E</b><b>C</b></span></div>
+    </div>
+    <div class="fr-stage" aria-hidden="true">
+      <i class="fr-sun"></i>
+      <div class="fr-floor"></div>
+      <img class="fr-cut fr-girl" src="https://storage.googleapis.com/vision-hack2skill-production/innovator/USER02555644/1795396086747-girlphone.webp" alt="" loading="lazy">
+      <img class="fr-cut fr-boy" src="https://storage.googleapis.com/vision-hack2skill-production/innovator/USER02555644/1795396104806-boylaptop.webp" alt="" loading="lazy">
+      <img class="fr-cut fr-bot" src="https://storage.googleapis.com/vision-hack2skill-production/innovator/USER02555644/1795396143271-botwave.webp" alt="" loading="lazy">
+    </div>
+  </div>
+  <div class="fr-lines">
+    <p class="fr-big">Futuready is not a lecture.<br>It is an interactive lab.</p>
+    <p>Students participate in realtime via their phones: five levels that spell R.E.A.D.Y., a live leaderboard, and an e-passport at the end.</p>
+  </div>
+  <div class="fr-partner">
+    <p class="fr-mono fr-label">Campus Organising Partner</p>
+    <div class="fr-logos"><img src="https://storage.googleapis.com/vision-hack2skill-production/innovator/USER02555644/1795396002184-paruluniversity.webp" alt="Parul University" width="152" height="42" loading="lazy"><img src="https://storage.googleapis.com/vision-hack2skill-production/innovator/USER02555644/1795396067486-puaisociety.webp" alt="The PU AI Society" width="139" height="38" loading="lazy"></div>
+  </div>
+</section>
+<h2 class="h2s-title">What you will learn</h2><!-- Futuready by H2S: What you will learn. HTML and CSS only. Made with home/initiative/build.py -->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@500..600&family=Syncopate:wght@700&family=Unbounded:wght@600..900&display=swap');
+
+.fr{--blue:#3463af;--marigold:#f2b230;--cream:#efe6d2;--paper:#fffcf5;--ink:#161a3a;--night:#1d1236;
+  container-type:inline-size;font:400 16px/1.5 'Geist',system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--ink);
+  -webkit-font-smoothing:antialiased;margin:0 0 8px;text-align:left}
+.fr *,.fr *::before,.fr *::after{box-sizing:border-box}
+.fr p,.fr h3,.fr h4,.fr ul,.fr ol,.fr figure,.fr blockquote{margin:0;padding:0}
+.fr ul,.fr ol{list-style:none}
+.fr img{display:block;max-width:none;height:auto}
+.fr a{color:inherit}
+.fr .fr-d{font-family:'Unbounded',system-ui,sans-serif;font-weight:700;letter-spacing:-.045em;line-height:1.02}
+.fr .fr-mono{font-family:'Geist Mono',ui-monospace,Menlo,monospace;font-weight:600;letter-spacing:.02em}
+.fr .fr-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 28px;border-radius:999px;
+  background:var(--ink);color:#fffcf5;font:600 16px/1 'Geist',system-ui,sans-serif;letter-spacing:-.01em;text-decoration:none;
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+.fr .fr-btn:hover{transform:translateY(-2px)}
+.fr .fr-btn:active{transform:scale(.96)}
+.fr .fr-btn--y{background:var(--marigold);color:var(--ink)}
+.fr .fr-cut{filter:drop-shadow(0 3px 2px rgba(10,12,30,.16)) drop-shadow(0 10px 14px rgba(10,12,30,.12))}
+.fr .fr-note{font:500 13px/1.5 'Geist Mono',ui-monospace,monospace;opacity:.8}
+
+.fr-levels .fr-intro{font:600 clamp(19px,4cqw,24px)/1.2 'Geist',sans-serif;letter-spacing:-.03em;max-width:30ch}
+.fr-levels .fr-grid{display:grid;gap:12px;margin-top:18px}
+.fr-levels .fr-lv{position:relative;overflow:hidden;min-height:168px;padding:20px 20px 18px;border-radius:20px;background:var(--wall);color:var(--fg)}
+.fr-levels .fr-lv b.fr-letter{position:absolute;right:-6px;bottom:-26px;font:900 150px/1 'Unbounded',sans-serif;letter-spacing:-.06em;color:var(--tint);pointer-events:none}
+.fr-levels .fr-lv .fr-tag{display:flex;align-items:center;gap:8px;font-size:12px}
+.fr-levels .fr-lv .fr-tag i{width:10px;height:10px;border-radius:50%;background:var(--fg);opacity:.7}
+.fr-levels .fr-lv .fr-say{position:relative;margin-top:12px;font:600 21px/1.15 'Geist',sans-serif;letter-spacing:-.03em}
+.fr-levels .fr-lv .fr-learn{position:relative;margin-top:10px;font:400 18px/1.2 'Geist',sans-serif;letter-spacing:-.02em}
+.fr-levels .fr-lv--y{--wall:#151a45;--fg:#efe6d2;--tint:#1f2660}
+.fr-levels .fr-lv--y .fr-you{position:relative;display:block;margin-top:4px;font:700 46px/1 'Unbounded',sans-serif;letter-spacing:-.05em;color:var(--marigold)}
+.fr-levels .fr-lv--y .fr-note{position:relative;margin-top:8px;color:var(--cream)}
+@container (min-width:560px){
+  .fr-levels .fr-grid{grid-template-columns:1fr 1fr}
+  .fr-levels .fr-lv--y{grid-column:1 / -1}
+}
+</style>
+<section class="fr fr-levels">
+  <p class="fr-intro">Futuready is an interactive bootcamp that teaches you exactly that, through five levels that spell R.E.A.D.Y.</p>
+  <ol class="fr-grid">
+    <li class="fr-lv" style="--wall:#f2a7b8;--tint:#e98ca2;--fg:#161a3a">
+      <b class="fr-letter" aria-hidden="true">R</b>
+      <p class="fr-mono fr-tag"><i></i>Level 1 • Requirements</p>
+      <p class="fr-say">AI does literally<br>what you say.</p>
+      <p class="fr-learn">Learn the art<br>of spec writing.</p>
+    </li>
+    <li class="fr-lv" style="--wall:#9ed6c0;--tint:#86c8ae;--fg:#161a3a">
+      <b class="fr-letter" aria-hidden="true">E</b>
+      <p class="fr-mono fr-tag"><i></i>Level 2 • Evaluate</p>
+      <p class="fr-say">If it looks right,<br>Is it really right?</p>
+      <p class="fr-learn">Learn to evaluate how<br>Anthropic engineers do.</p>
+    </li>
+    <li class="fr-lv" style="--wall:#f2b230;--tint:#e3a21c;--fg:#161a3a">
+      <b class="fr-letter" aria-hidden="true">A</b>
+      <p class="fr-mono fr-tag"><i></i>Level 3 • Architect</p>
+      <p class="fr-say">Anyone can<br>stack blocks.</p>
+      <p class="fr-learn">Learn to architect<br>scalable AI systems.</p>
+    </li>
+    <li class="fr-lv" style="--wall:#c3b5f2;--tint:#ae9deb;--fg:#161a3a">
+      <b class="fr-letter" aria-hidden="true">D</b>
+      <p class="fr-mono fr-tag"><i></i>Level 4 • Direct</p>
+      <p class="fr-say">Nobody codes<br>alone anymore.</p>
+      <p class="fr-learn">Learn to direct<br>a team of AI Agents</p>
+    </li>
+    <li class="fr-lv fr-lv--y">
+      <b class="fr-letter" aria-hidden="true">Y</b>
+      <p class="fr-mono fr-tag"><i></i>Level 5 • You</p>
+      <p class="fr-say">And the last level <span class="fr-you">is you</span></p>
+      <p class="fr-note">› the unique part that nobody can steal</p>
+    </li>
+  </ol>
+</section>
+<h2 class="h2s-title">Your e-passport</h2><!-- Futuready by H2S: Your e-passport. HTML and CSS only. Made with home/initiative/build.py -->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@500..600&family=Syncopate:wght@700&family=Unbounded:wght@600..900&display=swap');
+
+.fr{--blue:#3463af;--marigold:#f2b230;--cream:#efe6d2;--paper:#fffcf5;--ink:#161a3a;--night:#1d1236;
+  container-type:inline-size;font:400 16px/1.5 'Geist',system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--ink);
+  -webkit-font-smoothing:antialiased;margin:0 0 8px;text-align:left}
+.fr *,.fr *::before,.fr *::after{box-sizing:border-box}
+.fr p,.fr h3,.fr h4,.fr ul,.fr ol,.fr figure,.fr blockquote{margin:0;padding:0}
+.fr ul,.fr ol{list-style:none}
+.fr img{display:block;max-width:none;height:auto}
+.fr a{color:inherit}
+.fr .fr-d{font-family:'Unbounded',system-ui,sans-serif;font-weight:700;letter-spacing:-.045em;line-height:1.02}
+.fr .fr-mono{font-family:'Geist Mono',ui-monospace,Menlo,monospace;font-weight:600;letter-spacing:.02em}
+.fr .fr-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 28px;border-radius:999px;
+  background:var(--ink);color:#fffcf5;font:600 16px/1 'Geist',system-ui,sans-serif;letter-spacing:-.01em;text-decoration:none;
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+.fr .fr-btn:hover{transform:translateY(-2px)}
+.fr .fr-btn:active{transform:scale(.96)}
+.fr .fr-btn--y{background:var(--marigold);color:var(--ink)}
+.fr .fr-cut{filter:drop-shadow(0 3px 2px rgba(10,12,30,.16)) drop-shadow(0 10px 14px rgba(10,12,30,.12))}
+.fr .fr-note{font:500 13px/1.5 'Geist Mono',ui-monospace,monospace;opacity:.8}
+
+.fr-pass .fr-wrap{display:grid;gap:22px;align-items:center;padding:26px 22px;border-radius:22px;background:var(--cream);
+  background-image:repeating-linear-gradient(0deg,transparent 0 34px,rgba(52,99,175,.06) 34px 35px)}
+.fr-pass h3{font-size:clamp(21px,3.6cqw,28px);color:var(--ink)}
+.fr-pass h3 span{white-space:nowrap}
+.fr-pass .fr-copy p{margin-top:10px;max-width:40ch;opacity:.85}
+.fr-pass .fr-book{position:relative;width:100%;max-width:440px;aspect-ratio:1.42;justify-self:center;container-type:inline-size}
+.fr-pass .fr-pg{position:absolute;top:0;bottom:0;width:50%;padding:5.5cqw 4.5cqw;background:linear-gradient(135deg,#fff8ea,#f1e3c6);color:#22253a;overflow:hidden}
+.fr-pass .fr-pg--l{left:0;border-radius:2.6cqw 0 0 2.6cqw;box-shadow:inset -2.6cqw 0 3.8cqw rgba(0,0,0,.12),0 3.8cqw 9cqw rgba(10,12,30,.3)}
+.fr-pass .fr-pg--r{right:0;border-radius:0 2.6cqw 2.6cqw 0;box-shadow:inset 2.6cqw 0 3.8cqw rgba(0,0,0,.12),0 3.8cqw 9cqw rgba(10,12,30,.3)}
+.fr-pass .fr-pg small{display:block;font:700 1.7cqw/1 'Geist',sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#5a5f86}
+.fr-pass .fr-pg strong{display:block;margin-top:1.6cqw;font:800 4.6cqw/1 'Unbounded',sans-serif;letter-spacing:-.04em}
+.fr-pass .fr-pg--l span{display:block;margin-top:2.4cqw;font:400 2.3cqw/1.55 'Geist',sans-serif;color:#4a4f72}
+.fr-pass .fr-mrz{position:absolute;left:4cqw;right:2cqw;bottom:4cqw;font:400 1.55cqw/1.6 'Geist Mono',monospace;color:#6a6f95;white-space:nowrap;overflow:hidden}
+.fr-pass .fr-slots{position:absolute;inset:6% 7%;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,1fr);gap:4% 6%}
+.fr-pass .fr-slot{position:relative;aspect-ratio:1;height:100%;justify-self:center}
+.fr-pass .fr-slot svg{position:absolute;inset:-6%;width:112%;height:112%;opacity:.9;transform:rotate(var(--r));mix-blend-mode:multiply}
+.fr-pass .fr-slot--title{aspect-ratio:auto;justify-self:stretch;display:flex;flex-direction:column;justify-content:center}
+.fr-pass .fr-slot--title strong{margin:0;font-size:3.6cqw}
+.fr-pass .fr-slot--title span{margin-top:1cqw;font:400 2cqw/1.35 'Geist',sans-serif;color:#4a4f72}
+.fr-pass .fr-rubber{position:absolute;right:-2%;top:-26%;width:10%;transform:rotate(14deg)}
+@container (min-width:620px){
+  .fr-pass .fr-wrap{grid-template-columns:1fr 1.15fr;padding:30px}
+}
+</style>
+<section class="fr fr-pass">
+  <div class="fr-wrap">
+    <div class="fr-copy">
+      <h3 class="fr-d">On completing Futuready, you get an <span>e-passport.</span></h3>
+      <p>Five stamps, one for every level you clear. Sign it on your phone, save it to your photos, and show it off.</p>
+    </div>
+    <div class="fr-book" role="img" aria-label="An open Futuready passport with all five stamps">
+      <div class="fr-pg fr-pg--l"><small>Futuready Passport</small><strong>Builders Lab</strong>
+        <span>Holder: You<br>Issued by: Vivek Advani<br>Embassy: Hack2skill<br>Valid: from today, till life</span>
+        <div class="fr-mrz">P&lt;FUTUREADY&lt;&lt;BUILDERS&lt;LAB&lt;&lt;&lt;&lt;&lt;&lt;<br>R&lt;E&lt;A&lt;D&lt;Y&lt;&lt;HACK2SKILL&lt;&lt;&lt;&lt;&lt;2031</div></div>
+      <div class="fr-pg fr-pg--r"><div class="fr-slots"><div class="fr-slot fr-slot--title"><strong>Stamps</strong><span>One for every level you clear.</span></div><div class="fr-slot" style="--r:-12deg"><svg viewBox="0 0 200 200" aria-hidden="true"><defs><path id="fr-s-07122026-R" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0"/></defs><g fill="none" stroke="#C83A5B" stroke-width="5"><circle cx="100" cy="100" r="95"/><circle cx="100" cy="100" r="64" stroke-width="2.5"/></g><text font-family="Geist, sans-serif" font-weight="700" font-size="12.5" letter-spacing="3.2" fill="#C83A5B"><textPath href="#fr-s-07122026-R" textLength="482" lengthAdjust="spacing">FUTUREADY · BUILDERS LAB · HACK2SKILL · </textPath></text><text x="100" y="116" text-anchor="middle" font-family="Unbounded, sans-serif" font-weight="800" font-size="70" fill="#C83A5B">R</text><text x="100" y="148" text-anchor="middle" font-family="Geist, sans-serif" font-weight="700" font-size="10" letter-spacing="2" fill="#C83A5B">REQUIREMENTS</text></svg></div><div class="fr-slot" style="--r:8deg"><svg viewBox="0 0 200 200" aria-hidden="true"><defs><path id="fr-s-07122026-E" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0"/></defs><g fill="none" stroke="#0F8F6A" stroke-width="5"><circle cx="100" cy="100" r="95"/><circle cx="100" cy="100" r="64" stroke-width="2.5"/></g><text font-family="Geist, sans-serif" font-weight="700" font-size="12.5" letter-spacing="3.2" fill="#0F8F6A"><textPath href="#fr-s-07122026-E" textLength="482" lengthAdjust="spacing">FUTUREADY · BUILDERS LAB · HACK2SKILL · </textPath></text><text x="100" y="116" text-anchor="middle" font-family="Unbounded, sans-serif" font-weight="800" font-size="70" fill="#0F8F6A">E</text><text x="100" y="148" text-anchor="middle" font-family="Geist, sans-serif" font-weight="700" font-size="12.5" letter-spacing="2" fill="#0F8F6A">EVALUATE</text></svg></div><div class="fr-slot" style="--r:-5deg"><svg viewBox="0 0 200 200" aria-hidden="true"><defs><path id="fr-s-07122026-A" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0"/></defs><g fill="none" stroke="#1A6FC0" stroke-width="5"><circle cx="100" cy="100" r="95"/><circle cx="100" cy="100" r="64" stroke-width="2.5"/></g><text font-family="Geist, sans-serif" font-weight="700" font-size="12.5" letter-spacing="3.2" fill="#1A6FC0"><textPath href="#fr-s-07122026-A" textLength="482" lengthAdjust="spacing">FUTUREADY · BUILDERS LAB · HACK2SKILL · </textPath></text><text x="100" y="116" text-anchor="middle" font-family="Unbounded, sans-serif" font-weight="800" font-size="70" fill="#1A6FC0">A</text><text x="100" y="148" text-anchor="middle" font-family="Geist, sans-serif" font-weight="700" font-size="12.5" letter-spacing="2" fill="#1A6FC0">ARCHITECT</text></svg></div><div class="fr-slot" style="--r:11deg"><svg viewBox="0 0 200 200" aria-hidden="true"><defs><path id="fr-s-07122026-D" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0"/></defs><g fill="none" stroke="#D2600F" stroke-width="5"><circle cx="100" cy="100" r="95"/><circle cx="100" cy="100" r="64" stroke-width="2.5"/></g><text font-family="Geist, sans-serif" font-weight="700" font-size="12.5" letter-spacing="3.2" fill="#D2600F"><textPath href="#fr-s-07122026-D" textLength="482" lengthAdjust="spacing">FUTUREADY · BUILDERS LAB · HACK2SKILL · </textPath></text><text x="100" y="116" text-anchor="middle" font-family="Unbounded, sans-serif" font-weight="800" font-size="70" fill="#D2600F">D</text><text x="100" y="148" text-anchor="middle" font-family="Geist, sans-serif" font-weight="700" font-size="12.5" letter-spacing="2" fill="#D2600F">DIRECT</text></svg></div><div class="fr-slot" style="--r:-8deg"><svg viewBox="0 0 200 200" aria-hidden="true"><defs><path id="fr-s-07122026-Y" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0"/></defs><g fill="none" stroke="#B86E00" stroke-width="5"><circle cx="100" cy="100" r="95"/><circle cx="100" cy="100" r="64" stroke-width="2.5"/></g><text font-family="Geist, sans-serif" font-weight="700" font-size="12.5" letter-spacing="3.2" fill="#B86E00"><textPath href="#fr-s-07122026-Y" textLength="482" lengthAdjust="spacing">FUTUREADY · BUILDERS LAB · HACK2SKILL · </textPath></text><text x="100" y="116" text-anchor="middle" font-family="Unbounded, sans-serif" font-weight="800" font-size="70" fill="#B86E00">Y</text><text x="100" y="148" text-anchor="middle" font-family="Geist, sans-serif" font-weight="700" font-size="12.5" letter-spacing="2" fill="#B86E00">YOU</text></svg></div></div></div>
+      <img class="fr-rubber fr-cut" src="https://storage.googleapis.com/vision-hack2skill-production/innovator/USER02555644/1795396178702-stamp.webp" alt="" loading="lazy">
+    </div>
+  </div>
+</section>
+<h2 class="h2s-title">The day</h2><!-- Futuready by H2S: The day. HTML and CSS only. Made with home/initiative/build.py -->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@500..600&family=Syncopate:wght@700&family=Unbounded:wght@600..900&display=swap');
+
+.fr{--blue:#3463af;--marigold:#f2b230;--cream:#efe6d2;--paper:#fffcf5;--ink:#161a3a;--night:#1d1236;
+  container-type:inline-size;font:400 16px/1.5 'Geist',system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--ink);
+  -webkit-font-smoothing:antialiased;margin:0 0 8px;text-align:left}
+.fr *,.fr *::before,.fr *::after{box-sizing:border-box}
+.fr p,.fr h3,.fr h4,.fr ul,.fr ol,.fr figure,.fr blockquote{margin:0;padding:0}
+.fr ul,.fr ol{list-style:none}
+.fr img{display:block;max-width:none;height:auto}
+.fr a{color:inherit}
+.fr .fr-d{font-family:'Unbounded',system-ui,sans-serif;font-weight:700;letter-spacing:-.045em;line-height:1.02}
+.fr .fr-mono{font-family:'Geist Mono',ui-monospace,Menlo,monospace;font-weight:600;letter-spacing:.02em}
+.fr .fr-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 28px;border-radius:999px;
+  background:var(--ink);color:#fffcf5;font:600 16px/1 'Geist',system-ui,sans-serif;letter-spacing:-.01em;text-decoration:none;
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+.fr .fr-btn:hover{transform:translateY(-2px)}
+.fr .fr-btn:active{transform:scale(.96)}
+.fr .fr-btn--y{background:var(--marigold);color:var(--ink)}
+.fr .fr-cut{filter:drop-shadow(0 3px 2px rgba(10,12,30,.16)) drop-shadow(0 10px 14px rgba(10,12,30,.12))}
+.fr .fr-note{font:500 13px/1.5 'Geist Mono',ui-monospace,monospace;opacity:.8}
+
+.fr-day .fr-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.fr-day h3{font-size:clamp(22px,5cqw,30px)}
+.fr-day .fr-head p{margin-top:8px;opacity:.8;max-width:34ch}
+.fr-day .fr-steps{margin-top:20px;display:grid;gap:0;border-left:2px dashed rgba(22,26,58,.2);margin-left:8px}
+.fr-day .fr-step{position:relative;padding:0 0 20px 24px}
+.fr-day .fr-step::before{content:'';position:absolute;left:-8px;top:4px;width:14px;height:14px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 4px #fff}
+.fr-day .fr-step:last-child{padding-bottom:0}
+.fr-day .fr-step:last-child::before{background:var(--marigold)}
+.fr-day .fr-step small{font-size:12px;opacity:.65}
+.fr-day .fr-step strong{display:block;margin-top:2px;font:600 18px/1.25 'Geist',sans-serif;letter-spacing:-.02em}
+.fr-day .fr-step span{display:block;margin-top:2px;opacity:.8}
+</style>
+<section class="fr fr-day">
+  <div class="fr-head">
+    <div><h3 class="fr-d">How the 2 hours go</h3><p>Mon, 7 Dec 2026 · Parul University, Vadodara</p></div>
+  </div>
+  <ol class="fr-steps"><li class="fr-step"><small class="fr-mono">15 min</small><strong>Doors open</strong><span>Take a seat. Scan the QR code. Your name lights up the big screen.</span></li><li class="fr-step"><small class="fr-mono">15 min</small><strong>Warm up and the big question</strong><span>Fast games, honest polls, and the question of the day.</span></li><li class="fr-step"><small class="fr-mono">45 min</small><strong>Levels R, E, A, D</strong><span>The Literal Bot, the Bug Hunt, System Test and your AI team.</span></li><li class="fr-step"><small class="fr-mono">40 min</small><strong>Boss level Y</strong><span>Squad up, spec it, build it with AI, then break it.</span></li><li class="fr-step"><small class="fr-mono">10 min</small><strong>Your e-passport</strong><span>The last stamp, your signed passport, and what comes next.</span></li></ol>
+</section>
+<h2 class="h2s-title">Meet your trainer</h2><!-- Futuready by H2S: Meet your trainer. HTML and CSS only. Made with home/initiative/build.py -->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@500..600&family=Syncopate:wght@700&family=Unbounded:wght@600..900&display=swap');
+
+.fr{--blue:#3463af;--marigold:#f2b230;--cream:#efe6d2;--paper:#fffcf5;--ink:#161a3a;--night:#1d1236;
+  container-type:inline-size;font:400 16px/1.5 'Geist',system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--ink);
+  -webkit-font-smoothing:antialiased;margin:0 0 8px;text-align:left}
+.fr *,.fr *::before,.fr *::after{box-sizing:border-box}
+.fr p,.fr h3,.fr h4,.fr ul,.fr ol,.fr figure,.fr blockquote{margin:0;padding:0}
+.fr ul,.fr ol{list-style:none}
+.fr img{display:block;max-width:none;height:auto}
+.fr a{color:inherit}
+.fr .fr-d{font-family:'Unbounded',system-ui,sans-serif;font-weight:700;letter-spacing:-.045em;line-height:1.02}
+.fr .fr-mono{font-family:'Geist Mono',ui-monospace,Menlo,monospace;font-weight:600;letter-spacing:.02em}
+.fr .fr-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 28px;border-radius:999px;
+  background:var(--ink);color:#fffcf5;font:600 16px/1 'Geist',system-ui,sans-serif;letter-spacing:-.01em;text-decoration:none;
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+.fr .fr-btn:hover{transform:translateY(-2px)}
+.fr .fr-btn:active{transform:scale(.96)}
+.fr .fr-btn--y{background:var(--marigold);color:var(--ink)}
+.fr .fr-cut{filter:drop-shadow(0 3px 2px rgba(10,12,30,.16)) drop-shadow(0 10px 14px rgba(10,12,30,.12))}
+.fr .fr-note{font:500 13px/1.5 'Geist Mono',ui-monospace,monospace;opacity:.8}
+
+.fr-trainer .fr-card{position:relative;overflow:hidden;border-radius:22px;background:var(--night);color:var(--cream);padding:26px 22px 0;min-height:520px}
+.fr-trainer .fr-card::before{content:'';position:absolute;inset:0;opacity:.5;background:
+  radial-gradient(circle at 70% 60%,transparent 0 120px,rgba(179,157,255,.18) 121px 122px,transparent 123px 170px,rgba(179,157,255,.14) 171px 172px,transparent 173px)}
+.fr-trainer .fr-eyebrow{position:relative;font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.85}
+.fr-trainer h3{position:relative;margin-top:8px;font-size:clamp(30px,7cqw,44px);color:var(--marigold)}
+.fr-trainer .fr-links{position:relative;display:flex;gap:18px;margin-top:10px}
+.fr-trainer .fr-links a{display:inline-flex;align-items:center;min-height:40px;font:600 13px/1 'Geist Mono',monospace;text-underline-offset:4px}
+.fr-trainer .fr-floor{position:absolute;left:0;right:0;bottom:0;height:70px;background:#2c2058}
+.fr-trainer .fr-photo{position:absolute;left:50%;bottom:22px;height:330px;width:auto;transform:translateX(-50%)}
+.fr-trainer .fr-tapes{position:absolute;left:0;right:0;bottom:60px;top:190px}
+.fr-trainer .fr-tape{position:absolute;max-width:150px;padding:6px 10px 5px;border-radius:2px;font:700 11px/1.3 'Geist Mono',monospace;letter-spacing:.09em;
+  text-transform:uppercase;color:#fffcf5;box-shadow:0 6px 14px rgba(0,0,0,.3);text-shadow:0 -1px 0 rgba(0,0,0,.35)}
+.fr-trainer .fr-tape--light{color:#161a3a;text-shadow:0 1px 0 rgba(255,255,255,.4)}
+@container (min-width:620px){
+  .fr-trainer .fr-card{min-height:470px;padding:34px}
+  .fr-trainer .fr-photo{left:66%;height:380px}
+  .fr-trainer .fr-tapes{left:30%;top:150px}
+  .fr-trainer .fr-tape{max-width:220px}
+}
+</style>
+<section class="fr fr-trainer">
+  <div class="fr-card">
+    <p class="fr-mono fr-eyebrow">Meet your trainer</p>
+    <h3 class="fr-d">Vivek Advani</h3>
+    <p class="fr-links"><a href="https://www.linkedin.com/in/vivekadvani" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a><a href="https://instagram.com/vivekadvani" target="_blank" rel="noopener noreferrer">Instagram ↗</a></p>
+    <div class="fr-floor" aria-hidden="true"></div>
+    <img class="fr-photo fr-cut" src="https://storage.googleapis.com/vision-hack2skill-production/innovator/USER02555644/1795395966092-vivekdance.webp" alt="Vivek Advani, your trainer" loading="lazy">
+    <div class="fr-tapes"><span class="fr-tape fr-tape--light" style="left:8%;top:0%;background:#fffcf5;transform:rotate(-3deg)">DevRel · Hack2skill</span><span class="fr-tape" style="right:8%;top:12%;background:#c8312f;transform:rotate(2.5deg)">Architect</span><span class="fr-tape" style="left:6%;top:26%;background:#1a6fc0;transform:rotate(-2deg)">Builds AI products</span><span class="fr-tape fr-tape--light" style="right:6%;top:40%;background:#f2b230;transform:rotate(3deg)">Loves Math</span><span class="fr-tape fr-tape--light" style="left:10%;top:54%;background:#fffcf5;transform:rotate(-2.5deg)">Dances Salsa</span><span class="fr-tape" style="right:10%;top:68%;background:#c8312f;transform:rotate(2deg)">Plays music</span><span class="fr-tape" style="left:8%;top:82%;background:#1a6fc0;transform:rotate(-1.5deg)">Cares about Humanity</span></div>
+  </div>
+</section>
+<h2 class="h2s-title">What attendees say</h2><!-- Futuready by H2S: What Futuready attendees say. HTML and CSS only. Made with home/initiative/build.py -->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@500..600&family=Syncopate:wght@700&family=Unbounded:wght@600..900&display=swap');
+
+.fr{--blue:#3463af;--marigold:#f2b230;--cream:#efe6d2;--paper:#fffcf5;--ink:#161a3a;--night:#1d1236;
+  container-type:inline-size;font:400 16px/1.5 'Geist',system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--ink);
+  -webkit-font-smoothing:antialiased;margin:0 0 8px;text-align:left}
+.fr *,.fr *::before,.fr *::after{box-sizing:border-box}
+.fr p,.fr h3,.fr h4,.fr ul,.fr ol,.fr figure,.fr blockquote{margin:0;padding:0}
+.fr ul,.fr ol{list-style:none}
+.fr img{display:block;max-width:none;height:auto}
+.fr a{color:inherit}
+.fr .fr-d{font-family:'Unbounded',system-ui,sans-serif;font-weight:700;letter-spacing:-.045em;line-height:1.02}
+.fr .fr-mono{font-family:'Geist Mono',ui-monospace,Menlo,monospace;font-weight:600;letter-spacing:.02em}
+.fr .fr-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 28px;border-radius:999px;
+  background:var(--ink);color:#fffcf5;font:600 16px/1 'Geist',system-ui,sans-serif;letter-spacing:-.01em;text-decoration:none;
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+.fr .fr-btn:hover{transform:translateY(-2px)}
+.fr .fr-btn:active{transform:scale(.96)}
+.fr .fr-btn--y{background:var(--marigold);color:var(--ink)}
+.fr .fr-cut{filter:drop-shadow(0 3px 2px rgba(10,12,30,.16)) drop-shadow(0 10px 14px rgba(10,12,30,.12))}
+.fr .fr-note{font:500 13px/1.5 'Geist Mono',ui-monospace,monospace;opacity:.8}
+
+.fr-voices .fr-wall{display:grid;gap:22px;padding:30px 18px 22px;border-radius:22px;background:var(--cream)}
+.fr-voices .fr-paper{position:relative;padding:18px 18px 15px;border-radius:4px;background:var(--paper);box-shadow:0 1px 0 rgba(0,0,0,.05),0 12px 26px rgba(10,12,30,.14);transform:rotate(var(--r))}
+.fr-voices .fr-paper::before{content:'';position:absolute;top:-9px;left:50%;width:64px;height:18px;transform:translateX(-50%) rotate(-3deg);background:rgba(242,178,48,.6)}
+.fr-voices blockquote{font:500 17px/1.42 'Geist',sans-serif;letter-spacing:-.012em;text-wrap:pretty}
+.fr-voices figcaption{margin-top:10px;font:650 14px/1.3 'Geist',sans-serif}
+.fr-voices figcaption span{display:block;margin-top:1px;font:400 12px/1.3 'Geist Mono',monospace;opacity:.7}
+@container (min-width:620px){ .fr-voices .fr-wall{grid-template-columns:repeat(3,1fr);padding:34px 26px 26px} }
+</style>
+<section class="fr fr-voices"><div class="fr-wall"><figure class="fr-paper" style="--r:-2.5deg"><blockquote>“One of those rare sessions where you don’t feel bored even for a second!”</blockquote><figcaption>Swapnaja Waghapure<span>MCA student</span></figcaption></figure><figure class="fr-paper" style="--r:2deg"><blockquote>“One more step towards becoming a builder rather than just a thinker.”</blockquote><figcaption>Durga Khadbade<span>Engineering student, TAE Pune</span></figcaption></figure><figure class="fr-paper" style="--r:-1.5deg"><blockquote>“Live interactive activities, multiple levels to progress through, and a team-based prompting challenge.”</blockquote><figcaption>Aditi Guddeti<span>IT engineering, GDG TAE</span></figcaption></figure></div></section>
+<h2 class="h2s-title">FAQs</h2><!-- Futuready by H2S: FAQs. HTML and CSS only. Made with home/initiative/build.py -->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@500..600&family=Syncopate:wght@700&family=Unbounded:wght@600..900&display=swap');
+
+.fr{--blue:#3463af;--marigold:#f2b230;--cream:#efe6d2;--paper:#fffcf5;--ink:#161a3a;--night:#1d1236;
+  container-type:inline-size;font:400 16px/1.5 'Geist',system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--ink);
+  -webkit-font-smoothing:antialiased;margin:0 0 8px;text-align:left}
+.fr *,.fr *::before,.fr *::after{box-sizing:border-box}
+.fr p,.fr h3,.fr h4,.fr ul,.fr ol,.fr figure,.fr blockquote{margin:0;padding:0}
+.fr ul,.fr ol{list-style:none}
+.fr img{display:block;max-width:none;height:auto}
+.fr a{color:inherit}
+.fr .fr-d{font-family:'Unbounded',system-ui,sans-serif;font-weight:700;letter-spacing:-.045em;line-height:1.02}
+.fr .fr-mono{font-family:'Geist Mono',ui-monospace,Menlo,monospace;font-weight:600;letter-spacing:.02em}
+.fr .fr-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 28px;border-radius:999px;
+  background:var(--ink);color:#fffcf5;font:600 16px/1 'Geist',system-ui,sans-serif;letter-spacing:-.01em;text-decoration:none;
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+.fr .fr-btn:hover{transform:translateY(-2px)}
+.fr .fr-btn:active{transform:scale(.96)}
+.fr .fr-btn--y{background:var(--marigold);color:var(--ink)}
+.fr .fr-cut{filter:drop-shadow(0 3px 2px rgba(10,12,30,.16)) drop-shadow(0 10px 14px rgba(10,12,30,.12))}
+.fr .fr-note{font:500 13px/1.5 'Geist Mono',ui-monospace,monospace;opacity:.8}
+
+.fr-faq details{border-bottom:1px solid rgba(22,26,58,.12)}
+.fr-faq summary{display:flex;justify-content:space-between;align-items:center;gap:16px;min-height:56px;cursor:pointer;list-style:none;
+  font:600 17px/1.3 'Geist',sans-serif;letter-spacing:-.02em}
+.fr-faq summary::-webkit-details-marker{display:none}
+.fr-faq summary::after{content:'+';flex:none;width:30px;height:30px;display:grid;place-items:center;border-radius:50%;background:var(--cream);font:500 20px/1 'Geist',sans-serif;transition:transform .3s}
+.fr-faq details[open] summary::after{transform:rotate(45deg)}
+.fr-faq details p{padding:0 0 18px;max-width:60ch;opacity:.85}
+.fr-faq .fr-last{position:relative;overflow:hidden;margin-top:26px;padding:26px 22px 0;border-radius:22px;background:var(--blue);color:var(--cream);min-height:330px}
+.fr-faq .fr-last h3{font-size:clamp(24px,5.4cqw,34px);color:var(--cream);max-width:14ch}
+.fr-faq .fr-last h3 em{font-style:normal;color:var(--marigold)}
+.fr-faq .fr-last .fr-btn{margin-top:18px}
+.fr-faq .fr-last .fr-note{margin-top:12px;color:var(--cream)}
+.fr-faq .fr-last .fr-note a{text-underline-offset:3px}
+.fr-faq .fr-floor{position:absolute;left:0;right:0;bottom:0;height:60px;background:var(--cream)}
+.fr-faq .fr-last img{position:absolute;bottom:18px}
+.fr-faq .fr-wave{right:96px;height:170px}
+.fr-faq .fr-bot{right:22px;height:120px}
+@container (max-width:460px){ .fr-faq .fr-last{min-height:420px} .fr-faq .fr-wave{right:auto;left:30%} .fr-faq .fr-bot{right:auto;left:60%} }
+</style>
+<section class="fr fr-faq">
+  <details><summary>Who can attend?</summary><p>College students from any year and any college in and around Vadodara, from first-year beginners to final-year students, especially CSE, IT, AI and data science, and allied branches. Seniors get harder challenges in the same room.</p></details><details><summary>Do I need to pay?</summary><p>No. Futuready is free for students.</p></details><details><summary>Where exactly is it, and at what time?</summary><p>At Parul University, Vadodara. We will email you the hall and the time before the day, and they will be on this page too.</p></details><details><summary>Do I need a laptop?</summary><p>No. Your phone is enough for the whole session. For the build, one laptop per squad of four helps, but it is not a must.</p></details><details><summary>Do I need to know AI already?</summary><p>No. If you have used any AI chatbot even once, you are ready. If you have used none, you will leave having built something with one.</p></details><details><summary>What should I bring?</summary><p>A charged phone and your curiosity. A laptop if you have one.</p></details><details><summary>Why register?</summary><p>It helps us plan seats and saves you time at the door. Registering is not a guarantee of a seat; entry is confirmed on the day.</p></details><details><summary>How do I bring Futuready to my college?</summary><p>Ask your Training and Placement cell or your tech club to write to support@hack2skill.com.</p></details>
+  <div class="fr-last">
+    <h3 class="fr-d">See you at <em>Futuready.</em></h3>
+    <a class="fr-btn fr-btn--y" href="https://hack2skill.com/event/futuready-vadodara-07122026/registration">Register free</a>
+    <p class="fr-note">Free · Mon, 7 Dec 2026 · Parul University, Vadodara</p>
+    <div class="fr-floor" aria-hidden="true"></div>
+    <img class="fr-cut fr-wave" src="https://storage.googleapis.com/vision-hack2skill-production/innovator/USER02555644/1795396124189-boywave.webp" alt="" loading="lazy">
+    <img class="fr-cut fr-bot" src="https://storage.googleapis.com/vision-hack2skill-production/innovator/USER02555644/1795396143271-botwave.webp" alt="" loading="lazy">
+  </div>
+</section>
+</div></body></html>

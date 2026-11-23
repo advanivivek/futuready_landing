@@ -1,0 +1,62 @@
+<!-- Futuready by H2S: Your e-passport. HTML and CSS only. Made with home/initiative/build.py -->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@500..600&family=Syncopate:wght@700&family=Unbounded:wght@600..900&display=swap');
+
+.fr{--blue:#3463af;--marigold:#f2b230;--cream:#efe6d2;--paper:#fffcf5;--ink:#161a3a;--night:#1d1236;
+  container-type:inline-size;font:400 16px/1.5 'Geist',system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--ink);
+  -webkit-font-smoothing:antialiased;margin:0 0 8px;text-align:left}
+.fr *,.fr *::before,.fr *::after{box-sizing:border-box}
+.fr p,.fr h3,.fr h4,.fr ul,.fr ol,.fr figure,.fr blockquote{margin:0;padding:0}
+.fr ul,.fr ol{list-style:none}
+.fr img{display:block;max-width:none;height:auto}
+.fr a{color:inherit}
+.fr .fr-d{font-family:'Unbounded',system-ui,sans-serif;font-weight:700;letter-spacing:-.045em;line-height:1.02}
+.fr .fr-mono{font-family:'Geist Mono',ui-monospace,Menlo,monospace;font-weight:600;letter-spacing:.02em}
+.fr .fr-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 28px;border-radius:999px;
+  background:var(--ink);color:#fffcf5;font:600 16px/1 'Geist',system-ui,sans-serif;letter-spacing:-.01em;text-decoration:none;
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+.fr .fr-btn:hover{transform:translateY(-2px)}
+.fr .fr-btn:active{transform:scale(.96)}
+.fr .fr-btn--y{background:var(--marigold);color:var(--ink)}
+.fr .fr-cut{filter:drop-shadow(0 3px 2px rgba(10,12,30,.16)) drop-shadow(0 10px 14px rgba(10,12,30,.12))}
+.fr .fr-note{font:500 13px/1.5 'Geist Mono',ui-monospace,monospace;opacity:.8}
+
+.fr-pass .fr-wrap{display:grid;gap:22px;align-items:center;padding:26px 22px;border-radius:22px;background:var(--cream);
+  background-image:repeating-linear-gradient(0deg,transparent 0 34px,rgba(52,99,175,.06) 34px 35px)}
+.fr-pass h3{font-size:clamp(21px,3.6cqw,28px);color:var(--ink)}
+.fr-pass h3 span{white-space:nowrap}
+.fr-pass .fr-copy p{margin-top:10px;max-width:40ch;opacity:.85}
+.fr-pass .fr-book{position:relative;width:100%;max-width:440px;aspect-ratio:1.42;justify-self:center;container-type:inline-size}
+.fr-pass .fr-pg{position:absolute;top:0;bottom:0;width:50%;padding:5.5cqw 4.5cqw;background:linear-gradient(135deg,#fff8ea,#f1e3c6);color:#22253a;overflow:hidden}
+.fr-pass .fr-pg--l{left:0;border-radius:2.6cqw 0 0 2.6cqw;box-shadow:inset -2.6cqw 0 3.8cqw rgba(0,0,0,.12),0 3.8cqw 9cqw rgba(10,12,30,.3)}
+.fr-pass .fr-pg--r{right:0;border-radius:0 2.6cqw 2.6cqw 0;box-shadow:inset 2.6cqw 0 3.8cqw rgba(0,0,0,.12),0 3.8cqw 9cqw rgba(10,12,30,.3)}
+.fr-pass .fr-pg small{display:block;font:700 1.7cqw/1 'Geist',sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#5a5f86}
+.fr-pass .fr-pg strong{display:block;margin-top:1.6cqw;font:800 4.6cqw/1 'Unbounded',sans-serif;letter-spacing:-.04em}
+.fr-pass .fr-pg--l span{display:block;margin-top:2.4cqw;font:400 2.3cqw/1.55 'Geist',sans-serif;color:#4a4f72}
+.fr-pass .fr-mrz{position:absolute;left:4cqw;right:2cqw;bottom:4cqw;font:400 1.55cqw/1.6 'Geist Mono',monospace;color:#6a6f95;white-space:nowrap;overflow:hidden}
+.fr-pass .fr-slots{position:absolute;inset:6% 7%;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,1fr);gap:4% 6%}
+.fr-pass .fr-slot{position:relative;aspect-ratio:1;height:100%;justify-self:center}
+.fr-pass .fr-slot svg{position:absolute;inset:-6%;width:112%;height:112%;opacity:.9;transform:rotate(var(--r));mix-blend-mode:multiply}
+.fr-pass .fr-slot--title{aspect-ratio:auto;justify-self:stretch;display:flex;flex-direction:column;justify-content:center}
+.fr-pass .fr-slot--title strong{margin:0;font-size:3.6cqw}
+.fr-pass .fr-slot--title span{margin-top:1cqw;font:400 2cqw/1.35 'Geist',sans-serif;color:#4a4f72}
+.fr-pass .fr-rubber{position:absolute;right:-2%;top:-26%;width:10%;transform:rotate(14deg)}
+@container (min-width:620px){
+  .fr-pass .fr-wrap{grid-template-columns:1fr 1.15fr;padding:30px}
+}
+</style>
+<section class="fr fr-pass">
+  <div class="fr-wrap">
+    <div class="fr-copy">
+      <h3 class="fr-d">On completing Futuready, you get an <span>e-passport.</span></h3>
+      <p>Five stamps, one for every level you clear. Sign it on your phone, save it to your photos, and show it off.</p>
+    </div>
+    <div class="fr-book" role="img" aria-label="An open Futuready passport with all five stamps">
+      <div class="fr-pg fr-pg--l"><small>Futuready Passport</small><strong>Builders Lab</strong>
+        <span>Holder: You<br>Issued by: Vivek Advani<br>Embassy: Hack2skill<br>Valid: from today, till life</span>
+        <div class="fr-mrz">P&lt;FUTUREADY&lt;&lt;BUILDERS&lt;LAB&lt;&lt;&lt;&lt;&lt;&lt;<br>R&lt;E&lt;A&lt;D&lt;Y&lt;&lt;HACK2SKILL&lt;&lt;&lt;&lt;&lt;2031</div></div>
+      <div class="fr-pg fr-pg--r"><div class="fr-slots"><div class="fr-slot fr-slot--title"><strong>Stamps</strong><span>One for every level you clear.</span></div><div class="fr-slot" style="--r:-12deg"><svg viewBox="0 0 200 200" aria-hidden="true"><defs><path id="fr-s-07122026-R" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0"/></defs><g fill="none" stroke="#C83A5B" stroke-width="5"><circle cx="100" cy="100" r="95"/><circle cx="100" cy="100" r="64" stroke-width="2.5"/></g><text font-family="Geist, sans-serif" font-weight="700" font-size="12.5" letter-spacing="3.2" fill="#C83A5B"><textPath href="#fr-s-07122026-R" textLength="482" lengthAdjust="spacing">FUTUREADY · BUILDERS LAB · HACK2SKILL · </textPath></text><text x="100" y="116" text-anchor="middle" font-family="Unbounded, sans-serif" font-weight="800" font-size="70" fill="#C83A5B">R</text><text x="100" y="148" text-anchor="middle" font-family="Geist, sans-serif" font-weight="700" font-size="10" letter-spacing="2" fill="#C83A5B">REQUIREMENTS</text></svg></div><div class="fr-slot" style="--r:8deg"><svg viewBox="0 0 200 200" aria-hidden="true"><defs><path id="fr-s-07122026-E" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0"/></defs><g fill="none" stroke="#0F8F6A" stroke-width="5"><circle cx="100" cy="100" r="95"/><circle cx="100" cy="100" r="64" stroke-width="2.5"/></g><text font-family="Geist, sans-serif" font-weight="700" font-size="12.5" letter-spacing="3.2" fill="#0F8F6A"><textPath href="#fr-s-07122026-E" textLength="482" lengthAdjust="spacing">FUTUREADY · BUILDERS LAB · HACK2SKILL · </textPath></text><text x="100" y="116" text-anchor="middle" font-family="Unbounded, sans-serif" font-weight="800" font-size="70" fill="#0F8F6A">E</text><text x="100" y="148" text-anchor="middle" font-family="Geist, sans-serif" font-weight="700" font-size="12.5" letter-spacing="2" fill="#0F8F6A">EVALUATE</text></svg></div><div class="fr-slot" style="--r:-5deg"><svg viewBox="0 0 200 200" aria-hidden="true"><defs><path id="fr-s-07122026-A" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0"/></defs><g fill="none" stroke="#1A6FC0" stroke-width="5"><circle cx="100" cy="100" r="95"/><circle cx="100" cy="100" r="64" stroke-width="2.5"/></g><text font-family="Geist, sans-serif" font-weight="700" font-size="12.5" letter-spacing="3.2" fill="#1A6FC0"><textPath href="#fr-s-07122026-A" textLength="482" lengthAdjust="spacing">FUTUREADY · BUILDERS LAB · HACK2SKILL · </textPath></text><text x="100" y="116" text-anchor="middle" font-family="Unbounded, sans-serif" font-weight="800" font-size="70" fill="#1A6FC0">A</text><text x="100" y="148" text-anchor="middle" font-family="Geist, sans-serif" font-weight="700" font-size="12.5" letter-spacing="2" fill="#1A6FC0">ARCHITECT</text></svg></div><div class="fr-slot" style="--r:11deg"><svg viewBox="0 0 200 200" aria-hidden="true"><defs><path id="fr-s-07122026-D" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0"/></defs><g fill="none" stroke="#D2600F" stroke-width="5"><circle cx="100" cy="100" r="95"/><circle cx="100" cy="100" r="64" stroke-width="2.5"/></g><text font-family="Geist, sans-serif" font-weight="700" font-size="12.5" letter-spacing="3.2" fill="#D2600F"><textPath href="#fr-s-07122026-D" textLength="482" lengthAdjust="spacing">FUTUREADY · BUILDERS LAB · HACK2SKILL · </textPath></text><text x="100" y="116" text-anchor="middle" font-family="Unbounded, sans-serif" font-weight="800" font-size="70" fill="#D2600F">D</text><text x="100" y="148" text-anchor="middle" font-family="Geist, sans-serif" font-weight="700" font-size="12.5" letter-spacing="2" fill="#D2600F">DIRECT</text></svg></div><div class="fr-slot" style="--r:-8deg"><svg viewBox="0 0 200 200" aria-hidden="true"><defs><path id="fr-s-07122026-Y" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0"/></defs><g fill="none" stroke="#B86E00" stroke-width="5"><circle cx="100" cy="100" r="95"/><circle cx="100" cy="100" r="64" stroke-width="2.5"/></g><text font-family="Geist, sans-serif" font-weight="700" font-size="12.5" letter-spacing="3.2" fill="#B86E00"><textPath href="#fr-s-07122026-Y" textLength="482" lengthAdjust="spacing">FUTUREADY · BUILDERS LAB · HACK2SKILL · </textPath></text><text x="100" y="116" text-anchor="middle" font-family="Unbounded, sans-serif" font-weight="800" font-size="70" fill="#B86E00">Y</text><text x="100" y="148" text-anchor="middle" font-family="Geist, sans-serif" font-weight="700" font-size="12.5" letter-spacing="2" fill="#B86E00">YOU</text></svg></div></div></div>
+      <img class="fr-rubber fr-cut" src="https://storage.googleapis.com/vision-hack2skill-production/innovator/USER02555644/1795396178702-stamp.webp" alt="" loading="lazy">
+    </div>
+  </div>
+</section>

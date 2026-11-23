@@ -1,0 +1,74 @@
+<!-- Futuready by H2S: What you will learn. HTML and CSS only. Made with home/initiative/build.py -->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@500..600&family=Syncopate:wght@700&family=Unbounded:wght@600..900&display=swap');
+
+.fr{--blue:#3463af;--marigold:#f2b230;--cream:#efe6d2;--paper:#fffcf5;--ink:#161a3a;--night:#1d1236;
+  container-type:inline-size;font:400 16px/1.5 'Geist',system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--ink);
+  -webkit-font-smoothing:antialiased;margin:0 0 8px;text-align:left}
+.fr *,.fr *::before,.fr *::after{box-sizing:border-box}
+.fr p,.fr h3,.fr h4,.fr ul,.fr ol,.fr figure,.fr blockquote{margin:0;padding:0}
+.fr ul,.fr ol{list-style:none}
+.fr img{display:block;max-width:none;height:auto}
+.fr a{color:inherit}
+.fr .fr-d{font-family:'Unbounded',system-ui,sans-serif;font-weight:700;letter-spacing:-.045em;line-height:1.02}
+.fr .fr-mono{font-family:'Geist Mono',ui-monospace,Menlo,monospace;font-weight:600;letter-spacing:.02em}
+.fr .fr-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 28px;border-radius:999px;
+  background:var(--ink);color:#fffcf5;font:600 16px/1 'Geist',system-ui,sans-serif;letter-spacing:-.01em;text-decoration:none;
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+.fr .fr-btn:hover{transform:translateY(-2px)}
+.fr .fr-btn:active{transform:scale(.96)}
+.fr .fr-btn--y{background:var(--marigold);color:var(--ink)}
+.fr .fr-cut{filter:drop-shadow(0 3px 2px rgba(10,12,30,.16)) drop-shadow(0 10px 14px rgba(10,12,30,.12))}
+.fr .fr-note{font:500 13px/1.5 'Geist Mono',ui-monospace,monospace;opacity:.8}
+
+.fr-levels .fr-intro{font:600 clamp(19px,4cqw,24px)/1.2 'Geist',sans-serif;letter-spacing:-.03em;max-width:30ch}
+.fr-levels .fr-grid{display:grid;gap:12px;margin-top:18px}
+.fr-levels .fr-lv{position:relative;overflow:hidden;min-height:168px;padding:20px 20px 18px;border-radius:20px;background:var(--wall);color:var(--fg)}
+.fr-levels .fr-lv b.fr-letter{position:absolute;right:-6px;bottom:-26px;font:900 150px/1 'Unbounded',sans-serif;letter-spacing:-.06em;color:var(--tint);pointer-events:none}
+.fr-levels .fr-lv .fr-tag{display:flex;align-items:center;gap:8px;font-size:12px}
+.fr-levels .fr-lv .fr-tag i{width:10px;height:10px;border-radius:50%;background:var(--fg);opacity:.7}
+.fr-levels .fr-lv .fr-say{position:relative;margin-top:12px;font:600 21px/1.15 'Geist',sans-serif;letter-spacing:-.03em}
+.fr-levels .fr-lv .fr-learn{position:relative;margin-top:10px;font:400 18px/1.2 'Geist',sans-serif;letter-spacing:-.02em}
+.fr-levels .fr-lv--y{--wall:#151a45;--fg:#efe6d2;--tint:#1f2660}
+.fr-levels .fr-lv--y .fr-you{position:relative;display:block;margin-top:4px;font:700 46px/1 'Unbounded',sans-serif;letter-spacing:-.05em;color:var(--marigold)}
+.fr-levels .fr-lv--y .fr-note{position:relative;margin-top:8px;color:var(--cream)}
+@container (min-width:560px){
+  .fr-levels .fr-grid{grid-template-columns:1fr 1fr}
+  .fr-levels .fr-lv--y{grid-column:1 / -1}
+}
+</style>
+<section class="fr fr-levels">
+  <p class="fr-intro">Futuready is an interactive bootcamp that teaches you exactly that, through five levels that spell R.E.A.D.Y.</p>
+  <ol class="fr-grid">
+    <li class="fr-lv" style="--wall:#f2a7b8;--tint:#e98ca2;--fg:#161a3a">
+      <b class="fr-letter" aria-hidden="true">R</b>
+      <p class="fr-mono fr-tag"><i></i>Level 1 • Requirements</p>
+      <p class="fr-say">AI does literally<br>what you say.</p>
+      <p class="fr-learn">Learn the art<br>of spec writing.</p>
+    </li>
+    <li class="fr-lv" style="--wall:#9ed6c0;--tint:#86c8ae;--fg:#161a3a">
+      <b class="fr-letter" aria-hidden="true">E</b>
+      <p class="fr-mono fr-tag"><i></i>Level 2 • Evaluate</p>
+      <p class="fr-say">If it looks right,<br>Is it really right?</p>
+      <p class="fr-learn">Learn to evaluate how<br>Anthropic engineers do.</p>
+    </li>
+    <li class="fr-lv" style="--wall:#f2b230;--tint:#e3a21c;--fg:#161a3a">
+      <b class="fr-letter" aria-hidden="true">A</b>
+      <p class="fr-mono fr-tag"><i></i>Level 3 • Architect</p>
+      <p class="fr-say">Anyone can<br>stack blocks.</p>
+      <p class="fr-learn">Learn to architect<br>scalable AI systems.</p>
+    </li>
+    <li class="fr-lv" style="--wall:#c3b5f2;--tint:#ae9deb;--fg:#161a3a">
+      <b class="fr-letter" aria-hidden="true">D</b>
+      <p class="fr-mono fr-tag"><i></i>Level 4 • Direct</p>
+      <p class="fr-say">Nobody codes<br>alone anymore.</p>
+      <p class="fr-learn">Learn to direct<br>a team of AI Agents</p>
+    </li>
+    <li class="fr-lv fr-lv--y">
+      <b class="fr-letter" aria-hidden="true">Y</b>
+      <p class="fr-mono fr-tag"><i></i>Level 5 • You</p>
+      <p class="fr-say">And the last level <span class="fr-you">is you</span></p>
+      <p class="fr-note">› the unique part that nobody can steal</p>
+    </li>
+  </ol>
+</section>

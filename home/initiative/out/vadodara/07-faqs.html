@@ -1,0 +1,53 @@
+<!-- Futuready by H2S: FAQs. HTML and CSS only. Made with home/initiative/build.py -->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@500..600&family=Syncopate:wght@700&family=Unbounded:wght@600..900&display=swap');
+
+.fr{--blue:#3463af;--marigold:#f2b230;--cream:#efe6d2;--paper:#fffcf5;--ink:#161a3a;--night:#1d1236;
+  container-type:inline-size;font:400 16px/1.5 'Geist',system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--ink);
+  -webkit-font-smoothing:antialiased;margin:0 0 8px;text-align:left}
+.fr *,.fr *::before,.fr *::after{box-sizing:border-box}
+.fr p,.fr h3,.fr h4,.fr ul,.fr ol,.fr figure,.fr blockquote{margin:0;padding:0}
+.fr ul,.fr ol{list-style:none}
+.fr img{display:block;max-width:none;height:auto}
+.fr a{color:inherit}
+.fr .fr-d{font-family:'Unbounded',system-ui,sans-serif;font-weight:700;letter-spacing:-.045em;line-height:1.02}
+.fr .fr-mono{font-family:'Geist Mono',ui-monospace,Menlo,monospace;font-weight:600;letter-spacing:.02em}
+.fr .fr-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 28px;border-radius:999px;
+  background:var(--ink);color:#fffcf5;font:600 16px/1 'Geist',system-ui,sans-serif;letter-spacing:-.01em;text-decoration:none;
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+.fr .fr-btn:hover{transform:translateY(-2px)}
+.fr .fr-btn:active{transform:scale(.96)}
+.fr .fr-btn--y{background:var(--marigold);color:var(--ink)}
+.fr .fr-cut{filter:drop-shadow(0 3px 2px rgba(10,12,30,.16)) drop-shadow(0 10px 14px rgba(10,12,30,.12))}
+.fr .fr-note{font:500 13px/1.5 'Geist Mono',ui-monospace,monospace;opacity:.8}
+
+.fr-faq details{border-bottom:1px solid rgba(22,26,58,.12)}
+.fr-faq summary{display:flex;justify-content:space-between;align-items:center;gap:16px;min-height:56px;cursor:pointer;list-style:none;
+  font:600 17px/1.3 'Geist',sans-serif;letter-spacing:-.02em}
+.fr-faq summary::-webkit-details-marker{display:none}
+.fr-faq summary::after{content:'+';flex:none;width:30px;height:30px;display:grid;place-items:center;border-radius:50%;background:var(--cream);font:500 20px/1 'Geist',sans-serif;transition:transform .3s}
+.fr-faq details[open] summary::after{transform:rotate(45deg)}
+.fr-faq details p{padding:0 0 18px;max-width:60ch;opacity:.85}
+.fr-faq .fr-last{position:relative;overflow:hidden;margin-top:26px;padding:26px 22px 0;border-radius:22px;background:var(--blue);color:var(--cream);min-height:330px}
+.fr-faq .fr-last h3{font-size:clamp(24px,5.4cqw,34px);color:var(--cream);max-width:14ch}
+.fr-faq .fr-last h3 em{font-style:normal;color:var(--marigold)}
+.fr-faq .fr-last .fr-btn{margin-top:18px}
+.fr-faq .fr-last .fr-note{margin-top:12px;color:var(--cream)}
+.fr-faq .fr-last .fr-note a{text-underline-offset:3px}
+.fr-faq .fr-floor{position:absolute;left:0;right:0;bottom:0;height:60px;background:var(--cream)}
+.fr-faq .fr-last img{position:absolute;bottom:18px}
+.fr-faq .fr-wave{right:96px;height:170px}
+.fr-faq .fr-bot{right:22px;height:120px}
+@container (max-width:460px){ .fr-faq .fr-last{min-height:420px} .fr-faq .fr-wave{right:auto;left:30%} .fr-faq .fr-bot{right:auto;left:60%} }
+</style>
+<section class="fr fr-faq">
+  <details><summary>Who can attend?</summary><p>College students from any year and any college in and around Vadodara, from first-year beginners to final-year students, especially CSE, IT, AI and data science, and allied branches. Seniors get harder challenges in the same room.</p></details><details><summary>Do I need to pay?</summary><p>No. Futuready is free for students.</p></details><details><summary>Where exactly is it, and at what time?</summary><p>At Parul University, Vadodara. We will email you the hall and the time before the day, and they will be on this page too.</p></details><details><summary>Do I need a laptop?</summary><p>No. Your phone is enough for the whole session. For the build, one laptop per squad of four helps, but it is not a must.</p></details><details><summary>Do I need to know AI already?</summary><p>No. If you have used any AI chatbot even once, you are ready. If you have used none, you will leave having built something with one.</p></details><details><summary>What should I bring?</summary><p>A charged phone and your curiosity. A laptop if you have one.</p></details><details><summary>Why register?</summary><p>It helps us plan seats and saves you time at the door. Registering is not a guarantee of a seat; entry is confirmed on the day.</p></details><details><summary>How do I bring Futuready to my college?</summary><p>Ask your Training and Placement cell or your tech club to write to support@hack2skill.com.</p></details>
+  <div class="fr-last">
+    <h3 class="fr-d">See you at <em>Futuready.</em></h3>
+    <a class="fr-btn fr-btn--y" href="https://hack2skill.com/event/futuready-vadodara-07122026/registration">Register free</a>
+    <p class="fr-note">Free · Mon, 7 Dec 2026 · Parul University, Vadodara</p>
+    <div class="fr-floor" aria-hidden="true"></div>
+    <img class="fr-cut fr-wave" src="https://storage.googleapis.com/vision-hack2skill-production/innovator/USER02555644/1795396124189-boywave.webp" alt="" loading="lazy">
+    <img class="fr-cut fr-bot" src="https://storage.googleapis.com/vision-hack2skill-production/innovator/USER02555644/1795396143271-botwave.webp" alt="" loading="lazy">
+  </div>
+</section>

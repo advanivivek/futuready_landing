@@ -1,0 +1,53 @@
+<!-- Futuready by H2S: Meet your trainer. HTML and CSS only. Made with home/initiative/build.py -->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@500..600&family=Syncopate:wght@700&family=Unbounded:wght@600..900&display=swap');
+
+.fr{--blue:#3463af;--marigold:#f2b230;--cream:#efe6d2;--paper:#fffcf5;--ink:#161a3a;--night:#1d1236;
+  container-type:inline-size;font:400 16px/1.5 'Geist',system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--ink);
+  -webkit-font-smoothing:antialiased;margin:0 0 8px;text-align:left}
+.fr *,.fr *::before,.fr *::after{box-sizing:border-box}
+.fr p,.fr h3,.fr h4,.fr ul,.fr ol,.fr figure,.fr blockquote{margin:0;padding:0}
+.fr ul,.fr ol{list-style:none}
+.fr img{display:block;max-width:none;height:auto}
+.fr a{color:inherit}
+.fr .fr-d{font-family:'Unbounded',system-ui,sans-serif;font-weight:700;letter-spacing:-.045em;line-height:1.02}
+.fr .fr-mono{font-family:'Geist Mono',ui-monospace,Menlo,monospace;font-weight:600;letter-spacing:.02em}
+.fr .fr-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 28px;border-radius:999px;
+  background:var(--ink);color:#fffcf5;font:600 16px/1 'Geist',system-ui,sans-serif;letter-spacing:-.01em;text-decoration:none;
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+.fr .fr-btn:hover{transform:translateY(-2px)}
+.fr .fr-btn:active{transform:scale(.96)}
+.fr .fr-btn--y{background:var(--marigold);color:var(--ink)}
+.fr .fr-cut{filter:drop-shadow(0 3px 2px rgba(10,12,30,.16)) drop-shadow(0 10px 14px rgba(10,12,30,.12))}
+.fr .fr-note{font:500 13px/1.5 'Geist Mono',ui-monospace,monospace;opacity:.8}
+
+.fr-trainer .fr-card{position:relative;overflow:hidden;border-radius:22px;background:var(--night);color:var(--cream);padding:26px 22px 0;min-height:520px}
+.fr-trainer .fr-card::before{content:'';position:absolute;inset:0;opacity:.5;background:
+  radial-gradient(circle at 70% 60%,transparent 0 120px,rgba(179,157,255,.18) 121px 122px,transparent 123px 170px,rgba(179,157,255,.14) 171px 172px,transparent 173px)}
+.fr-trainer .fr-eyebrow{position:relative;font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.85}
+.fr-trainer h3{position:relative;margin-top:8px;font-size:clamp(30px,7cqw,44px);color:var(--marigold)}
+.fr-trainer .fr-links{position:relative;display:flex;gap:18px;margin-top:10px}
+.fr-trainer .fr-links a{display:inline-flex;align-items:center;min-height:40px;font:600 13px/1 'Geist Mono',monospace;text-underline-offset:4px}
+.fr-trainer .fr-floor{position:absolute;left:0;right:0;bottom:0;height:70px;background:#2c2058}
+.fr-trainer .fr-photo{position:absolute;left:50%;bottom:22px;height:330px;width:auto;transform:translateX(-50%)}
+.fr-trainer .fr-tapes{position:absolute;left:0;right:0;bottom:60px;top:190px}
+.fr-trainer .fr-tape{position:absolute;max-width:150px;padding:6px 10px 5px;border-radius:2px;font:700 11px/1.3 'Geist Mono',monospace;letter-spacing:.09em;
+  text-transform:uppercase;color:#fffcf5;box-shadow:0 6px 14px rgba(0,0,0,.3);text-shadow:0 -1px 0 rgba(0,0,0,.35)}
+.fr-trainer .fr-tape--light{color:#161a3a;text-shadow:0 1px 0 rgba(255,255,255,.4)}
+@container (min-width:620px){
+  .fr-trainer .fr-card{min-height:470px;padding:34px}
+  .fr-trainer .fr-photo{left:66%;height:380px}
+  .fr-trainer .fr-tapes{left:30%;top:150px}
+  .fr-trainer .fr-tape{max-width:220px}
+}
+</style>
+<section class="fr fr-trainer">
+  <div class="fr-card">
+    <p class="fr-mono fr-eyebrow">Meet your trainer</p>
+    <h3 class="fr-d">Vivek Advani</h3>
+    <p class="fr-links"><a href="https://www.linkedin.com/in/vivekadvani" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a><a href="https://instagram.com/vivekadvani" target="_blank" rel="noopener noreferrer">Instagram ↗</a></p>
+    <div class="fr-floor" aria-hidden="true"></div>
+    <img class="fr-photo fr-cut" src="https://storage.googleapis.com/vision-hack2skill-production/innovator/USER02555644/1795395966092-vivekdance.webp" alt="Vivek Advani, your trainer" loading="lazy">
+    <div class="fr-tapes"><span class="fr-tape fr-tape--light" style="left:8%;top:0%;background:#fffcf5;transform:rotate(-3deg)">DevRel · Hack2skill</span><span class="fr-tape" style="right:8%;top:12%;background:#c8312f;transform:rotate(2.5deg)">Architect</span><span class="fr-tape" style="left:6%;top:26%;background:#1a6fc0;transform:rotate(-2deg)">Builds AI products</span><span class="fr-tape fr-tape--light" style="right:6%;top:40%;background:#f2b230;transform:rotate(3deg)">Loves Math</span><span class="fr-tape fr-tape--light" style="left:10%;top:54%;background:#fffcf5;transform:rotate(-2.5deg)">Dances Salsa</span><span class="fr-tape" style="right:10%;top:68%;background:#c8312f;transform:rotate(2deg)">Plays music</span><span class="fr-tape" style="left:8%;top:82%;background:#1a6fc0;transform:rotate(-1.5deg)">Cares about Humanity</span></div>
+  </div>
+</section>

@@ -4,11 +4,13 @@
 
 // ---- The cities on the train ----
 // Paste each city's Futuready page link. The city and the date are read from the link itself:
-//   https://hack2skill.com/futuready/pune26102026  ->  Pune, 26 Oct 2026
-// (two-word cities: /futuready/navi-mumbai05012027). Until its day has passed a city shows "Departs" and its
-// carriage opens its page; afterwards "Landed". A city with no page yet: just { city: 'Name' } (boarding soon).
+//   https://hack2skill.com/event/futuready-vadodara-07122026  ->  Vadodara, 7 Dec 2026
+// (so name each Hack2skill page futuready-<city>-<ddmmyyyy>; two-word cities: futuready-navi-mumbai-05012027).
+// Until its day has passed a city shows "Departs" and its carriage opens its page; afterwards "Landed".
+// A city with no page yet: just { city: 'Name' } (boarding soon).
 export const CITIES = [
   { link: 'https://hack2skill.com/futuready/pune26102026', campus: 'Trinity Academy of Engineering' },
+  { link: 'https://hack2skill.com/event/futuready-vadodara-07122026', campus: 'Parul University' },
   { city: 'Mumbai' },
   { city: 'Ahmedabad' },
   { city: 'Jaipur' },
@@ -20,7 +22,7 @@ export const CITIES = [
 export const CITIES_FEED = '';
 
 // ---- The last scene: "Didn't find your city? Attend Virtual, or bring it to your campus." ----
-export const VIRTUAL_URL = './virtual/';
+export const VIRTUAL_URL = 'https://hack2skill.com/event/futuready-virtual';
 export const SUPPORT = 'support@hack2skill.com';
 // Where "Bring it to your campus" requests go: the web app link of the Google Sheet script
 // (scripts/bring-campus.gs, see START-HERE.md). Until it is set, a request opens an email instead.
