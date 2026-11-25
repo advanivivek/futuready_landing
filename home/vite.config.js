@@ -1,6 +1,6 @@
 import { execSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
@@ -35,21 +35,30 @@ const lastChange = () => {
     - packs[0]: the next scenes' pictures (scenes 1 to 3, and the crowd photo), fetched a moment after the page opens;
     - packs[1]: every other story picture and the TV screens, fetched once the visitor starts scrolling.
   A new picture in public/story or public/tv joins packs[1] by itself.
+  Each pack comes twice: as AVIF (the twins scripts/avif.mjs makes, about 40% lighter), for every browser that shows
+  AVIF, and as WebP for the few that cannot (iPhones on iOS 15 and older). A picture without a twin goes as WebP in both.
 */
 const INLINE = ['story/girl-phone.webp', 'story/boy-laptop.webp', 'story/bot-stand.webp', 'h2s-logo.webp'];
 const EARLY = ['bot-type', 'bot-cage', 'bot-cage-open', 'bug', 'boy-sit', 'girl-sit', 'crowd'].map(n => `story/${n}.webp`);
+const TYPES = { webp: 'image/webp', avif: 'image/avif', png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg' };
 function pictures(base) {
   const all = [
     ...readdirSync(here('./public/story')).filter(f => f.endsWith('.webp')).map(f => `story/${f}`),
     ...readdirSync(here('./public/tv')).filter(f => /\.(webp|jpe?g|png)$/.test(f)).map(f => `tv/${f}`),
   ].filter(p => !INLINE.includes(p));
-  const pack = (name, paths) => {
+  const twin = p => {
+    const a = p.replace(/\.webp$/, '.avif');
+    return a !== p && existsSync(here(`./public/${a}`)) ? a : p;
+  };
+  // one file holding the pictures back to back; files: path -> [start, length, type]
+  const pack = (name, paths, avif) => {
     const files = {};
     const parts = [];
     let at = 0;
     for (const p of [...paths].sort()) {
-      const buf = readFileSync(here(`./public/${p}`));
-      files[p] = [at, buf.length];
+      const file = avif ? twin(p) : p;
+      const buf = readFileSync(here(`./public/${file}`));
+      files[p] = [at, buf.length, TYPES[file.split('.').pop()]];
       parts.push(buf);
       at += buf.length;
     }
@@ -57,9 +66,13 @@ function pictures(base) {
     const fileName = `assets/${name}-${createHash('sha256').update(source).digest('hex').slice(0, 10)}.bin`;
     return { fileName, source, url: base + fileName, files };
   };
-  const packs = [pack('pictures-early', all.filter(p => EARLY.includes(p))), pack('pictures', all.filter(p => !EARLY.includes(p)))];
+  const early = all.filter(p => EARLY.includes(p));
+  const rest = all.filter(p => !EARLY.includes(p));
+  const packs = [pack('pictures-early', early), pack('pictures', rest)];
+  const avif = [pack('pictures-early-avif', early, true), pack('pictures-avif', rest, true)];
+  const list = ps => ps.map(({ url, files }) => ({ url, files }));
   const inline = Object.fromEntries(INLINE.map(p => [p, `data:image/webp;base64,${readFileSync(here(`./public/${p}`)).toString('base64')}`]));
-  return { packs, module: `export default ${JSON.stringify({ inline, packs: packs.map(({ url, files }) => ({ url, files })) })};` };
+  return { emit: [...packs, ...avif], module: `export default ${JSON.stringify({ inline, packs: list(packs), avif: list(avif) })};` };
 }
 
 // the fonts the first screen needs go inside the stylesheet: one request instead of five (Great Vibes, used further
@@ -94,7 +107,7 @@ export default defineConfig(({ command }) => {
         load: id => (id === '\0virtual:pictures' ? (pics ? pics.module : 'export default null;') : null),
         generateBundle(_, bundle) {
           if (!pics) return;
-          for (const p of pics.packs) this.emitFile({ type: 'asset', fileName: p.fileName, source: p.source });
+          for (const p of pics.emit) this.emitFile({ type: 'asset', fileName: p.fileName, source: p.source });
           for (const file of Object.values(bundle)) {
             if (file.type === 'asset' && file.fileName.endsWith('.css')) file.source = fontsInCss(String(file.source));
           }

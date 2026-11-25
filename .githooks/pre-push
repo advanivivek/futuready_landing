@@ -1,0 +1,27 @@
+#!/bin/bash
+# One `git push`, two repositories:
+#   1. this repository (github.com/advanivivek/futuready_landing) gets every commit, with its full message, as usual;
+#   2. the live repository (github.com/vivek-h2s/futuready) gets the site as ONE clean commit with a short message
+#      (ship-h2s.sh), and Vercel puts it on https://futuready.hack2skill.com about a minute later.
+#
+# The short message is the "Live:" line at the end of the commit message (after a blank line), for example
+#     Live: Lighter pictures
+# Several commits pushed at once: their Live lines, joined. No Live line at all: "Update site".
+# A push that changes nothing in the site sends nothing.
+#
+# Push without sending the site live:   SHIP=0 git push     (or: git push --no-verify)
+# If the send fails, your push still goes through; send it later with ./ship-h2s.sh (it always sends the whole site).
+# Turned on once per copy of this repository: git config core.hooksPath .githooks
+[ "${SHIP:-1}" = 0 ] && exit 0
+case "$2" in *advanivivek/futuready_landing*) ;; *) exit 0 ;; esac
+ROOT="$(git rev-parse --show-toplevel)"
+ZERO=0000000000000000000000000000000000000000
+while read -r _local_ref sha remote_ref remote_sha; do
+  [ "$remote_ref" = refs/heads/main ] && [ "$sha" != "$ZERO" ] || continue
+  if [ "$remote_sha" != "$ZERO" ] && git cat-file -e "$remote_sha" 2>/dev/null; then range=("$remote_sha..$sha"); else range=(-1 "$sha"); fi
+  msg="$(git log --reverse --format='%(trailers:key=Live,valueonly)' "${range[@]}" | sed '/^[[:space:]]*$/d' | awk '!seen[$0]++' | paste -sd ';' - | sed 's/;/; /g')"
+  echo "Live site: sending..."
+  SHIP_REV="$sha" "$ROOT/ship-h2s.sh" "${msg:-Update site}" </dev/null ||
+    echo "Live site NOT updated (your push still goes through). Send it later with: ./ship-h2s.sh \"${msg:-Update site}\""
+done
+exit 0

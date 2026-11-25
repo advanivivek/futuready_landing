@@ -37,7 +37,7 @@ MAP = {
 # and scaled down, so he reads as a real person cut out of a magazine, standing in the paper world
 # standing poses only, so he is always the same height on the floor
 PHOTOS = {
-    'viv11': 'vivek-walk', 'viv10': 'vivek-dance', 'viv7': 'vivek-kick',
+    'viv11': 'vivek-walk', 'viv10': 'vivek-dance',  # viv7 (the kick) was dropped from the story
     'viv8': 'vivek-step', 'viv9': 'vivek-chair', 'viv5': 'vivek-lean',
 }
 PHOTO_HEIGHT = 1000

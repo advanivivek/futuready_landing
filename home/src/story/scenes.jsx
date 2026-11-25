@@ -228,7 +228,6 @@ function You({ s, k }) {
 // so he is the same size in every one. a: width / height of the picture.
 const POSES = [
   { src: 'vivek-dance', a: 443 / 1022, k: 1.03 },
-  { src: 'vivek-kick', a: 692 / 986, k: 1.05 },
   { src: 'vivek-walk', a: 343 / 1022, k: 1 },
   { src: 'vivek-step', a: 287 / 1002, k: 1.3 },
   { src: 'vivek-chair', a: 715 / 1022, k: 1.33 },

@@ -36,7 +36,6 @@ const DEV_WARM = [
   'story/engine.webp',
   'story/coach.webp',
   'story/vivek-dance.webp',
-  'story/vivek-kick.webp',
   'story/vivek-walk.webp',
   'story/vivek-step.webp',
   'story/vivek-chair.webp',
