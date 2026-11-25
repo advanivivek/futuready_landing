@@ -339,8 +339,8 @@ function Trainer({ s, k }) {
 }
 
 /* ---------- the station board ---------- */
-const coachTag = c => (c.status === 'past' ? `✓ ${c.date}` : c.status === 'open' ? 'Open' : 'Soon');
-const stationTag = c => (c.status === 'past' ? `Landed${c.campus ? ` · ${c.campus}` : ''}` : c.status === 'open' ? 'Registrations open' : 'Boarding soon');
+const coachTag = c => (c.status === 'past' ? 'Concluded' : c.status === 'open' ? 'Open' : 'Soon');
+const stationTag = c => (c.status === 'past' ? `Concluded${c.campus ? ` · ${c.campus}` : ''}` : c.status === 'open' ? 'Registrations open' : 'Boarding soon');
 const MONTH = /^(\d{1,2})\s+([A-Za-z]{3})/;
 // the board: the day above, the month below (or -- / TBA before a date is set)
 function boardRows(c) {
@@ -358,8 +358,8 @@ function Flaps({ c, o }) {
     else sound.play('flap');
   }, [key]);
   return (
-    <div className="flaps" style={{ opacity: o }} aria-label={c.date ? `${c.status === 'past' ? 'Landed' : 'Departs'} ${c.date}` : stationTag(c)} role="text">
-      <small aria-hidden="true">{c.status === 'past' ? 'Landed' : 'Departs'}</small>
+    <div className="flaps" style={{ opacity: o }} aria-label={c.date ? `${c.status === 'past' ? 'Concluded' : 'Departs'} ${c.date}` : stationTag(c)} role="text">
+      <small aria-hidden="true">{c.status === 'past' ? 'Concluded' : 'Departs'}</small>
       {rows.map((r, j) => (
         <div key={j} aria-hidden="true">
           {[...r].map((ch, i) => (
@@ -893,8 +893,9 @@ export const SCENES = [
                   </span>
                 </>
               );
-              const style = { height: t.ch, width: t.cw, marginLeft: t.gap };
-              const cls = `coach ${i === t.near ? 'is-near' : ''}`;
+              // the concluded cities ride at the back, in black and white, after a little gap
+              const style = { height: t.ch, width: t.cw, marginLeft: t.gap + (i === t.firstPast ? t.split : 0) };
+              const cls = `coach${i === t.near ? ' is-near' : ''}${c.status === 'past' ? ' is-past' : ''}${i === t.firstPast ? ' is-first-past' : ''}`;
               // a city with its own page opens it; one still boarding soon asks for Futuready there
               return c.url ? (
                 <a key={c.city + i} className={cls} href={c.url} style={style} aria-label={`Attend in ${c.city}: ${stationTag(c)}${c.date ? `, ${c.date}` : ''}`}>
@@ -1021,19 +1022,24 @@ function trainGeometry(s, { W, H, land, F, cities }) {
   const ew = eh * (732 / 410);
   const gap = ch * 0.03;
   const start = W + 20;
-  const end = W / 2 - (ew + gap + (n - 1) * (cw + gap) + cw / 2);
+  // the concluded cities sit at the back after a gap; the train stops with the first city still to come in the middle
+  const firstPast = cities.findIndex(c => c.status === 'past');
+  const split = firstPast > 0 ? cw * 0.22 : 0;
+  const at = i => ew + gap + i * (cw + gap) + (firstPast > 0 && i >= firstPast ? split : 0) + cw / 2;
+  const stop = Math.max(0, cities.findIndex(c => c.status !== 'past'));
+  const end = W / 2 - at(stop);
   const move = inout(seg(s, 0.3, 3.0));
   const X = lerp(start, end, move);
   let near = 0;
   let best = Infinity;
   for (let i = 0; i < n; i++) {
-    const c = X + ew + gap + i * (cw + gap) + cw / 2;
+    const c = X + at(i);
     if (Math.abs(c - W / 2) < best) {
       best = Math.abs(c - W / 2);
       near = i;
     }
   }
   const moving = move > 0 && move < 1;
-  return { ch, cw, eh, ew, gap, X, near, moving, shake: moving ? Math.sin(s * 90) : 0, railY: (F - 0.07) * H };
+  return { ch, cw, eh, ew, gap, X, near, moving, firstPast, split, shake: moving ? Math.sin(s * 90) : 0, railY: (F - 0.07) * H };
 }
 

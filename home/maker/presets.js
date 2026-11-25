@@ -5,7 +5,9 @@ const HOOK = 'AI writes most of the code today, so how will developers stay rele
 const SUB = 'A free, interactive AI bootcamp to prepare developers for the future.';
 export const PRESETS = {
   vadodara: { name: 'Parul University · Vadodara · 7 Dec', kind: 'campus', city: 'Vadodara', campus: 'Parul University', date: '2026-12-07', start: '12:45 PM', end: '3:30 PM', hello: '',
-    hook: HOOK, sub: SUB, partnerLabel: 'Campus Organising Partner', stripUrl: HOSTED.parulStrip, stripW: 420, stripH: 52, note: 'We will email you the hall before the day.',
+    hook: HOOK, sub: SUB, partnerLabel: 'Campus Organising Partner', stripUrl: HOSTED.parulStrip, stripW: 420, stripH: 52,
+    // the two logos for the covers (a local file, kept out of the public repo; upload the logos in the maker otherwise)
+    coverStrip: '/initiative/assets/made/vadodara-partner-logos.png', note: 'We will email you the hall before the day.',
     schedule: [
       { time: '12:45 – 1:00 PM', title: 'Arrival and registration', detail: 'Scan the QR code. Your name lights up the big screen.' },
       { time: '1:00 – 3:00 PM', title: 'Futuready hands-on bootcamp', detail: 'Five levels, live on your phone. Then the boss level: your squad builds with AI.' },

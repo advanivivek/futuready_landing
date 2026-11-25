@@ -6,7 +6,7 @@
 // Paste each city's Futuready page link. The city and the date are read from the link itself:
 //   https://hack2skill.com/event/futuready-vadodara-07122026  ->  Vadodara, 7 Dec 2026
 // (so name each Hack2skill page futuready-<city>-<ddmmyyyy>; two-word cities: futuready-navi-mumbai-05012027).
-// Until its day has passed a city shows "Departs" and its carriage opens its page; afterwards "Landed".
+// Until its day has passed a city shows "Departs" and its carriage opens its page; afterwards "Concluded" (in black and white, at the back of the train).
 // A city with no page yet: just { city: 'Name' } (boarding soon).
 export const CITIES = [
   { link: 'https://hack2skill.com/futuready/pune26102026', campus: 'Trinity Academy of Engineering' },

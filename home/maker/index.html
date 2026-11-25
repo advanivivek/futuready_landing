@@ -45,6 +45,10 @@ ol.steps a{color:var(--blue);font-weight:700}
 code{background:var(--cream);padding:1px 6px;border-radius:6px}
 .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:999px;opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.on{opacity:1}
+.stage{position:relative}.stage canvas{cursor:grab;touch-action:none;display:block}.stage canvas:active{cursor:grabbing}
+.sel{position:absolute;display:none;border:2px dashed var(--gold);border-radius:6px;pointer-events:none;box-shadow:0 0 0 1px rgba(22,26,58,.5)}
+.tweak{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:13px}.tweak .what{font-weight:700;min-width:150px}
+.tweak label{display:flex;gap:6px;align-items:center}.tweak input[type=range]{width:150px;padding:0}.tweak .btn{padding:6px 12px;font-size:13px}
 .faq{display:grid;grid-template-columns:1fr auto;gap:6px;align-items:start;border-top:1px solid var(--line);padding-top:8px}
 </style>
 </head>
@@ -60,7 +64,8 @@ code{background:var(--cream);padding:1px 6px;border-radius:6px}
       <div class="seg" id="kind"><button type="button" data-k="campus">Campus</button><button type="button" data-k="virtual">Virtual</button></div>
       <div class="two campus"><label>City<input name="city"></label><label>Campus<input name="campus"></label></div>
       <div class="two"><label class="campus">Date<input name="date" type="date"></label><label>Cover greeting (cursive)<input name="hello" placeholder="the city"></label></div>
-      <label>FUTUREADY next to the H2S logo on the cover<select name="brand"><option value="">Yes</option><option value="off">No</option></select></label>
+      <div class="two"><label>FUTUREADY beside the H2S logo<select name="brand"><option value="">Yes</option><option value="off">No</option></select></label>
+      <label class="campus">Campus name on the thumbnail<select name="thumbCampus"><option value="">Yes</option><option value="off">No</option></select></label></div>
       <div class="two campus"><label>Starts<input name="start" placeholder="12:45 PM"></label><label>Ends<input name="end" placeholder="3:30 PM"></label></div>
     </fieldset>
     <fieldset><legend>Words at the top</legend>
@@ -70,6 +75,7 @@ code{background:var(--cream);padding:1px 6px;border-radius:6px}
     <fieldset class="campus"><legend>Partner</legend>
       <label>Label<input name="partnerLabel" placeholder="Campus Organising Partner"></label>
       <label>Logos (1 or 2, any size; they are trimmed and put on one line)<input id="logos" type="file" accept="image/*" multiple></label>
+      <label>Partner logos on the covers too<select name="coverLogos"><option value="">Yes</option><option value="off">No</option></select></label>
       <label>Logo strip link, after you upload it (see Steps)<input name="stripUrl" placeholder="https://storage.googleapis.com/…"></label>
     </fieldset>
     <fieldset><legend>Schedule</legend>
@@ -86,11 +92,11 @@ code{background:var(--cream);padding:1px 6px;border-radius:6px}
     </div>
     <div class="pane on" id="pics">
       <div class="pics">
-        <div class="card wide"><h3>Cover, wide <small>(Live Edit → Event Overview → Banner → Desktop)</small></h3><canvas id="cWide"></canvas>
+        <div class="card wide"><h3>Cover, wide <small>(Live Edit → Event Overview → Banner → Desktop)</small></h3><div class="stage"><canvas id="cWide"></canvas><div class="sel"></div></div><div class="tweak" data-for="cWide"><span class="what">Click or drag any part to move it</span><label>Size <input type="range" min="40" max="200" value="100" disabled></label><button type="button" class="btn ghost" data-reset="part">Reset part</button><button type="button" class="btn ghost" data-reset="all">Reset picture</button></div>
           <div class="btns"><button class="btn y" data-dl="cWide" data-name="cover-wide" data-type="image/jpeg">Download</button></div></div>
-        <div class="card"><h3>Cover, square <small>(Banner → Mobile)</small></h3><canvas id="cSquare"></canvas>
+        <div class="card"><h3>Cover, square <small>(Banner → Mobile)</small></h3><div class="stage"><canvas id="cSquare"></canvas><div class="sel"></div></div><div class="tweak" data-for="cSquare"><span class="what">Click or drag any part to move it</span><label>Size <input type="range" min="40" max="200" value="100" disabled></label><button type="button" class="btn ghost" data-reset="part">Reset part</button><button type="button" class="btn ghost" data-reset="all">Reset picture</button></div>
           <div class="btns"><button class="btn y" data-dl="cSquare" data-name="cover-square" data-type="image/jpeg">Download</button></div></div>
-        <div class="card"><h3>Thumbnail <small>(Initiative Settings → logo)</small></h3><canvas id="cThumb"></canvas>
+        <div class="card"><h3>Thumbnail <small>(Initiative Settings → logo)</small></h3><div class="stage"><canvas id="cThumb"></canvas><div class="sel"></div></div><div class="tweak" data-for="cThumb"><span class="what">Click or drag any part to move it</span><label>Size <input type="range" min="40" max="200" value="100" disabled></label><button type="button" class="btn ghost" data-reset="part">Reset part</button><button type="button" class="btn ghost" data-reset="all">Reset picture</button></div>
           <div class="btns"><button class="btn y" data-dl="cThumb" data-name="thumbnail" data-type="image/png">Download</button></div></div>
         <div class="card wide campus" id="stripCard"><h3>Partner logos on one line <small>(upload once, then paste its link in the form)</small></h3><canvas id="cStrip" style="background:#fff"></canvas>
           <div class="btns"><button class="btn y" data-dl="cStrip" data-name="partner-logos" data-type="image/png">Download</button></div></div>
@@ -112,6 +118,8 @@ import { PRESETS } from './presets.js';
 
 const store = { get: k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
 let all = { ...structuredClone(PRESETS), ...(store.get('fr-maker-events') || {}) };
+// a preset saved by an older maker still picks up fields added since
+for (const k of Object.keys(PRESETS)) all[k] = { ...structuredClone(PRESETS[k]), ...all[k] };
 let key = store.get('fr-maker-current') || 'vadodara';
 if (!all[key]) key = 'vadodara';
 let logos = [];
@@ -153,13 +161,17 @@ let t;
 function render() { clearTimeout(t); t = setTimeout(paint, 120); }
 async function paint() {
   const e = read(), x = derive(e);
-  await cover($('#cWide'), e, true);
-  await cover($('#cSquare'), e, false);
-  await thumb($('#cThumb'), e);
   if (logos.length) {
     const { w, h } = await strip($('#cStrip'), logos);
     e.stripW = 420; e.stripH = Math.round((420 * h) / w);
+    // the same strip goes on the covers (kept with the event, so it is there next time too)
+    e.coverStrip = $('#cStrip').toDataURL('image/png');
+    store.set('fr-maker-events', all);
   }
+  await cover($('#cWide'), e, true);
+  await cover($('#cSquare'), e, false);
+  await thumb($('#cThumb'), e);
+  showSel();
   const secs = sections(e);
   $('#text').innerHTML = secs.map((s, i) => `<div class="card"><h3>${i + 1}. ${s.title} <small>→ ${s.where}</small></h3><div class="btns"><button class="btn y" data-copy="${i}">Copy HTML</button>${(s.parts || []).map(([label], j) => `<button class="btn" data-rich="${i}:${j}">Copy ${label}</button>`).join('')}<button class="btn ghost" data-look="${i}">Show / hide a rough look</button></div><div class="look" hidden>${s.html}</div></div>`).join('') +
     `<div class="card"><h3>How to paste</h3><small>Open the section in Live Edit → <b>Insert → Source Code</b> → paste → <b>Embed</b> → <b>Save</b>. It replaces what was there.</small></div>`;
@@ -207,14 +219,107 @@ $('#addRow').onclick = () => { all[key].schedule = read().schedule.concat({ time
 f.addEventListener('input', render);
 $('#rows').addEventListener('input', render);
 $('#logos').onchange = ev => { logos = [...ev.target.files].slice(0, 2); render(); };
-$('#preset').onchange = ev => { key = ev.target.value; logos = []; load(); render(); };
+$('#preset').onchange = ev => { key = ev.target.value; logos = []; sel = {}; load(); render(); };
 $('#fresh').onclick = () => {
   const base = structuredClone(PRESETS.vadodara);
   key = 'city-' + Date.now();
-  all[key] = { ...base, name: 'New city', city: '', campus: '', date: '', stripUrl: '', note: 'We will email you the hall before the day.' };
+  all[key] = { ...base, name: 'New city', city: '', campus: '', date: '', stripUrl: '', coverStrip: '', tweak: {}, note: 'We will email you the hall before the day.' };
   fillPresets(); load(); render();
   f.elements.city.focus();
 };
+
+// ---- moving and resizing parts of a picture ----
+// Click a part (the greeting, the headline, the characters, the logo...) to pick it, drag to move it, use the slider
+// to resize it, or the arrow keys to nudge it (Shift: 10 at a time). It is kept with the event, and the Download
+// buttons save exactly what you see.
+const PICS = { cWide: 'wide', cSquare: 'square', cThumb: 'thumb' };
+let sel = {};
+const tw = (pic, name) => (((all[key].tweak ||= {})[pic] ||= {})[name] ||= {});
+const partAt = (c, x, y) => [...(c.__parts || [])].reverse().find(p => x >= p.box[0] && x <= p.box[0] + p.box[2] && y >= p.box[1] && y <= p.box[1] + p.box[3]);
+const toCanvas = (c, ev) => { const r = c.getBoundingClientRect(); return [((ev.clientX - r.left) * c.width) / r.width, ((ev.clientY - r.top) * c.height) / r.height]; };
+async function draw1(id) {
+  const e = all[key];
+  if (id === 'cThumb') await thumb($('#cThumb'), e);
+  else await cover($('#' + id), e, id === 'cWide');
+  showSel();
+}
+let busy = false, pending = null;
+async function queue(id) {
+  pending = id;
+  if (busy) return;
+  busy = true;
+  while (pending) { const p = pending; pending = null; await draw1(p); }
+  busy = false;
+}
+function showSel() {
+  document.querySelectorAll('.stage').forEach(st => {
+    const c = st.querySelector('canvas'), box = st.querySelector('.sel');
+    const p = sel.canvas === c.id && (c.__parts || []).find(q => q.name === sel.name);
+    if (!p) return (box.style.display = 'none');
+    const k = c.getBoundingClientRect().width / c.width, [x, y, w, h] = p.box;
+    Object.assign(box.style, { display: 'block', left: `${x * k - 3}px`, top: `${y * k - 3}px`, width: `${w * k + 6}px`, height: `${h * k + 6}px` });
+  });
+  document.querySelectorAll('.tweak').forEach(t => {
+    const id = t.dataset.for, c = $('#' + id);
+    const p = sel.canvas === id && (c.__parts || []).find(q => q.name === sel.name);
+    t.querySelector('.what').textContent = p ? `${p.label}: drag, slide or use the arrow keys` : 'Click or drag any part to move it';
+    const r = t.querySelector('input');
+    r.disabled = !p;
+    r.value = p ? Math.round((all[key].tweak?.[PICS[id]]?.[p.name]?.s || 1) * 100) : 100;
+  });
+}
+const keep = () => store.set('fr-maker-events', all);
+for (const id of Object.keys(PICS)) {
+  const c = $('#' + id);
+  let drag = null;
+  c.addEventListener('pointerdown', ev => {
+    const [x, y] = toCanvas(c, ev), p = partAt(c, x, y);
+    sel = p ? { canvas: id, name: p.name } : {};
+    showSel();
+    if (!p) return;
+    const t = tw(PICS[id], p.name);
+    drag = { x, y, ox: +t.x || 0, oy: +t.y || 0 };
+    c.setPointerCapture(ev.pointerId);
+  });
+  c.addEventListener('pointermove', ev => {
+    if (!drag) return;
+    const [x, y] = toCanvas(c, ev), t = tw(PICS[id], sel.name);
+    t.x = Math.round(drag.ox + x - drag.x);
+    t.y = Math.round(drag.oy + y - drag.y);
+    queue(id);
+  });
+  const end = () => { if (drag) { drag = null; keep(); } };
+  c.addEventListener('pointerup', end);
+  c.addEventListener('pointercancel', end);
+}
+document.querySelectorAll('.tweak').forEach(t => {
+  const id = t.dataset.for;
+  t.querySelector('input').addEventListener('input', ev => {
+    if (sel.canvas !== id || !sel.name) return;
+    tw(PICS[id], sel.name).s = ev.target.value / 100;
+    queue(id);
+    keep();
+  });
+  t.addEventListener('click', ev => {
+    const r = ev.target.dataset.reset, all2 = (all[key].tweak ||= {});
+    if (!r) return;
+    if (r === 'all') delete all2[PICS[id]];
+    else if (sel.canvas === id && sel.name && all2[PICS[id]]) delete all2[PICS[id]][sel.name];
+    keep();
+    queue(id);
+  });
+});
+document.addEventListener('keydown', ev => {
+  const d = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[ev.key];
+  if (!d || !sel.name || /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName)) return;
+  ev.preventDefault();
+  const m = ev.shiftKey ? 10 : 1, t = tw(PICS[sel.canvas], sel.name);
+  t.x = (+t.x || 0) + d[0] * m;
+  t.y = (+t.y || 0) + d[1] * m;
+  queue(sel.canvas);
+  keep();
+});
+addEventListener('resize', showSel);
 
 await ready();
 fillPresets();

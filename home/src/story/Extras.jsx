@@ -137,12 +137,15 @@ export function BringDialog({ open, city: presetCity = '', onClose }) {
       setCity(presetCity);
       setRole('Student');
       d.showModal();
+      // the page behind stays still while the form is open
+      window.__lenis?.stop();
       // laptops start typing straight away; phones keep the keyboard down until a field is tapped
       if (matchMedia('(pointer: fine)').matches) d.querySelector('#bf-college')?.focus();
       else d.querySelector('#bring-h')?.focus();
       sound.play('whoosh');
     }
     if (!open && d.open) d.close();
+    if (!open) window.__lenis?.start();
   }, [open, presetCity]);
 
   // light dismiss where <dialog closedby="any"> is not supported yet (Safari)
@@ -225,6 +228,7 @@ export function BringDialog({ open, city: presetCity = '', onClose }) {
     <dialog
       ref={ref}
       className="sheet bring"
+      data-lenis-prevent
       closedby="any"
       aria-labelledby="bring-h"
       onClose={onClose}

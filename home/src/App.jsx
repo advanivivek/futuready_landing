@@ -84,7 +84,8 @@ function Experience() {
     let lenis;
     let raf = 0;
     import('lenis').then(({ default: Lenis }) => {
-      lenis = new Lenis({ lerp: 0.085, wheelMultiplier: 0.8, touchMultiplier: 1 });
+      // any pop-up (the campus form, the share sheet) scrolls on its own: Lenis leaves the wheel alone inside it
+      lenis = new Lenis({ lerp: 0.085, wheelMultiplier: 0.8, touchMultiplier: 1, prevent: node => node.nodeName === 'DIALOG' });
       window.__lenis = lenis;
       const loop = t => {
         lenis.raf(t);

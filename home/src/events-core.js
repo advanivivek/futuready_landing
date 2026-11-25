@@ -42,11 +42,12 @@ export function statusOf({ start, end, status }, now = Date.now()) {
   return 'soon';
 }
 
-const ORDER = { past: 0, open: 1, soon: 2 };
+// the train: open cities first (soonest first), then the ones boarding soon, then the concluded ones (latest first)
+const ORDER = { open: 0, soon: 1, past: 2 };
 const when = c => Date.parse(c.end || c.start || '') || Infinity;
 
 export function sortCities(list) {
-  return [...list].sort((a, b) => ORDER[a.status] - ORDER[b.status] || when(a) - when(b));
+  return [...list].sort((a, b) => ORDER[a.status] - ORDER[b.status] || (a.status === 'past' ? when(b) - when(a) : when(a) - when(b)));
 }
 
 // A Futuready page link -> its city and date. Both kinds of link work:

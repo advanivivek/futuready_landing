@@ -1,5 +1,9 @@
 // Futuready page maker: the pictures (wide cover, square cover, thumbnail, partner-logo strip), drawn on a canvas
 // with the main page's own fonts and cut-outs, so what you see is exactly what you download.
+//
+// Every element of a picture is a "part" (greeting, headline, date board, people, logo, partner logos, ...). Each part
+// can be nudged and resized in the maker (drag it, then use the size slider); the nudges live in e.tweak[picture][part]
+// as { x, y, s }. After drawing, canvas.__parts lists where each part sits, so the maker knows what you clicked.
 import { derive } from './sections.js';
 
 const BLUE = '#3463af', GOLD = '#f2b230', CREAM = '#efe6d2', PAPER = '#fffcf5', INK = '#161a3a';
@@ -51,6 +55,22 @@ function floor(ctx, W, y, H, k, grain = 2) {
   ctx.fillRect(0, y, W, 30 * k);
 }
 
+// one part of a picture, drawn with its nudge (moved by x, y and resized by s around its own centre)
+async function part(ctx, pic, name, label, box, draw) {
+  const t = pic.tw[name] || {}, dx = +t.x || 0, dy = +t.y || 0, s = +t.s || 1;
+  const [bx, by, bw, bh] = box, ax = bx + bw / 2, ay = by + bh / 2;
+  ctx.save();
+  ctx.translate(ax + dx, ay + dy);
+  ctx.scale(s, s);
+  ctx.translate(-ax, -ay);
+  await draw();
+  ctx.restore();
+  pic.parts.push({ name, label, box: [ax + dx - (bw * s) / 2, ay + dy - (bh * s) / 2, bw * s, bh * s] });
+}
+
+function cutBox(i, x, bottom, h) {
+  return [x, bottom - h, (i.width / i.height) * h, h];
+}
 async function cut(ctx, src, x, bottom, h, k) {
   const i = await load(src), w = (i.width / i.height) * h;
   ctx.save();
@@ -60,6 +80,15 @@ async function cut(ctx, src, x, bottom, h, k) {
   ctx.drawImage(i, x, bottom - h, w, h);
   ctx.restore();
 }
+// several cut-outs as one part: [src, x, bottom, h]
+async function people(ctx, pic, list, k) {
+  const boxes = await Promise.all(list.map(async ([src, x, b, h]) => cutBox(await load(src), x, b, h)));
+  const x0 = Math.min(...boxes.map(b => b[0])), y0 = Math.min(...boxes.map(b => b[1]));
+  const x1 = Math.max(...boxes.map(b => b[0] + b[2])), y1 = Math.max(...boxes.map(b => b[1] + b[3]));
+  await part(ctx, pic, 'people', 'Characters', [x0, y0, x1 - x0, y1 - y0], async () => {
+    for (const [src, x, b, h] of list) await cut(ctx, src, x, b, h, k);
+  });
+}
 
 function rr(ctx, x, y, w, h, r) {
   ctx.beginPath();
@@ -67,6 +96,11 @@ function rr(ctx, x, y, w, h, r) {
 }
 
 // the split-flap board: a label and rows of letters, right-aligned at `right`
+function boardBox(rows, right, top, f) {
+  const cw = f * 0.78, chh = f * 1.08, gap = f * 0.08, pad = f * 0.1;
+  const w = Math.max(...rows.map(r => r.length * cw + (r.length - 1) * gap + pad * 2));
+  return [right - w, top, w, f * 0.55 + rows.length * (chh + pad * 2 + f * 0.14)];
+}
 function board(ctx, label, rows, right, top, f) {
   ctx.textAlign = 'right';
   ctx.textBaseline = 'alphabetic';
@@ -107,6 +141,14 @@ function board(ctx, label, rows, right, top, f) {
   }
 }
 
+// lines of the headline: each line is [[text, colour], ...]
+function headBox(ctx, lines, x, y0, size, lead) {
+  ctx.font = `700 ${size}px Unbounded`;
+  ctx.letterSpacing = `${-size * 0.045}px`;
+  const w = Math.max(...lines.map(l => l.reduce((a, [t]) => a + ctx.measureText(t).width, 0)));
+  ctx.letterSpacing = '0px';
+  return [x, y0 - size * 0.78, w, lead * (lines.length - 1) + size];
+}
 function words(ctx, parts, x, y, size) {
   ctx.font = `700 ${size}px Unbounded`;
   ctx.letterSpacing = `${-size * 0.045}px`;
@@ -119,6 +161,11 @@ function words(ctx, parts, x, y, size) {
   ctx.letterSpacing = '0px';
 }
 
+function scriptBox(ctx, text, x, y, size, align = 'left') {
+  ctx.font = `400 ${size}px "Great Vibes"`;
+  const w = ctx.measureText(text).width;
+  return [align === 'center' ? x - w / 2 : x, y - size * 0.8, w, size * 1.05];
+}
 function script(ctx, text, x, y, size, color, align = 'left') {
   ctx.font = `400 ${size}px "Great Vibes"`;
   ctx.textAlign = align;
@@ -127,19 +174,22 @@ function script(ctx, text, x, y, size, color, align = 'left') {
 }
 
 // the H2S logo, and (unless turned off) a thin rule and FUTUREADY, its capitals exactly as tall as the logo
-// (shrunk to fit in maxW, so it never runs into the characters)
-async function logo(ctx, x, cy, h, brand = true, maxW = Infinity) {
+async function lockupSize(ctx, h, brand) {
   const i = await load('/h2s-logo.png'), r = i.width / i.height;
+  if (!brand) return { w: r * h, per: r };
   ctx.font = '700 100px Syncopate';
   ctx.letterSpacing = '8px';
-  const m = ctx.measureText('FUTUREADY'), per = (r + 1.15) + m.width / m.actualBoundingBoxAscent; // width per unit of height
+  const m = ctx.measureText('FUTUREADY');
   ctx.letterSpacing = '0px';
-  if (brand) h = Math.min(h, maxW / per);
-  const w = r * h;
+  const per = r + 1.15 + m.width / m.actualBoundingBoxAscent; // width for each unit of height
+  return { w: per * h, per, asc: m.actualBoundingBoxAscent };
+}
+async function lockup(ctx, x, cy, h, brand) {
+  const i = await load('/h2s-logo.png'), w = (i.width / i.height) * h;
   ctx.drawImage(i, x, cy - h / 2, w, h);
   if (!brand) return;
-  const size = (100 * h) / m.actualBoundingBoxAscent;
-  const gap = h * 0.55;
+  const { asc } = await lockupSize(ctx, h, brand);
+  const size = (100 * h) / asc, gap = h * 0.55;
   ctx.fillStyle = 'rgba(22,26,58,.3)';
   ctx.fillRect(x + w + gap, cy - h / 2, Math.max(2, h * 0.05), h);
   ctx.font = `700 ${size}px Syncopate`;
@@ -156,8 +206,13 @@ function boardFor(e) {
   return x.virtual ? ['Virtual', ['LIVE', 'ONLINE']] : [x.weekday || 'Date', [x.day, x.mon]];
 }
 
+const tweaks = (e, pic) => ({ tw: (e.tweak && e.tweak[pic]) || {}, parts: [] });
+// the partner logos (a strip, already trimmed) for the covers, unless turned off
+const coverLogos = e => (!e || e.kind === 'virtual' || e.coverLogos === 'off' ? '' : e.coverStrip || '');
+
 export async function cover(canvas, e, wide) {
   const x = derive(e), [W, H] = wide ? [1800, 600] : [1080, 1080];
+  const pic = tweaks(e, wide ? 'wide' : 'square');
   canvas.width = W;
   canvas.height = H;
   const ctx = canvas.getContext('2d'), k = wide ? 1 : 1.2;
@@ -167,50 +222,99 @@ export async function cover(canvas, e, wide) {
   floor(ctx, W, fy, H, k);
   const hello = x.hello ? `${x.hello},` : '';
   const [label, rows] = boardFor(e);
+  const brand = e.brand !== 'off', strip = coverLogos(e);
   ctx.textBaseline = 'alphabetic';
-  if (wide) {
-    script(ctx, hello, 88, 160, 104, PAPER);
-    words(ctx, [['are you ready', PAPER]], 90, 300, 92);
-    words(ctx, [['for the ', PAPER], ['future?', GOLD]], 90, 405, 92);
-    board(ctx, label, rows, 1716, 52, 60);
-    await cut(ctx, '/story/girl-phone.webp', 1080, 578, 400, k);
-    await cut(ctx, '/story/boy-laptop.webp', 1262, 590, 382, k);
-    await cut(ctx, '/story/bot-wave.webp', 1500, 584, 232, k);
-    await logo(ctx, 90, fy + (H - fy) / 2, 40, e.brand !== 'off');
-  } else {
-    script(ctx, hello, 68, 200, 120, PAPER);
-    words(ctx, [['are you', PAPER]], 72, 350, 100);
-    words(ctx, [['ready for', PAPER]], 72, 462, 100);
-    words(ctx, [['the ', PAPER], ['future?', GOLD]], 72, 574, 100);
-    board(ctx, label, rows, 1010, 48, 66);
-    await cut(ctx, '/story/girl-phone.webp', 548, 1024, 372, k);
-    await cut(ctx, '/story/boy-laptop.webp', 735, 1040, 356, k);
-    await cut(ctx, '/story/bot-wave.webp', 920, 1034, 218, k);
-    await logo(ctx, 72, fy + (H - fy) / 2, 48, e.brand !== 'off', 440);
+  const L = wide
+    ? { greet: [88, 160, 104], head: [[[['are you ready', PAPER]], [['for the ', PAPER], ['future?', GOLD]]], 90, 300, 92, 105], board: [1716, 52, 60],
+        // with partner logos on the floor, the characters step a little right to make room for them
+        people: [['/story/girl-phone.webp', 1080 + (strip ? 90 : 0), 578, 400], ['/story/boy-laptop.webp', 1262 + (strip ? 80 : 0), 590, 382], ['/story/bot-wave.webp', 1500 + (strip ? 70 : 0), 584, 232]],
+        logo: [90, fy + (H - fy) / 2, strip ? 36 : 40, 940] }
+    : { greet: [68, 200, 120], head: [[[['are you', PAPER]], [['ready for', PAPER]], [['the ', PAPER], ['future?', GOLD]]], 72, 350, 100, 112], board: [1010, 48, 66],
+        people: [['/story/girl-phone.webp', 548, 1024, 372], ['/story/boy-laptop.webp', 735, 1040, 356], ['/story/bot-wave.webp', 920, 1034, 218]],
+        logo: [72, strip ? fy + 82 : fy + (H - fy) / 2, 48, 440] };
+
+  if (hello) {
+    const [gx, gy, gs] = L.greet;
+    await part(ctx, pic, 'greeting', 'Greeting', scriptBox(ctx, hello, gx, gy, gs), () => script(ctx, hello, gx, gy, gs, PAPER));
   }
+  const [lines, hx, hy, hs, lead] = L.head;
+  await part(ctx, pic, 'headline', 'Headline', headBox(ctx, lines, hx, hy, hs, lead), () => lines.forEach((l, j) => words(ctx, l, hx, hy + j * lead, hs)));
+  const [br, bt, bf] = L.board;
+  await part(ctx, pic, 'board', 'Date board', boardBox(rows, br, bt, bf), () => board(ctx, label, rows, br, bt, bf));
+  await people(ctx, pic, L.people, k);
+
+  // the logo, then (wide) the partner logos beside it, or (square) under it
+  let [lx, ly, lh, maxW] = L.logo;
+  const size = await lockupSize(ctx, lh, brand);
+  if (brand && size.per * lh > maxW) lh = maxW / size.per;
+  const lw = (await lockupSize(ctx, lh, brand)).w;
+  await part(ctx, pic, 'logo', 'H2S logo', [lx, ly - lh / 2, lw, lh], () => lockup(ctx, lx, ly, lh, brand));
+  if (strip) {
+    const s = await load(strip), ph = wide ? 46 : 50, pw = (s.width / s.height) * ph;
+    const [px, py] = wide ? [lx + lw + 56, ly - ph / 2] : [lx, ly + lh / 2 + 34];
+    await part(ctx, pic, 'partners', 'Partner logos', [px, py, pw, ph], () => {
+      if (wide) {
+        ctx.fillStyle = 'rgba(22,26,58,.3)';
+        ctx.fillRect(px - 30, ly - lh / 2, 2, lh);
+      }
+      ctx.drawImage(s, px, py, pw, ph);
+    });
+  }
+  canvas.__parts = pic.parts;
 }
 
 export async function thumb(canvas, e) {
-  const x = derive(e), W = 600;
+  const x = derive(e), W = 600, pic = tweaks(e, 'thumb');
   canvas.width = canvas.height = W;
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = BLUE;
   ctx.fillRect(0, 0, W, W);
   floor(ctx, W, 430, W, 0.6, 0.45);
   ctx.textBaseline = 'alphabetic';
+  const campus = !x.virtual && e.thumbCampus !== 'off' ? (e.campus || '').trim() : '';
+  // with the campus name everything sits a little higher and the characters a touch smaller
+  const Y = campus ? { title: 96, city: 204, campus: 262, girl: [184, 586, 282], bot: [318, 580, 186] } : { title: 112, city: 238, girl: [182, 580, 300], bot: [318, 574, 196] };
+
   ctx.font = '700 50px Syncopate';
   ctx.letterSpacing = '5px';
-  ctx.textAlign = 'center';
-  ctx.fillStyle = PAPER;
-  ctx.fillText('FUTUREADY', W / 2 + 2.5, 112);
+  const tw = ctx.measureText('FUTUREADY').width;
   ctx.letterSpacing = '0px';
-  let size = 104;
-  ctx.font = `400 ${size}px "Great Vibes"`;
+  await part(ctx, pic, 'title', 'FUTUREADY', [W / 2 - tw / 2, Y.title - 38, tw, 40], () => {
+    ctx.font = '700 50px Syncopate';
+    ctx.letterSpacing = '5px';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = PAPER;
+    ctx.fillText('FUTUREADY', W / 2 + 2.5, Y.title);
+    ctx.letterSpacing = '0px';
+  });
+
+  let size = campus ? 96 : 104;
   const word = x.virtual ? 'Virtual' : e.city || x.hello;
+  ctx.font = `400 ${size}px "Great Vibes"`;
   while (ctx.measureText(word).width > 520 && size > 60) ctx.font = `400 ${(size -= 4)}px "Great Vibes"`;
-  script(ctx, word, W / 2, 238, size, GOLD, 'center');
-  await cut(ctx, '/story/girl-phone.webp', 182, 580, 300, 0.6);
-  await cut(ctx, '/story/bot-wave.webp', 318, 574, 196, 0.6);
+  await part(ctx, pic, 'city', 'City', scriptBox(ctx, word, W / 2, Y.city, size, 'center'), () => script(ctx, word, W / 2, Y.city, size, GOLD, 'center'));
+
+  if (campus) {
+    let cs = 30;
+    const fit = () => {
+      ctx.font = `700 ${cs}px Unbounded`;
+      ctx.letterSpacing = `${cs * 0.02}px`;
+      return ctx.measureText(campus.toUpperCase()).width;
+    };
+    while (fit() > 500 && cs > 16) cs -= 1;
+    const cw = fit();
+    ctx.letterSpacing = '0px';
+    await part(ctx, pic, 'campus', 'Campus name', [W / 2 - cw / 2, Y.campus - cs * 0.8, cw, cs], () => {
+      ctx.font = `700 ${cs}px Unbounded`;
+      ctx.letterSpacing = `${cs * 0.02}px`;
+      ctx.textAlign = 'center';
+      ctx.fillStyle = PAPER;
+      ctx.fillText(campus.toUpperCase(), W / 2, Y.campus);
+      ctx.letterSpacing = '0px';
+    });
+  }
+  await people(ctx, pic, [['/story/girl-phone.webp', ...Y.girl], ['/story/bot-wave.webp', ...Y.bot]], 0.6);
+  canvas.__parts = pic.parts;
 }
 
 // partner logos side by side on a clear background (one logo works too)

@@ -1016,8 +1016,58 @@ button.coach {
   font-weight: 600;
 }
 
+/* the carriage the station board is talking about: lifted, lit in marigold, with a pin above it */
 .coach.is-near {
-  transform: translateY(-4%);
+  z-index: 1;
+  transform: translateY(-7%);
+}
+.coach.is-near img {
+  filter: drop-shadow(0 0 1cqh #f2b230) drop-shadow(0 0 4cqh rgba(242, 178, 48, 0.9));
+}
+.coach.is-near::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  width: 14cqh;
+  height: 12cqh;
+  margin: 0 0 3cqh -7cqh;
+  background: #f2b230;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  filter: drop-shadow(0 0.6cqh 0 rgba(22, 26, 58, 0.35));
+}
+@media (prefers-reduced-motion: no-preference) {
+  .coach.is-near::before {
+    animation: pin-bob 1.2s ease-in-out infinite alternate;
+  }
+}
+@keyframes pin-bob {
+  to {
+    translate: 0 -2.5cqh;
+  }
+}
+
+/* concluded: black and white, a little faded, at the back of the train */
+.coach.is-past img {
+  filter: grayscale(1) contrast(0.92) brightness(1.06);
+  opacity: 0.85;
+}
+.coach.is-past .coach__board {
+  color: #4a4a4a;
+}
+.coach.is-first-past::after {
+  content: 'Concluded';
+  position: absolute;
+  left: 0;
+  bottom: 100%;
+  margin-bottom: 2cqh;
+  padding: 1cqh 3.2cqh;
+  border-radius: 999px;
+  background: #3b3b3b;
+  color: #fff;
+  font: 600 7cqh var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 /* ---------- the passport (as in the deck) ---------- */
@@ -1813,6 +1863,10 @@ button.coach {
   background: var(--cream);
   color: #161a3a;
   overflow: auto;
+  overscroll-behavior: contain;
+  /* a slim scrollbar in the page's colours, not the grey system one (Windows) */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(22, 26, 58, 0.35) transparent;
 }
 
 dialog.sheet:modal {
