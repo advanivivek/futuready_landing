@@ -748,7 +748,7 @@ export const SCENES = [
           <Rows rows={['On completing Futuready,', 'you get an e-passport.']} p={seg(s, 0.1, 0.7)} />
         </Lines>
         <div className="pass-cta" style={{ opacity: seg(s, 0.72, 0.92), pointerEvents: s > 0.8 ? 'auto' : 'none' }}>
-          <button className="pill pill--ink pill--big" onClick={() => jump('train', 1.0)}>
+          <button className="pill pill--ink pill--big" onClick={() => jump('train', 2.1)}>
             Attend Futuready
           </button>
           <p className="pass-cta__row">
@@ -864,19 +864,22 @@ export const SCENES = [
   /* 14. the train: one carriage per city, straight from the event list. Arrives from the right. */
   {
     id: 'train',
-    rest: 3.65,
+    // arrives and waits at the next city (the story holds there: tap to attend), then, as you scroll on,
+    // rolls past the other cities and the concluded ones before the next scene
+    rest: 2.55,
+    after: 1.5,
     wall: '#a6d8ee',
     floor: '#2f7a4e',
     F: 0.22,
     ink: INK,
     enter: { type: 'wipe', T: 0.8 },
-    cues: [[0.32, 'whistle'], ...Array.from({ length: 14 }, (_, i) => [0.5 + i * 0.19, 'chug']), [2.8, 'ding']],
+    cues: [[0.32, 'whistle'], ...Array.from({ length: 8 }, (_, i) => [0.5 + i * 0.19, 'chug']), [2.0, 'ding'], [2.72, 'whistle'], ...Array.from({ length: 6 }, (_, i) => [2.9 + i * 0.19, 'chug'])],
     cam: s => ({ z: lerp(1.08, 1, out(seg(s, 0, 1.2))), x: 0.5, y: 0.75 }),
     world: (s, k) => {
       const { H, cities } = k;
       const t = trainGeometry(s, k);
-      const walk = seg(s, 2.75, 3.45);
-      const run = seg(s, 3.05, 3.6);
+      const walk = seg(s, 1.95, 2.55);
+      const run = seg(s, 2.2, 2.7);
       return (
         <>
           <div className="rails" style={{ bottom: t.railY - 6 }} aria-hidden="true" />
@@ -908,19 +911,19 @@ export const SCENES = [
               );
             })}
           </div>
-          <Cut src={A('girl-walk')} alt="She walks to the platform with her suitcase" x={lerp(-0.25, k.land ? 0.18 : 0.2, out(walk))} h={[0.36, 0.46]} d={0.1} z={5} o={walk > 0 ? 1 : 0} />
-          <Cut src={A('boy-run')} alt="Her friend runs to catch the train" x={lerp(-0.3, k.land ? 0.36 : 0.64, out(run))} h={[0.33, 0.43]} d={0.13} z={6} o={run > 0 ? 1 : 0} />
+          <Cut src={A('girl-walk')} alt="She walks to the platform with her suitcase" x={lerp(-0.25, k.land ? 0.13 : 0.2, out(walk))} h={[0.36, 0.46]} d={0.1} z={5} o={walk > 0 ? 1 : 0} />
+          <Cut src={A('boy-run')} alt="Her friend runs to catch the train" x={lerp(-0.3, k.land ? 0.27 : 0.64, out(run))} h={[0.33, 0.43]} d={0.13} z={6} o={run > 0 ? 1 : 0} />
         </>
       );
     },
     ui: (s, k) => {
       const c = k.cities[trainGeometry(s, k).near] || k.cities[0];
-      const late = seg(s, 2.85, 3.05);
+      const late = seg(s, 2.75, 2.95);
       const hint = seg(s, 0.6, 0.8);
       return (
         <>
           <Lines className="lines--train">
-            <Typed text="Attend in:" p={seg(s, 0.1, 0.3)} className="line" />
+            <Typed text={c.status === 'past' ? 'Concluded in:' : 'Attend in:'} p={seg(s, 0.1, 0.3)} className="line" />
             <div className="station" style={{ opacity: seg(s, 0.3, 0.5), fontSize: stationSize(c.city, k) }} aria-live="polite">
               {c.city}
               <small style={{ maxWidth: stationRoom(k) }}>{stationTag(c)}</small>
@@ -1027,9 +1030,12 @@ function trainGeometry(s, { W, H, land, F, cities }) {
   const split = firstPast > 0 ? cw * 0.22 : 0;
   const at = i => ew + gap + i * (cw + gap) + (firstPast > 0 && i >= firstPast ? split : 0) + cw / 2;
   const stop = Math.max(0, cities.findIndex(c => c.status !== 'past'));
-  const end = W / 2 - at(stop);
-  const move = inout(seg(s, 0.3, 3.0));
-  const X = lerp(start, end, move);
+  const stopX = W / 2 - at(stop);
+  const lastX = W / 2 - at(n - 1);
+  // arrive and wait at the next city; then roll on until the last carriage (a concluded city) has come by
+  const arrive = inout(seg(s, 0.3, 2.0));
+  const leave = lastX < stopX ? inout(seg(s, 2.7, 3.95)) : 0;
+  const X = leave > 0 ? lerp(stopX, lastX, leave) : lerp(start, stopX, arrive);
   let near = 0;
   let best = Infinity;
   for (let i = 0; i < n; i++) {
@@ -1039,7 +1045,7 @@ function trainGeometry(s, { W, H, land, F, cities }) {
       near = i;
     }
   }
-  const moving = move > 0 && move < 1;
+  const moving = (arrive > 0 && arrive < 1) || (leave > 0 && leave < 1);
   return { ch, cw, eh, ew, gap, X, near, moving, firstPast, split, shake: moving ? Math.sin(s * 90) : 0, railY: (F - 0.07) * H };
 }
 

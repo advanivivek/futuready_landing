@@ -646,7 +646,7 @@ export default function Story() {
               className="pill pill--small pill--head"
               onClick={() => {
                 sound.play('click');
-                jump('train', 1.0);
+                jump('train', 2.1);
               }}
             >
               Attend
