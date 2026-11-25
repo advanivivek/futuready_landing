@@ -30,7 +30,7 @@ export const BRING_FORM_URL = '';
 
 // ---- Sharing ----
 // The site's own address, for share links and previews. Leave '' to use the address it is opened at.
-export const SITE_URL = '';
+export const SITE_URL = 'https://hack2skill.com/futuready/';
 export const SHARE_TEXT = 'Found something before everyone else: Futuready, a free campus builder lab by Hack2skill. Are you ready for the future?';
 
 // ---- The TV in the lab ----

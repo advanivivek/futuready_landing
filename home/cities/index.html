@@ -1,6 +1,6 @@
 <!doctype html>
-<!-- The other Futuready cities, for an "Embed Iframe" on each Hack2skill page: /cities/index.html?not=<this page slug>.
-     Reads ../cities.json, which every build writes from Hack2skill's event list (scripts/fetch-events.mjs). -->
+<!-- The other Futuready cities, for each Hack2skill page (an iframe): /cities/index.html?not=<this page slug>.
+     On hack2skill.com it reads Hack2skill's event list live; anywhere else, the copy saved at build (cities.json). -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -8,8 +8,8 @@
 <meta name="robots" content="noindex">
 <title>Other Futuready cities</title>
 <style>
-@font-face{font-family:Unbounded;src:url(../fonts/unbounded.woff2) format('woff2');font-weight:700;font-display:swap}
-@font-face{font-family:'Great Vibes';src:url(../fonts/great-vibes.woff2) format('woff2');font-display:swap}
+@font-face{font-family:Unbounded;src:url(/fonts/unbounded.woff2) format('woff2');font-weight:700;font-display:swap}
+@font-face{font-family:'Great Vibes';src:url(/fonts/great-vibes.woff2) format('woff2');font-display:swap}
 :root{--ink:#161a3a;--blue:#3463af;--gold:#f2b230;--paper:#fffcf5;--cream:#efe6d2}
 *{box-sizing:border-box}
 html,body{margin:0;background:transparent;font:15px/1.4 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:var(--ink)}
@@ -31,19 +31,6 @@ a.card.virtual .date{color:var(--cream)}
 </head>
 <body>
 <div class="row" id="row"></div>
-<script>
-const not = new URLSearchParams(location.search).get('not') || '';
-const esc = t => String(t || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
-const card = (c, cls, label) => `<a class="card ${cls}" href="${esc(c.url)}" target="_top"><span class="pill">${label}</span><span class="city">${esc(c.city)}</span><span class="campus">${esc(c.campus)}</span><span class="date">${esc(c.date)}</span><span class="go">${cls === 'open' || cls === 'virtual' ? 'Register free →' : 'See the page →'}</span></a>`;
-fetch('../cities.json', { cache: 'no-cache' })
-  .then(r => (r.ok ? r.json() : { cities: [] }))
-  .catch(() => ({ cities: [] }))
-  .then(({ cities = [], virtual }) => {
-    const live = cities.filter(c => c.status !== 'past' && c.url && !(not && c.url.includes(not)));
-    let html = live.map(c => card(c, c.status, c.status === 'open' ? 'Registrations open' : 'Coming soon')).join('');
-    if (virtual && !virtual.includes(not || '\u0000')) html += card({ url: virtual, city: 'Virtual', campus: 'Online, from anywhere', date: 'Every few weeks' }, 'virtual', 'Live online');
-    document.getElementById('row').innerHTML = html;
-  });
-</script>
+<script type="module" src="./cities.js"></script>
 </body>
 </html>
