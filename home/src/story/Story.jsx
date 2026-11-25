@@ -432,10 +432,10 @@ export default function Story() {
   }, [stamps]);
 
   useEffect(() => sound.mood(idx), [idx]);
-  // the wheel turns heavier at the station, so people slow down long enough to pick a city
+  // the wheel is heavier at the station (the train scene sets it); everywhere else it is back to normal
   useEffect(() => {
     const vs = window.__lenis?.virtualScroll?.options;
-    if (vs) vs.wheelMultiplier = SCENES[idx].id === 'train' ? 0.4 : 0.8;
+    if (vs && SCENES[idx].id !== 'train') vs.wheelMultiplier = 0.8;
   }, [idx]);
 
   const lastU = useRef(u);
@@ -554,12 +554,19 @@ export default function Story() {
   const headInk = topScene.ink;
   const topWall = topScene.wall;
 
-  // The phone's own bars (the status bar by the notch, Android's address bar) take the colour of the scene
-  // at the top, and so does the page behind them, so the page reads as one piece with the phone.
+  // Edge to edge on every phone: the status bar by the notch and Android's address bar take the colour of the
+  // scene's wall (theme-color; the stage itself also runs under the notch, viewport-fit=cover). The page behind
+  // the bottom bars (iOS Safari's floating toolbar, Android's gesture bar, a foldable's hinge) takes the colour of
+  // the scene's floor, so no strip of another colour shows at the top or the bottom.
+  const edgeTop = over > 0 ? '#0b0820' : topWall;
+  const edgeBottom = over > 0 ? '#0b0820' : topScene.F ? topScene.floor : topScene.wall;
   useEffect(() => {
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', topWall);
-    document.documentElement.style.backgroundColor = topWall;
-  }, [topWall]);
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', edgeTop);
+  }, [edgeTop]);
+  useEffect(() => {
+    document.documentElement.style.backgroundColor = edgeBottom;
+    document.body.style.backgroundColor = edgeBottom;
+  }, [edgeBottom]);
   // past the end the page lifts; on phones by less, the word there is smaller
   const lift = over > 0 ? H * (land ? 0.46 : 0.24) * (1 - Math.pow(1 - over, 2.2)) : 0;
 

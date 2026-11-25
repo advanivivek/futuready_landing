@@ -1,5 +1,6 @@
 /**
- * "Bring Futuready to your campus" requests, into a tidy Google Sheet.
+ * "Bring Futuready to your campus" requests, and the cities shown as "boarding soon" on the train:
+ * one Google Sheet for both.
  *
  * Set up (about 5 minutes; the same steps are in START-HERE.md):
  *  1. Make a new Google Sheet. Extensions, Apps Script. Delete what is there, paste this file, Save.
@@ -10,6 +11,9 @@
  *  - "Requests": one row per request, newest at the bottom, with a filter on every column
  *    (click the small icon in a header to filter by college, city, role and so on).
  *  - "By campus": how many requests each college and city has, most first. It updates by itself.
+ *  - "Cities": the cities shown on the main page's train as "boarding soon". Tick "Show on the train" to show
+ *    one, untick to hide it, or type a new city in a new row. A city someone asks for is added by itself
+ *    (unticked), with how many requests it has, so you can see which ones to switch on.
  * The same email asking for the same college twice is saved once.
  */
 const SHEET = 'Requests';
@@ -17,6 +21,45 @@ const SUMMARY = 'By campus';
 const HEAD = ['Time', 'College', 'City', 'Name', 'Role', 'Email', 'Phone', 'From page'];
 const WIDTHS = [150, 280, 130, 180, 110, 230, 130, 220];
 const ROLES = ['Student', 'Faculty', 'Management', 'Club lead', 'Other'];
+const CITIES = 'Cities';
+const START_CITIES = ['Mumbai', 'Ahmedabad', 'Jaipur', 'Delhi'];
+
+// the "Cities" tab, made once
+function cities_(ss) {
+  let sh = ss.getSheetByName(CITIES);
+  if (sh) return sh;
+  sh = ss.insertSheet(CITIES);
+  sh.getRange(1, 1, 1, 3).setValues([['City', 'Show on the train', 'Requests']])
+    .setFontWeight('bold').setFontColor('#ffffff').setBackground('#161a3a');
+  sh.setFrozenRows(1);
+  sh.setColumnWidth(1, 200);
+  sh.setColumnWidth(2, 150);
+  sh.setColumnWidth(3, 100);
+  sh.getRange('B2:B500').insertCheckboxes();
+  if (START_CITIES.length) sh.getRange(2, 1, START_CITIES.length, 2).setValues(START_CITIES.map((c) => [c, true]));
+  sh.getRange('C2').setFormula(`=ARRAYFORMULA(IF(A2:A="",,COUNTIF('${SHEET}'!C:C, A2:A)))`);
+  return sh;
+}
+
+// the ticked cities, for the train
+function shown_(ss) {
+  const sh = cities_(ss);
+  if (sh.getLastRow() < 2) return [];
+  return sh.getRange(2, 1, sh.getLastRow() - 1, 2).getValues()
+    .filter((r) => String(r[0]).trim() && r[1] === true)
+    .map((r) => String(r[0]).trim());
+}
+
+// a city someone asked for, added (unticked) if it is not there yet
+function remember_(ss, city) {
+  const sh = cities_(ss);
+  const have = sh.getLastRow() > 1 ? sh.getRange(2, 1, sh.getLastRow() - 1, 1).getValues().map((r) => key_(r[0])) : [];
+  if (have.indexOf(key_(city)) < 0) {
+    const row = sh.getLastRow() + 1;
+    sh.getRange(row, 1).setValue(city);
+    sh.getRange(row, 2).setValue(false);
+  }
+}
 
 function setup_(ss) {
   let sh = ss.getSheetByName(SHEET);
@@ -54,10 +97,11 @@ function json_(o) {
 
 const key_ = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 
-// Opening the web app link in a browser shows how many requests there are.
+// The main page asks this for the cities to show; opening the link in a browser shows the same.
 function doGet() {
-  const sh = setup_(SpreadsheetApp.getActiveSpreadsheet());
-  return json_({ ok: true, requests: Math.max(0, sh.getLastRow() - 1) });
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sh = setup_(ss);
+  return json_({ ok: true, requests: Math.max(0, sh.getLastRow() - 1), cities: shown_(ss) });
 }
 
 function doPost(e) {
@@ -82,6 +126,7 @@ function doPost(e) {
       const safe = (v) => (/^[=+\-@]/.test(v) ? "'" + v : v);
       sh.appendRow([new Date(), safe(college), safe(city), safe(name), role, email,
         safe(clean(d.phone, 20)), clean(d.page, 200)]);
+      remember_(SpreadsheetApp.getActiveSpreadsheet(), safe(city));
     }
     return json_({ ok: true, already: seen });
   } catch (err) {

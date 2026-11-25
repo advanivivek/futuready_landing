@@ -125,7 +125,12 @@ export function fromHack2skill(json, match = 'futuready', now = Date.now()) {
 
 // The feed's cities first, then any city only in the hand-made list (Pune, "boarding soon" names).
 export function mergeCities(feed, manual, now = Date.now()) {
-  const mine = normalise(manual, now);
+  // the same city twice (the list in data.js and the Google Sheet) shows once
+  const once = new Set();
+  const mine = normalise(manual, now).filter(c => {
+    const k = (c.url || c.city).toLowerCase();
+    return once.has(k) ? false : once.add(k);
+  });
   const key = c => (c.url || c.city).toLowerCase();
   const seen = new Set(feed.map(key));
   const cities = new Set(feed.map(c => c.city.toLowerCase()));

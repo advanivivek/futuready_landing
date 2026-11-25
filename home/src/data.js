@@ -7,7 +7,8 @@
 //   https://hack2skill.com/event/futuready-vadodara-07122026  ->  Vadodara, 7 Dec 2026
 // (so name each Hack2skill page futuready-<city>-<ddmmyyyy>; two-word cities: futuready-navi-mumbai-05012027).
 // Until its day has passed a city shows "Departs" and its carriage opens its page; afterwards "Concluded" (in black and white, at the back of the train).
-// A city with no page yet: just { city: 'Name' } (boarding soon).
+// A city with no page yet: just { city: 'Name' } (boarding soon). Once the Google Sheet is connected (BRING_FORM_URL
+// below, START-HERE.md Step 6), the boarding-soon cities come from its "Cities" tab instead: tick to show, untick to hide.
 export const CITIES = [
   { link: 'https://hack2skill.com/futuready/pune26102026', campus: 'Trinity Academy of Engineering' },
   { link: 'https://hack2skill.com/event/futuready-vadodara-07122026', campus: 'Parul University' },
@@ -24,8 +25,9 @@ export const CITIES_FEED = 'https://hack2skill.com/api/v1/innovator/public/event
 // ---- The last scene: "Didn't find your city? Attend Virtual, or bring it to your campus." ----
 export const VIRTUAL_URL = 'https://hack2skill.com/event/futuready-virtual';
 export const SUPPORT = 'support@hack2skill.com';
-// Where "Bring it to your campus" requests go: the web app link of the Google Sheet script
-// (scripts/bring-campus.gs, see START-HERE.md). Until it is set, a request opens an email instead.
+// One Google Sheet for the "Bring it to your campus" requests AND the boarding-soon cities on the train: the web app
+// link of its script (scripts/bring-campus.gs, see START-HERE.md Step 6). Until it is set, a request opens an email
+// to SUPPORT instead, and the boarding-soon cities are the names in CITIES above.
 export const BRING_FORM_URL = '';
 
 // ---- Sharing ----

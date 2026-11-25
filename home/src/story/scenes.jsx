@@ -874,13 +874,14 @@ export const SCENES = [
     F: 0.22,
     ink: INK,
     enter: { type: 'wipe', T: 0.8 },
-    cues: [[0.32, 'whistle'], ...Array.from({ length: 8 }, (_, i) => [0.5 + i * 0.19, 'chug']), [2.0, 'ding'], [2.72, 'whistle']],
+    cues: [[0.32, 'whistle'], ...Array.from({ length: 8 }, (_, i) => [0.5 + i * 0.19, 'chug']), [2.0, 'ding']],
     cam: s => ({ z: lerp(1.08, 1, out(seg(s, 0, 1.2))), x: 0.5, y: 0.75 }),
     world: (s, k) => {
       const { H, cities } = k;
       const t = trainGeometry(s, k);
-      const walk = seg(s, 1.95, 2.55);
-      const run = seg(s, 2.2, 2.7);
+      // the two friends walk onto the platform once the cities still to come have gone by
+      const walk = seg(s, t.cs - 0.05, t.cs + 0.55);
+      const run = seg(s, t.cs + 0.15, t.cs + 0.65);
       return (
         <>
           <div className="rails" style={{ bottom: t.railY - 6 }} aria-hidden="true" />
@@ -918,8 +919,12 @@ export const SCENES = [
       );
     },
     ui: (s, k) => {
-      const c = k.cities[trainGeometry(s, k).near] || k.cities[0];
+      const t = trainGeometry(s, k);
+      const c = k.cities[t.near] || k.cities[0];
       const hint = seg(s, 0.6, 0.8);
+      // the wheel turns heavier while the cities still to come are at the station, normal again for the concluded ones
+      const vs = typeof window !== 'undefined' && window.__lenis?.virtualScroll?.options;
+      if (vs) vs.wheelMultiplier = t.calm ? 0.4 : 0.8;
       return (
         <>
           <Lines className="lines--train">
@@ -1029,26 +1034,34 @@ function trainGeometry(s, { W, H, land, F, cities }) {
   const split = firstPast > 0 ? cw * 0.22 : 0;
   const at = i => ew + gap + i * (cw + gap) + (firstPast > 0 && i >= firstPast ? split : 0) + cw / 2;
   const xAt = i => W / 2 - at(i);
-  // Arrive and wait at the first city to come (the story holds there). Then, scroll by scroll, stop again at every
-  // other city still to come (each gets a long, slow stretch, so it can be tapped), and finally roll past the
-  // concluded ones at the back. The whole ride fits the scene, however many cities there are.
+  // Arrive and wait at the first city to come (the story holds there). Then, scroll by scroll, stop at every other
+  // city still to come (each gets a long, slow stretch, so it can be tapped). After the last one the train pulls up
+  // to the gap before the concluded cities, the two friends walk onto the platform, and the concluded carriages
+  // roll past quickly. The whole ride fits the scene, however many cities there are.
   const up = Math.max(1, cities.filter(c => c.status !== 'past').length);
   const hasPast = up < n;
+  const R = 4.2;
+  const pastPart = hasPast ? 0.7 : 0;
+  const charsPart = 0.7;
+  const U = R - pastPart - charsPart;
+  const cs = 2.7 + U; // the friends come on here
   const legs = [];
-  let t = 2.7;
-  const u = Math.min(0.45, 4.2 / ((up - 1) * 3.2 + (hasPast ? 2.5 : 0) || 1));
-  for (let i = 1; i < up; i++) {
-    legs.push([t, t + u, i - 1, i]);
-    t += u * 3.2;
+  if (up > 1) {
+    const slot = U / (up - 1);
+    for (let i = 1; i < up; i++) legs.push([2.7 + (i - 1) * slot, 2.7 + (i - 1) * slot + slot * 0.3, xAt(i - 1), xAt(i)]);
   }
-  if (hasPast) legs.push([t, t + u * 2.5, up - 1, n - 1]);
+  if (hasPast) {
+    const gapX = W / 2 - (at(up - 1) + at(up)) / 2;
+    legs.push([cs, cs + charsPart * 0.5, xAt(up - 1), gapX]);
+    legs.push([cs + charsPart, cs + charsPart + pastPart, gapX, xAt(n - 1)]);
+  }
   const arrive = inout(seg(s, 0.3, 2.0));
   let X = lerp(start, xAt(0), arrive);
   let rolling = false;
-  for (const [a, b, from, to] of legs) {
+  for (const [a, b, x0, x1] of legs) {
     if (s >= a) {
       const p = inout(seg(s, a, b));
-      X = lerp(xAt(from), xAt(to), p);
+      X = lerp(x0, x1, p);
       rolling = rolling || (p > 0 && p < 1);
     }
   }
@@ -1062,6 +1075,6 @@ function trainGeometry(s, { W, H, land, F, cities }) {
     }
   }
   const moving = (arrive > 0 && arrive < 1) || rolling;
-  return { ch, cw, eh, ew, gap, X, near, moving, firstPast, split, shake: moving ? Math.sin(s * 90) : 0, railY: (F - 0.07) * H };
+  return { ch, cw, eh, ew, gap, X, near, moving, firstPast, split, cs, calm: s < cs, shake: moving ? Math.sin(s * 90) : 0, railY: (F - 0.07) * H };
 }
 

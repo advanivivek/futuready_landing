@@ -68,14 +68,15 @@
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
-  background: var(--blue);
+  /* the first scene's floor, until the story sets the colour of whichever scene is showing */
+  background: var(--cream);
   /* no double-tap zoom (pinch zoom still works) */
   touch-action: manipulation;
 }
 
 body {
   margin: 0;
-  background: var(--blue);
+  background: var(--cream);
   color: var(--ink);
   font-family: var(--sans);
   -webkit-font-smoothing: antialiased;
@@ -2289,6 +2290,12 @@ dialog.sheet:modal {
 }
 
 /* ---------- team preview: the code screen ---------- */
+/* the review page is all blue, edge to edge */
+html:has(.gate),
+html:has(.gate) body {
+  background: var(--blue);
+}
+
 .gate {
   min-height: 100svh;
   display: grid;
