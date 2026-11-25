@@ -208,9 +208,9 @@ async function paint() {
   $('#stepList').innerHTML = [
     isNew && `<b>Make the page:</b> My Dashboard → Create New Initiative → <b>Clone from Initiative</b> → Clone the Parul page. Name: <code>${x.title}</code>. Thumbnail: the one from tab 1. Turn on <b>Copy Email Template</b>. URL: <code>${x.slug}</code> → Finish.`,
     `<b>Pictures:</b> download the three from tab 1. In <a href="${x.liveEdit}" target="_blank">Live Edit</a> → Event Overview → Banner: Desktop gets the wide cover, Mobile gets the square one. <b>Press Save after each one.</b> If a slot already has a picture, delete it with the bin and add a new one.`,
-    `<b>Thumbnail:</b> Live Edit → Initiative Settings → logo → upload → Crop → Save.`,
+    `<b>Thumbnail:</b> Live Edit → <b>Initiative Settings → logo</b> → upload → Crop → Save. (The Thumbnail spot under Event Overview does not save.)`,
     !x.virtual && `<b>Partner logos:</b> open About → Insert → Image → Add File → the strip from tab 1 → Insert. Copy its link: right-click the picture in the preview → Copy image address. Paste it into the form (Partner → Logo strip link). Then do step 5 for About.`,
-    `<b>Sections:</b> tab 2. Paste each into its section (Insert → Source Code → Embed → Save). Skip <b>Meet your trainer</b>: the clone already has it.`,
+    `<b>Sections:</b> tab 2. In each section: <b>Select Editor: Embed HTML</b> → click in the box → select all → paste → Save. (Using the Lexical backup instead? Insert → Source Code → Embed → Save.)`,
     isNew && `<b>Manage Sections:</b> hide Challenges, Jury, Mentor and Partner (the clone turns them on) → Save.`,
     isNew && `<b>Initiative Settings:</b> organisation = <code>${e.campus || 'the campus'}</code>; mode = ${x.virtual ? 'Virtual' : 'In Person'} → Save.`,
     `<b>FAQs:</b> tab 3, into Live Edit → FAQs.`,
