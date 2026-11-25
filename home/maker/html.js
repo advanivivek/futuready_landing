@@ -6,7 +6,8 @@
   (The older Lexical versions of the same sections are in sections.js, kept as the backup.)
 */
 import { derive, HOSTED, TRAINER, QUOTES } from './sections.js';
-import { SITE_URL } from '../src/data.js';
+// where the main site lives (its small "Other cities" page is shown on every event page)
+const HOME = 'https://hack2skill.com/futuready/';
 
 const esc = t => String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const H2S = 'https://storage.googleapis.com/vision-hack2skill-production/innovator/USER02555644/';
@@ -17,12 +18,12 @@ export const ART = {
   stamp: H2S + '1795396178702-stamp.webp',
 };
 
-// what each level gives you comes first (that is what students sign up for); the story line sits under it
+// each level says plainly what you get: that is what students sign up for
 const LEVELS = [
-  ['R', 'Requirements', 'Learn the art of spec writing.', 'AI does literally what you say.', '#f2a7b8', '#e98ca2'],
-  ['E', 'Evaluate', 'Learn to evaluate like Anthropic engineers.', 'If it looks right, is it really right?', '#9ed6c0', '#86c8ae'],
-  ['A', 'Architect', 'Learn to architect scalable AI systems.', 'Anyone can stack blocks.', '#f2b230', '#e3a21c'],
-  ['D', 'Direct', 'Learn to direct a team of AI agents.', 'Nobody codes alone anymore.', '#c3b5f2', '#ae9deb'],
+  ['R', 'Requirements', 'Learn the art of spec writing.', '#f2a7b8', '#e98ca2'],
+  ['E', 'Evaluate', 'Learn to evaluate like Anthropic engineers.', '#9ed6c0', '#86c8ae'],
+  ['A', 'Architect', 'Learn to architect scalable AI systems.', '#f2b230', '#e3a21c'],
+  ['D', 'Direct', 'Learn to direct a team of AI agents.', '#c3b5f2', '#ae9deb'],
 ];
 const TAGS = ['DevRel · Hack2skill', 'Architect', 'Builds AI products', 'Loves math', 'Dances salsa', 'Plays music'];
 const TINTS = ['#fdeef1', '#eaf6f0', '#fff4dc', '#efeafc'];
@@ -30,13 +31,13 @@ const TINTS = ['#fdeef1', '#eaf6f0', '#fff4dc', '#efeafc'];
 const FONTS = "@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400..700&family=Geist+Mono:wght@500..600&family=Unbounded:wght@600..900&display=swap');";
 const BASE = `
 .fr{--blue:#3463af;--gold:#f2b230;--cream:#efe6d2;--paper:#fffcf5;--ink:#161a3a;container-type:inline-size;
-  font:400 16px/1.5 'Geist',system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;margin:0 0 8px;text-align:left}
+  font:400 16px/1.5 'Geist',system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;margin:0 0 56px;text-align:left;text-wrap:balance}
 .fr *,.fr *::before,.fr *::after{box-sizing:border-box}
 .fr p,.fr h3,.fr ul,.fr ol,.fr li,.fr figure,.fr blockquote{margin:0;padding:0}
 .fr ul,.fr ol{list-style:none}
 .fr img{display:block;max-width:100%;height:auto}
 .fr a{color:inherit}
-.fr .fr-d{font-family:'Unbounded',system-ui,sans-serif;font-weight:700;letter-spacing:-.045em;line-height:1.08;text-wrap:balance}
+.fr .fr-d{font-family:'Unbounded',system-ui,sans-serif;font-weight:700;letter-spacing:-.045em;line-height:1.08}
 .fr .fr-mono{font-family:'Geist Mono',ui-monospace,Menlo,monospace;font-weight:600;letter-spacing:.06em}
 .fr .fr-btn{display:flex;align-items:center;justify-content:center;gap:10px;min-height:58px;padding:0 28px;border-radius:999px;background:var(--gold);color:var(--ink);
   font:700 18px/1 'Unbounded',system-ui,sans-serif;letter-spacing:-.03em;text-decoration:none;box-shadow:0 6px 0 #c98c12,0 14px 24px rgba(10,12,30,.14);
@@ -122,17 +123,15 @@ export function htmlSections(e, hosted = HOSTED) {
   const learn = block('What you will learn', `
 .fr-learn .fr-intro{font:600 clamp(19px,3.6cqw,23px)/1.25 'Geist',sans-serif;letter-spacing:-.03em;max-width:32ch}
 .fr-learn .fr-grid{display:grid;gap:12px;margin-top:18px}
-.fr-learn .fr-lv{position:relative;overflow:hidden;min-height:150px;padding:18px 20px;border-radius:20px;background:var(--wall);transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
-.fr-learn .fr-lv:hover{transform:translateY(-3px) rotate(-.5deg)}
+.fr-learn .fr-lv{position:relative;overflow:hidden;min-height:124px;padding:18px 20px;border-radius:20px;background:var(--wall)}
 .fr-learn .fr-letter{position:absolute;right:-4px;bottom:-30px;font:900 150px/1 'Unbounded',sans-serif;letter-spacing:-.06em;color:var(--tint);pointer-events:none;transition:transform .4s cubic-bezier(.34,1.56,.64,1)}
 .fr-learn .fr-lv:hover .fr-letter{transform:translate(-6px,-8px) rotate(-6deg)}
 .fr-learn .fr-tag{position:relative;display:flex;align-items:center;gap:8px;font-size:12px}
 .fr-learn .fr-tag i{width:9px;height:9px;border-radius:50%;background:currentColor;opacity:.6}
 .fr-learn .fr-say{position:relative;margin-top:10px;font:700 clamp(18px,3cqw,21px)/1.18 'Unbounded',sans-serif;letter-spacing:-.04em;max-width:17ch}
-.fr-learn .fr-what{position:relative;margin-top:8px;font-size:16px;max-width:24ch;opacity:.85}
 .fr-learn .fr-lv--y{--wall:#151a45;--tint:#20286a;color:var(--cream)}
-.fr-learn .fr-you{display:block;margin-top:6px;font:800 clamp(32px,6cqw,44px)/1 'Unbounded',sans-serif;letter-spacing:-.05em;color:var(--gold)}
-.fr-learn .fr-lv--y .fr-say{max-width:24ch}
+.fr-learn .fr-you{position:relative;margin-top:8px;font:800 clamp(34px,6cqw,46px)/1 'Unbounded',sans-serif;letter-spacing:-.05em;color:var(--gold)}
+.fr-learn .fr-lv--y .fr-say{max-width:30ch}
 .fr-learn .fr-pass{display:flex;align-items:center;gap:18px;margin-top:12px;padding:16px 20px;border-radius:20px;background:var(--cream)}
 .fr-learn .fr-pass img{width:150px;flex:none;transform:rotate(-4deg);filter:drop-shadow(0 8px 14px rgba(10,12,30,.2))}
 .fr-learn .fr-pass b{display:block;font:700 clamp(17px,3cqw,21px)/1.2 'Unbounded',sans-serif;letter-spacing:-.04em}
@@ -143,8 +142,8 @@ export function htmlSections(e, hosted = HOSTED) {
 <section class="fr fr-learn">
   <p class="fr-intro">The five skills developers need now that AI writes the code. One level each, and a stamp for every level you clear.</p>
   <ol class="fr-grid">
-    ${LEVELS.map(([k, name, gain, story, wall, tint], i) => `<li class="fr-lv fr-in" style="--wall:${wall};--tint:${tint}"><b class="fr-letter" aria-hidden="true">${k}</b><p class="fr-mono fr-tag"><i></i>Level ${i + 1} · ${name}</p><p class="fr-say">${esc(gain)}</p><p class="fr-what">${esc(story)}</p></li>`).join('\n    ')}
-    <li class="fr-lv fr-lv--y fr-in"><b class="fr-letter" aria-hidden="true">Y</b><p class="fr-mono fr-tag"><i></i>Level 5 · You</p><p class="fr-say">Build your own edge: the part of you <span class="fr-you">AI can’t copy.</span></p><p class="fr-what">The last level is you.</p></li>
+    ${LEVELS.map(([k, name, gain, wall, tint], i) => `<li class="fr-lv fr-in" style="--wall:${wall};--tint:${tint}"><b class="fr-letter" aria-hidden="true">${k}</b><p class="fr-mono fr-tag"><i></i>Level ${i + 1} · ${name}</p><p class="fr-say">${esc(gain)}</p></li>`).join('\n    ')}
+    <li class="fr-lv fr-lv--y fr-in"><b class="fr-letter" aria-hidden="true">Y</b><p class="fr-mono fr-tag"><i></i>Level 5 · You</p><p class="fr-you">Younique.</p><p class="fr-say">Discover your own strengths, the edge no AI can copy.</p></li>
   </ol>
   <div class="fr-pass fr-in">
     <img src="${hosted.passport}" alt="An open Futuready passport with all five stamps" width="150" height="116" loading="lazy">
@@ -204,10 +203,10 @@ export function htmlSections(e, hosted = HOSTED) {
   const facts = x.virtual ? ['Free', 'Online', 'Every few weeks'] : ['Free', x.dateShort, `${e.start} – ${e.end}`, `${e.campus}, ${e.city}`];
   const voices = block('What students say', `
 .fr-voices .fr-wall{display:grid;gap:22px;padding:30px 18px 24px;border-radius:22px;background:var(--cream)}
-.fr-voices .fr-paper{position:relative;padding:20px 20px 16px;border-radius:4px;background:var(--paper);box-shadow:0 1px 0 rgba(0,0,0,.05),0 12px 26px rgba(10,12,30,.14);transform:rotate(var(--r));transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+.fr-voices .fr-paper{position:relative;display:flex;flex-direction:column;justify-content:space-between;padding:20px 20px 16px;border-radius:4px;background:var(--paper);box-shadow:0 1px 0 rgba(0,0,0,.05),0 12px 26px rgba(10,12,30,.14);transform:rotate(var(--r));transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
 .fr-voices .fr-paper:hover{transform:rotate(0) translateY(-4px)}
 .fr-voices .fr-paper::before{content:'';position:absolute;top:-9px;left:50%;width:64px;height:18px;transform:translateX(-50%) rotate(-3deg);background:rgba(242,178,48,.65)}
-.fr-voices blockquote{font:600 19px/1.38 'Geist',sans-serif;letter-spacing:-.015em;text-wrap:pretty}
+.fr-voices blockquote{font:600 19px/1.38 'Geist',sans-serif;letter-spacing:-.015em}
 .fr-voices figcaption{margin-top:12px;font:700 14px/1.3 'Geist',sans-serif;color:var(--blue)}
 .fr-voices figcaption span{display:block;margin-top:1px;font:500 12px/1.3 'Geist Mono',monospace;color:var(--ink);opacity:.7}
 .fr-voices .fr-facts{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:20px}
@@ -230,8 +229,8 @@ export function htmlSections(e, hosted = HOSTED) {
     { key: 'voices', title: 'What students say', where: 'Custom section "What students say" → Select Editor: Embed HTML', html: voices },
   ];
   // the other cities, live: a small page on the main site (public/cities/) that lists what Hack2skill has published
-  if (SITE_URL) {
-    const src = `${SITE_URL.replace(/\/?$/, '/')}cities/index.html?not=${x.slug}`;
+  {
+    const src = `${HOME}cities/index.html?not=${x.slug}`;
     out.push({ key: 'cities', title: 'Other cities', where: 'New custom section "Other cities" → Select Editor: Embed HTML', html: block('Other cities', '.fr-cities iframe{display:block;width:100%;height:230px;border:0}', `<section class="fr fr-cities"><iframe src="${src}" title="Other Futuready cities" loading="lazy"></iframe></section>`) });
   }
   return out;
