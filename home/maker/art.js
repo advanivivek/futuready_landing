@@ -249,8 +249,10 @@ export async function cover(canvas, e, wide) {
   if (brand && size.per * lh > maxW) lh = maxW / size.per;
   const lw = (await lockupSize(ctx, lh, brand)).w;
   await part(ctx, pic, 'logo', 'H2S logo', [lx, ly - lh / 2, lw, lh], () => lockup(ctx, lx, ly, lh, brand));
-  if (strip) {
-    const s = await load(strip), ph = wide ? 46 : 50, pw = (s.width / s.height) * ph;
+  // (the partner strip is a file made on your Mac: where it is missing, the cover simply goes without it)
+  const s = strip ? await load(strip).catch(() => null) : null;
+  if (s) {
+    const ph = wide ? 46 : 50, pw = (s.width / s.height) * ph;
     const [px, py] = wide ? [lx + lw + 56, ly - ph / 2] : [lx, ly + lh / 2 + 34];
     await part(ctx, pic, 'partners', 'Partner logos', [px, py, pw, ph], () => {
       if (wide) {

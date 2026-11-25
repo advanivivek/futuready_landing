@@ -8,13 +8,41 @@ import { BringDialog, ShareButton } from './Extras';
 import { TV_SCREENS } from '../data';
 import { loadPictures, pic } from './pics';
 
-// the story's pictures, for warming them up in dev (on the live site they all come in the pack)
-const WARM = [
-  'girl-sit', 'girl-list', 'girl-lens', 'girl-baton', 'girl-walk',
-  'boy-sit', 'boy-plan', 'boy-run', 'boy-wave', 'boy-thumb',
-  'bot-type', 'bot-cage-open', 'bot-cage', 'bot-paper', 'bot-block', 'bot-horn', 'bot-wave',
-  'bug', 'tv', 'blocks', 'desk', 'stamp', 'squad', 'engine', 'coach',
-  'vivek-dance', 'vivek-kick', 'vivek-walk', 'vivek-step', 'vivek-chair', 'vivek-lean',
+// in dev (no packs) every picture is warmed one by one, as before
+const DEV_WARM = [
+  'story/girl-sit.webp',
+  'story/girl-list.webp',
+  'story/girl-lens.webp',
+  'story/girl-baton.webp',
+  'story/girl-walk.webp',
+  'story/boy-sit.webp',
+  'story/boy-plan.webp',
+  'story/boy-run.webp',
+  'story/boy-wave.webp',
+  'story/boy-thumb.webp',
+  'story/bot-type.webp',
+  'story/bot-cage-open.webp',
+  'story/bot-cage.webp',
+  'story/bot-paper.webp',
+  'story/bot-block.webp',
+  'story/bot-horn.webp',
+  'story/bot-wave.webp',
+  'story/bug.webp',
+  'story/tv.webp',
+  'story/blocks.webp',
+  'story/desk.webp',
+  'story/stamp.webp',
+  'story/squad.webp',
+  'story/engine.webp',
+  'story/coach.webp',
+  'story/vivek-dance.webp',
+  'story/vivek-kick.webp',
+  'story/vivek-walk.webp',
+  'story/vivek-step.webp',
+  'story/vivek-chair.webp',
+  'story/vivek-lean.webp',
+  'story/crowd.webp',
+  ...TV_SCREENS,
 ];
 
 // how light a colour is (0 dark, 1 light), for the little line at the bottom
@@ -313,7 +341,9 @@ export default function Story() {
   const [unit, setUnit] = useState(() => innerHeight);
   const [safe, setSafe] = useState(0);
   const soundState = useSound();
-  const cities = useCities();
+  // the cities are fetched fresh only once the visitor heads for the train (the saved list draws until then)
+  const [wantCities, setWantCities] = useState(false);
+  const cities = useCities(wantCities);
   const jumping = useRef(0);
   const [bring, setBring] = useState(null);
   // While the campus form is open, the story is paused: nothing reacts to scrolling (a phone scrolls the page
@@ -431,6 +461,7 @@ export default function Story() {
   TL.forEach((t, i) => {
     if (uu >= t.start) idx = i;
   });
+  if (idx >= INDEX.pass && !wantCities) setWantCities(true);
 
   // sounds and haptics as you move forward through the story
   const stamps = LEVEL_IDS.filter(id => sAt(id) >= STAMP_AT).length;
@@ -528,30 +559,27 @@ export default function Story() {
     };
   }, [unit]);
 
-  // once the first scene is up, fetch every other picture (one file, see pics.js) and decode each ahead, a few at a
-  // time, so no picture decodes in the middle of a scroll
+  // A moment after the first scene is up, the next scenes' pictures (one file, see pics.js); the rest once the
+  // visitor starts scrolling. Each picture is decoded ahead, a few at a time, so none decodes mid-scroll.
+  const scrolled = uu > 0.25;
   useEffect(() => {
     let alive = true;
-    const t = setTimeout(() => {
-      loadPictures().then(paths => {
-        // in dev (no pack) or if the pack failed: warm them one by one, as before
-        // (the crowd is a CSS background, so it always loads on its own)
-        const list = [...(paths.length ? paths : [...WARM.map(n => `story/${n}.webp`), ...TV_SCREENS]), 'story/crowd.webp'];
-        list.forEach((path, j) =>
-          setTimeout(() => {
-            if (!alive) return;
-            const i = new Image();
-            i.src = pic(path);
-            i.decode?.().catch(() => {});
-          }, j * 40)
-        );
-      });
-    }, 1200);
+    const warm = paths =>
+      paths.forEach((path, j) =>
+        setTimeout(() => {
+          if (!alive) return;
+          const i = new Image();
+          i.src = pic(path);
+          i.decode?.().catch(() => {});
+        }, j * 40)
+      );
+    const t = setTimeout(() => loadPictures(0).then(paths => warm(paths.length ? paths : DEV_WARM)), 1200);
+    if (scrolled) loadPictures(1).then(warm);
     return () => {
       alive = false;
       clearTimeout(t);
     };
-  }, []);
+  }, [scrolled]);
 
   const ctx = useMemo(() => ({ W, H, land, jump, cities, reduced, openBring }), [W, H, land, jump, cities, reduced, openBring]);
   // With "reduce motion" on, scenes still change the same way (you drive them with your own scroll), but
@@ -658,7 +686,7 @@ export default function Story() {
         <header className={`head ${headInk === CREAM ? 'is-light' : ''}`} style={{ '--ink': headInk }}>
           <a href="#top" className="head__brand" aria-label="Futuready by Hack2skill, back to the start" onClick={e => (e.preventDefault(), jump('title'))}>
             <span>Futuready</span>
-            <img src={`${import.meta.env.BASE_URL}h2s-logo.png`} alt="" width="48" height="18" />
+            <img src={pic('h2s-logo.webp')} alt="" width="48" height="18" />
           </a>
           <div className="head__actions">
             <ShareButton label="Share" iconOnly icon={20} className="share--head" />

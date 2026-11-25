@@ -68,6 +68,16 @@ export function fromLink(link) {
   return { city, date: `${dd} ${MONTHS[mm - 1]} ${yyyy}`, end: new Date(Date.UTC(yyyy, mm - 1, dd, 18, 30)).toISOString() };
 }
 
+// '26 Oct 2026' or '2026-10-26' -> the end of that day in India (ISO), or '' if it is not a date like that
+export function endOfDay(date) {
+  const t = String(date || '').trim();
+  let m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(t);
+  if (m) return new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], 18, 30)).toISOString();
+  m = /^(\d{1,2})\s+([A-Za-z]{3})[a-z]*\.?,?\s+(\d{4})$/.exec(t);
+  const mon = m ? MONTHS.findIndex(x => x.toLowerCase() === m[2].toLowerCase()) : -1;
+  return mon < 0 ? '' : new Date(Date.UTC(+m[3], mon, +m[1], 18, 30)).toISOString();
+}
+
 // Any list of links, or { link?, city?, campus?, date?, start?, end?, status? } -> clean, sorted cities.
 export function normalise(list, now = Date.now()) {
   if (!Array.isArray(list)) return [];
@@ -79,7 +89,7 @@ export function normalise(list, now = Date.now()) {
       const fromUrl = fromLink(link) || {};
       const city = c.city || fromUrl.city;
       if (!city) return null;
-      const end = c.end || fromUrl.end || '';
+      const end = c.end || fromUrl.end || endOfDay(c.date) || '';
       // worked out now, in the visitor's browser, from the dates: a city turns "Concluded" by itself the day after
       // its event, even if the list was saved days ago. A city with a page and no dates is open; a name alone is soon.
       const status = end || c.start ? statusOf({ start: c.start, end }, now) : c.status || (link ? 'open' : 'soon');

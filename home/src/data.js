@@ -7,10 +7,11 @@
 //   https://hack2skill.com/event/futuready-vadodara-07122026  ->  Vadodara, 7 Dec 2026
 // (so name each Hack2skill page futuready-<city>-<ddmmyyyy>; two-word cities: futuready-navi-mumbai-05012027).
 // Until its day has passed a city shows "Departs" and its carriage opens its page; afterwards "Concluded" (in black and white, at the back of the train).
+// A page whose link is named differently: give the city and its day, like Pune below (date: '26 Oct 2026').
 // A city with no page yet: just { city: 'Name' } (boarding soon). Once the Google Sheet is connected (BRING_FORM_URL
 // below), the boarding-soon cities come from its "Cities" tab instead: tick to show, untick to hide (live in ~10 min).
 export const CITIES = [
-  { link: 'https://hack2skill.com/futuready/pune26102026', campus: 'Trinity Academy of Engineering' },
+  { city: 'Pune', campus: 'Trinity Academy of Engineering', date: '26 Oct 2026', link: 'https://hack2skill.com/event/builderslab' },
   { link: 'https://hack2skill.com/event/futuready-vadodara-07122026', campus: 'Parul University' },
   { city: 'Mumbai' },
   { city: 'Ahmedabad' },
@@ -35,7 +36,7 @@ export const BRING_FORM_URL = '';
 // The site's one true address: share links, link previews, search engines (canonical, sitemap, structured data)
 // all use it, wherever the page is opened (your Mac, a Vercel preview). Its own domain, so pages sit at the root.
 export const SITE_URL = 'https://futuready.hack2skill.com/';
-export const SHARE_TEXT = 'Found something before everyone else: Futuready, a free campus builder lab by Hack2skill. Are you ready for the future?';
+export const SHARE_TEXT = 'Futuready is a free campus builder lab by Hack2skill to make developers ready for the future with AI. Are you ready for the future?';
 
 // ---- The TV in the lab ----
 // Its screen plays these pictures in turn. Replace any file in public/tv/ with your own (same name),

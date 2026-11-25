@@ -4,7 +4,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
-import { SITE_URL } from './src/data.js';
+import { SITE_URL, VIRTUAL_URL } from './src/data.js';
 import { DESCRIPTION, jsonLd, llms, robots, sitemap, text, TITLE } from './scripts/seo.mjs';
 
 // The site lives at the root of its own domain (SITE_URL in src/data.js: https://futuready.hack2skill.com/).
@@ -30,40 +30,60 @@ const lastChange = () => {
 };
 
 /*
-  The picture pack: every story picture (and the TV screens) in one file, so a visit makes one request for them
-  instead of about forty (src/story/pics.js reads it). The three pictures of the first scene are left out (the page
-  asks for them at once, see index.html), and so is the crowd (a CSS background).
+  The pictures, in as few requests as possible (src/story/pics.js reads them):
+    - inline: the first scene's three cut-outs and the H2S logo, inside the page's script (ready at once);
+    - packs[0]: the next scenes' pictures (scenes 1 to 3, and the crowd photo), fetched a moment after the page opens;
+    - packs[1]: every other story picture and the TV screens, fetched once the visitor starts scrolling.
+  A new picture in public/story or public/tv joins packs[1] by itself.
 */
-const FIRST = ['girl-phone', 'boy-laptop', 'bot-stand', 'crowd'].map(n => `story/${n}.webp`);
-function picturePack(base) {
-  const paths = [
+const INLINE = ['story/girl-phone.webp', 'story/boy-laptop.webp', 'story/bot-stand.webp', 'h2s-logo.webp'];
+const EARLY = ['bot-type', 'bot-cage', 'bot-cage-open', 'bug', 'boy-sit', 'girl-sit', 'crowd'].map(n => `story/${n}.webp`);
+function pictures(base) {
+  const all = [
     ...readdirSync(here('./public/story')).filter(f => f.endsWith('.webp')).map(f => `story/${f}`),
     ...readdirSync(here('./public/tv')).filter(f => /\.(webp|jpe?g|png)$/.test(f)).map(f => `tv/${f}`),
-  ].filter(p => !FIRST.includes(p));
-  const files = {};
-  const parts = [];
-  let at = 0;
-  for (const p of paths.sort()) {
-    const buf = readFileSync(here(`./public/${p}`));
-    files[p] = [at, buf.length];
-    parts.push(buf);
-    at += buf.length;
-  }
-  const source = Buffer.concat(parts);
-  const fileName = `assets/pictures-${createHash('sha256').update(source).digest('hex').slice(0, 10)}.bin`;
-  return { fileName, source, module: `export default ${JSON.stringify({ url: base + fileName, files })};` };
+  ].filter(p => !INLINE.includes(p));
+  const pack = (name, paths) => {
+    const files = {};
+    const parts = [];
+    let at = 0;
+    for (const p of [...paths].sort()) {
+      const buf = readFileSync(here(`./public/${p}`));
+      files[p] = [at, buf.length];
+      parts.push(buf);
+      at += buf.length;
+    }
+    const source = Buffer.concat(parts);
+    const fileName = `assets/${name}-${createHash('sha256').update(source).digest('hex').slice(0, 10)}.bin`;
+    return { fileName, source, url: base + fileName, files };
+  };
+  const packs = [pack('pictures-early', all.filter(p => EARLY.includes(p))), pack('pictures', all.filter(p => !EARLY.includes(p)))];
+  const inline = Object.fromEntries(INLINE.map(p => [p, `data:image/webp;base64,${readFileSync(here(`./public/${p}`)).toString('base64')}`]));
+  return { packs, module: `export default ${JSON.stringify({ inline, packs: packs.map(({ url, files }) => ({ url, files })) })};` };
 }
+
+// the fonts the first screen needs go inside the stylesheet: one request instead of five (Great Vibes, used further
+// down the story, still loads on its own when it is needed)
+const INLINE_FONTS = ['unbounded', 'geist', 'geist-mono', 'syncopate-700'];
+const fontsInCss = css =>
+  css.replace(/url\((['"]?)\/fonts\/([a-z0-9-]+)\.woff2\1\)/g, (m, q, name) =>
+    INLINE_FONTS.includes(name) ? `url(data:font/woff2;base64,${readFileSync(here(`./public/fonts/${name}.woff2`)).toString('base64')})` : m
+  );
 
 // https://vite.dev/config/
 // host: true serves the dev server on your Wi-Fi too, so you can open it on a phone (see START-HERE.md).
 export default defineConfig(({ command }) => {
   const build = command === 'build';
   const base = process.env.BASE_PATH || '/';
-  const pack = build ? picturePack(base) : null;
+  const pics = build ? pictures(base) : null;
   return {
     base,
     // the main page, and the small "Other cities" page that each Hack2skill page shows
-    build: { rollupOptions: { input: { main: 'index.html', cities: 'cities/index.html' } } },
+    build: {
+      rollupOptions: { input: { main: 'index.html', cities: 'cities/index.html' } },
+      // every browser the page supports preloads modules itself; without the polyfill the two pages share no file
+      modulePreload: { polyfill: false },
+    },
     // the Google Sheet's link, when it is set in Vercel (Settings, Environment Variables: BRING_FORM_URL)
     define: { 'import.meta.env.BRING_FORM_URL': JSON.stringify((process.env.BRING_FORM_URL || '').trim()) },
     plugins: [
@@ -71,9 +91,13 @@ export default defineConfig(({ command }) => {
       {
         name: 'pictures',
         resolveId: id => (id === 'virtual:pictures' ? '\0virtual:pictures' : null),
-        load: id => (id === '\0virtual:pictures' ? (pack ? pack.module : 'export default null;') : null),
-        generateBundle() {
-          if (pack) this.emitFile({ type: 'asset', fileName: pack.fileName, source: pack.source });
+        load: id => (id === '\0virtual:pictures' ? (pics ? pics.module : 'export default null;') : null),
+        generateBundle(_, bundle) {
+          if (!pics) return;
+          for (const p of pics.packs) this.emitFile({ type: 'asset', fileName: p.fileName, source: p.source });
+          for (const file of Object.values(bundle)) {
+            if (file.type === 'asset' && file.fileName.endsWith('.css')) file.source = fontsInCss(String(file.source));
+          }
         },
       },
       {
@@ -82,8 +106,13 @@ export default defineConfig(({ command }) => {
         transformIndexHtml: {
           order: 'pre',
           handler(html, ctx) {
+            if (ctx.path === '/cities/index.html') {
+              const list = JSON.stringify({ cities: baked(), virtual: VIRTUAL_URL }).replace(/</g, '\\u003c');
+              return html.replace('<!--cities-->', `<script>window.__CITIES = ${list};</script>`);
+            }
             if (ctx.path !== '/index.html') return html;
             const cities = baked();
+            if (build) html = html.replace(/^\s*<link rel="preload" as="(font|image)"[^>]*>\n/gm, '');
             return html
               .replaceAll('%SITE%', SITE)
               .replaceAll('%TITLE%', TITLE)

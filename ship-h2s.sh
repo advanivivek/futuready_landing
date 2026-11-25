@@ -1,7 +1,7 @@
 #!/bin/bash
 # Sends the Futuready site to its live repository, github.com/vivek-h2s/futuready (Vercel builds it for
-# https://futuready.hack2skill.com), as ONE new commit with a short message on its main branch: only the site
-# (home/ without the page maker, the Hack2skill page files or the design tools) and its daily-refresh workflow.
+# https://futuready.hack2skill.com), as ONE new commit with a short message on its main branch: only the site and
+# its password-locked page maker (home/ without the Hack2skill page files or the design tools), and the daily refresh.
 # None of this repository's history or detailed messages go there. Vercel is live about a minute later.
 #   ./ship-h2s.sh                         -> "Update site"
 #   ./ship-h2s.sh "Add Pune to the train"
@@ -20,8 +20,8 @@ git checkout --quiet -B main
 # the repository holds exactly the site: clear it, then copy the site in
 find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
 git -C "$HERE" archive HEAD home | tar -x -C . --strip-components=1 \
-  --exclude=home/maker --exclude=home/initiative --exclude=home/scripts/art \
-  --exclude=home/scripts/shots.mjs --exclude=home/scripts/brand.mjs --exclude=home/scripts/bring-campus.gs
+  --exclude=home/maker/print.mjs --exclude=home/maker/export.mjs --exclude=home/initiative --exclude=home/brand \
+  --exclude=home/scripts/art --exclude=home/scripts/shots.mjs --exclude=home/scripts/brand.mjs --exclude=home/scripts/bring-campus.gs
 # the daily-refresh workflow, if gh may add workflows (once: gh auth refresh -h github.com -s workflow)
 if gh api -i user 2>/dev/null | grep -i '^x-oauth-scopes:' | grep -q workflow; then
   git -C "$HERE" archive HEAD .github | tar -x -C .
@@ -41,7 +41,8 @@ npm run build   # into dist/
 ```
 
 Node 20 or newer. Hosted on Vercel (Vite). `api/cities.js` serves the list of cities, cached at the edge.
-Optional environment variable: `BRING_FORM_URL`, the Google Sheet web app that receives campus requests.
+The page maker is built to `/maker/`, behind a password (`middleware.js`).
+Environment variables: `BRING_FORM_URL` (the Google Sheet web app for campus requests), `MAKER_PASSWORD`.
 MD
 git add -A
 if git diff --cached --quiet; then echo "Nothing new to send."; exit 0; fi

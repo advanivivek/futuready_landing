@@ -520,7 +520,7 @@ button {
   /* background-clip: text only paints inside the box, so the box holds the whole of "you?" with room around it */
   padding: 0.06em 0.18em 0.22em 0.06em;
   color: transparent;
-  background: url('/story/crowd.webp') 40% 45% / cover;
+  background: var(--crowd, url('/story/crowd.webp')) 40% 45% / cover;
   -webkit-background-clip: text;
   background-clip: text;
 }
@@ -532,7 +532,7 @@ button {
   display: block;
   border-radius: 50%;
   margin: 0;
-  background: url('/story/crowd.webp') no-repeat;
+  background: var(--crowd, url('/story/crowd.webp')) no-repeat;
   translate: -50% -50%;
 }
 
@@ -2167,6 +2167,69 @@ dialog.sheet:modal {
   display: block;
 }
 
+/* a field that is right: a green edge and a tick inside it, so people can see they are done */
+.field__box {
+  position: relative;
+}
+
+.field.is-ok input {
+  border-color: #1f8a5b;
+  padding-right: 42px;
+}
+
+.field__tick {
+  display: none;
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  margin-top: -9px;
+  border-radius: 50%;
+  background: #1f8a5b;
+}
+
+.field__tick::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 3px;
+  width: 4px;
+  height: 8px;
+  border: solid #fffcf5;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.field.is-ok .field__tick {
+  display: block;
+}
+
+/* the error says what to fix; a small mark in front makes it easy to spot */
+.field__error::before {
+  content: '!';
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: #b3263f;
+  color: #fffcf5;
+  font-size: 0.7rem;
+  font-weight: 800;
+  vertical-align: 1px;
+}
+
+.field__suggest {
+  margin: 2px 0 0;
+  font-size: 0.86rem;
+}
+
+.field__suggest .link-btn {
+  font-size: inherit;
+}
+
 .chips {
   margin: 0;
   padding: 0;
@@ -2271,6 +2334,9 @@ dialog.sheet:modal {
 
 .bring__failed {
   margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(179, 38, 63, 0.08);
   font-size: 0.9rem;
   font-weight: 600;
   color: #b3263f;

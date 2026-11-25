@@ -103,17 +103,81 @@ const CONFETTI = Array.from({ length: 26 }, (_, i) => ({
   r: (i * 47) % 360,
 }));
 
-function Field({ id, label, hint, error, children }) {
+/*
+  What each field needs, and what to say when it is not there yet: one plain sentence that tells the visitor
+  exactly what to fix. '' means the field is fine. (Checked here, in the browser, before anything is sent; the
+  Google Sheet checks again.)
+*/
+const letters = v => v.replace(/[^\p{L}]/gu, '').length;
+const RULES = {
+  college: v =>
+    !v ? 'Please enter your college name.' : letters(v) < 3 ? 'Please enter the full name of your college.' : '',
+  city: v =>
+    !v
+      ? 'Please enter your city.'
+      : !/^[\p{L}][\p{L}\s.'()-]*$/u.test(v)
+        ? 'Please use letters only, like Pune or Navi Mumbai.'
+        : letters(v) < 2
+          ? 'Please enter the full name of the city.'
+          : '',
+  name: v => (!v ? 'Please enter your name.' : !letters(v) ? 'Please enter your name in letters.' : letters(v) < 2 ? 'Please enter your full name.' : ''),
+  email: v => {
+    if (!v) return 'Please enter your email.';
+    if (/\s/.test(v)) return 'Please remove the spaces from your email.';
+    const parts = v.split('@');
+    if (parts.length < 2) return 'Your email needs an @, like you@college.edu.';
+    if (parts.length > 2) return 'An email has only one @. Please check it.';
+    const [user, domain] = parts;
+    if (!user) return 'Please add the part before the @, like you@college.edu.';
+    if (!domain) return 'Please add the part after the @, like gmail.com.';
+    if (!domain.includes('.')) return `Please add the ending after ${domain}, like ${domain}.com or ${domain}.edu.`;
+    if (domain.endsWith('.')) return `Please finish the ending after the dot, like ${domain}com or ${domain}in.`;
+    if (/\.[^.]$/.test(domain)) return 'The ending after the dot looks too short, like .com or .in.';
+    if (!/^[^.\s]+(\.[^.\s]+)*\.[\p{L}]{2,}$/u.test(domain)) return 'Please check the part after the @, like gmail.com.';
+    if (/^\.|\.$|\.\./.test(user) || /[(),:;<>[\]\\"]/.test(user)) return 'Please check the part before the @.';
+    return '';
+  },
+  // optional, but if it is there it should be a real number: 10 digits, with or without +91 or a leading 0
+  phone: v => {
+    if (!v) return '';
+    if (/[^\d\s+()-]/.test(v)) return 'Please use digits only, like 98765 43210.';
+    const n = v.replace(/\D/g, '').length;
+    if (n < 10) return `That is ${n} digit${n === 1 ? '' : 's'}. Please enter the full 10-digit number.`;
+    if (n > 13) return 'That number looks too long. Please check it.';
+    return '';
+  },
+};
+
+// the usual slips in email addresses, to offer the right one (the visitor decides)
+const TYPOS = {
+  'gmial.com': 'gmail.com', 'gamil.com': 'gmail.com', 'gmai.com': 'gmail.com', 'gmal.com': 'gmail.com', 'gnail.com': 'gmail.com',
+  'gmaill.com': 'gmail.com', 'gmail.co': 'gmail.com', 'gmail.con': 'gmail.com', 'gmail.cm': 'gmail.com', 'gmail.om': 'gmail.com',
+  'gmail.in': 'gmail.com', 'gmail.co.in': 'gmail.com', 'yaho.com': 'yahoo.com', 'yahooo.com': 'yahoo.com', 'yahoo.co': 'yahoo.com',
+  'yahoo.con': 'yahoo.com', 'hotmial.com': 'hotmail.com', 'hotmail.co': 'hotmail.com', 'hotmail.con': 'hotmail.com',
+  'outlok.com': 'outlook.com', 'outlook.co': 'outlook.com', 'outlook.con': 'outlook.com', 'rediffmail.co': 'rediffmail.com',
+  'icloud.co': 'icloud.com', 'iclod.com': 'icloud.com',
+};
+const betterEmail = v => {
+  const at = v.lastIndexOf('@');
+  const fix = at > 0 && TYPOS[v.slice(at + 1).toLowerCase()];
+  return fix ? `${v.slice(0, at)}@${fix}` : '';
+};
+
+function Field({ id, label, hint, error, ok, children, after }) {
   return (
-    <div className="field">
+    <div className={`field${error ? ' is-bad' : ''}${ok ? ' is-ok' : ''}`}>
       <label htmlFor={id}>
         {label}
         {hint ? <i> {hint}</i> : null}
       </label>
-      {children}
-      <span className="field__error" id={`${id}-err`}>
+      <div className="field__box">
+        {children}
+        <span className="field__tick" aria-hidden="true" />
+      </div>
+      <span className="field__error" id={`${id}-err`} aria-live="polite">
         {error}
       </span>
+      {after}
     </div>
   );
 }
@@ -131,12 +195,17 @@ export function BringDialog({ open, city: presetCity = '', onClose }) {
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(null);
   const [failed, setFailed] = useState('');
+  // per field: { error: 'what to fix' } or { ok: true } once it has been checked and is right
+  const [marks, setMarks] = useState({});
+  const [suggest, setSuggest] = useState('');
 
   useEffect(() => {
     const d = ref.current;
     if (open && !d.open) {
       setDone(null);
       setFailed('');
+      setMarks({});
+      setSuggest('');
       setStep(1);
       form.current?.reset();
       setCollege('');
@@ -173,24 +242,44 @@ export function BringDialog({ open, city: presetCity = '', onClose }) {
     };
   }, []);
 
-  // errors show once a field has been left (or on Next / Send), and clear as soon as it is fixed
+  // A field is checked when it is left with something in it, and on Next / Send. Once it shows an error, the
+  // error updates as you type and clears the moment it is fixed; a field that is right gets a tick.
   const check = el => {
-    const bad = !el.validity.valid;
-    el.setAttribute('aria-invalid', bad ? 'true' : 'false');
-    if (bad) el.setAttribute('aria-describedby', `${el.id}-err`);
+    const rule = RULES[el.name];
+    if (!rule) return true;
+    const value = el.value.trim();
+    const error = rule(value);
+    el.setAttribute('aria-invalid', error ? 'true' : 'false');
+    if (error) el.setAttribute('aria-describedby', `${el.id}-err`);
     else el.removeAttribute('aria-describedby');
-    el.closest('.field')?.classList.toggle('is-bad', bad);
-    return !bad;
+    // a likely typo ("gmial.com") gets an offer to fix it instead of a tick
+    const tip = el.name === 'email' && !error ? betterEmail(value) : '';
+    setMarks(m => ({ ...m, [el.id]: error ? { error } : value && !tip ? { ok: true } : {} }));
+    if (el.name === 'email') setSuggest(tip);
+    return !error;
   };
   const onBlur = e => e.target.matches('input:not([type=radio])') && e.target.value && check(e.target);
-  const onInput = e => e.target.matches('input') && e.target.closest('.is-bad') && check(e.target);
+  const onInput = e => {
+    const el = e.target;
+    if (!el.matches('input:not([type=radio])')) return;
+    if (marks[el.id]?.error) check(el);
+    else if (marks[el.id]?.ok) setMarks(m => ({ ...m, [el.id]: {} }));
+    if (failed) setFailed('');
+  };
   // checks one step's fields; the first problem gets the focus
   const valid = n => {
     const inputs = [...form.current.querySelectorAll(`[data-step="${n}"] input:not([type=radio])`)];
     const ok = inputs.map(check);
     const first = inputs[ok.indexOf(false)];
     first?.focus();
+    if (first) buzz(30);
     return !first;
+  };
+  const useSuggestion = () => {
+    const el = form.current.querySelector('#bf-email');
+    el.value = suggest;
+    setSuggest('');
+    check(el);
   };
 
   const next = () => {
@@ -210,9 +299,16 @@ export function BringDialog({ open, city: presetCity = '', onClose }) {
     setFailed('');
     try {
       if (BRING_FORM_URL) {
-        const res = await fetch(BRING_FORM_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(data) });
-        const out = await res.json().catch(() => ({ ok: res.ok }));
-        if (out.ok === false) throw new Error(out.error || 'failed');
+        const res = await fetch(BRING_FORM_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(data),
+          signal: AbortSignal.timeout?.(20000),
+        });
+        if (!res.ok) throw Object.assign(new Error(`${res.status}`), { kind: 'server' });
+        const out = await res.json().catch(() => ({ ok: true }));
+        // the Sheet said what is wrong: say exactly that
+        if (out.ok === false) throw Object.assign(new Error(out.error || ''), { kind: 'refused' });
       } else {
         // not connected to the Google Sheet yet: hand the request to their email app instead
         const body = ['College: ' + data.college, 'City: ' + data.city, 'Name: ' + data.name, 'I am: ' + data.role, 'Email: ' + data.email, 'Phone: ' + (data.phone || '')].join('\n');
@@ -223,8 +319,17 @@ export function BringDialog({ open, city: presetCity = '', onClose }) {
       setTimeout(() => sound.play('chime'), 380);
       buzz([14, 40, 24]);
       requestAnimationFrame(() => ref.current.querySelector('#bring-h')?.focus());
-    } catch {
-      setFailed('That did not go through. Please check your connection and try again.');
+    } catch (err) {
+      setFailed(
+        err.kind === 'refused' && err.message
+          ? err.message
+          : err.kind === 'server'
+            ? `Our form is busy right now. Please try again in a minute, or write to ${SUPPORT}.`
+            : err.name === 'TimeoutError'
+              ? 'This is taking too long. Please check your internet and press the button again.'
+              : 'We could not reach our server. Please check your internet and press the button again.'
+      );
+      buzz(30);
     }
     setBusy(false);
   };
@@ -243,7 +348,7 @@ export function BringDialog({ open, city: presetCity = '', onClose }) {
         <button aria-label="Close">×</button>
       </form>
       <div className={`bring__coach ${done ? 'is-done' : ''}`} aria-hidden="true">
-        <img src={opened ? storyPic('coach') : undefined} alt="" />
+        {opened ? <img src={storyPic('coach')} alt="" /> : null}
         <span className="bring__board" style={{ fontSize: `min(8.4cqh, ${(124 / (Math.max(8, board.length) * 0.72)).toFixed(2)}cqh)` }}>
           {board}
         </span>
@@ -289,13 +394,13 @@ export function BringDialog({ open, city: presetCity = '', onClose }) {
           </ol>
 
           <div data-step="1" className="bring__step" hidden={step !== 1}>
-            <Field id="bf-college" label="College name" error="Please enter your college name.">
+            <Field id="bf-college" label="College name" {...marks['bf-college']}>
               <input id="bf-college" name="college" required maxLength={140} autoComplete="organization" enterKeyHint="next" value={college} onChange={e => setCollege(e.target.value)} />
             </Field>
-            <Field id="bf-city" label="City" error="Please enter the city.">
+            <Field id="bf-city" label="City" {...marks['bf-city']}>
               <input id="bf-city" name="city" required maxLength={60} autoComplete="address-level2" enterKeyHint="next" value={city} onChange={e => setCity(e.target.value)} />
             </Field>
-            <Field id="bf-name" label="Your name" error="Please enter your name.">
+            <Field id="bf-name" label="Your name" {...marks['bf-name']}>
               <input id="bf-name" name="name" required maxLength={80} autoComplete="name" enterKeyHint="next" />
             </Field>
             <button type="button" className="pill pill--ink pill--big" onClick={next}>
@@ -304,7 +409,21 @@ export function BringDialog({ open, city: presetCity = '', onClose }) {
           </div>
 
           <div data-step="2" className="bring__step" hidden={step !== 2}>
-            <Field id="bf-email" label="Your email" error="Please enter an email like you@college.edu.">
+            <Field
+              id="bf-email"
+              label="Your email"
+              {...marks['bf-email']}
+              after={
+                suggest ? (
+                  <p className="field__suggest">
+                    Did you mean <b>{suggest}</b>?{' '}
+                    <button type="button" className="link-btn" onClick={useSuggestion}>
+                      Yes, use it
+                    </button>
+                  </p>
+                ) : null
+              }
+            >
               <input id="bf-email" name="email" type="email" required maxLength={120} autoComplete="email" autoCapitalize="none" autoCorrect="off" spellCheck={false} enterKeyHint="next" />
             </Field>
             <fieldset className="chips">
@@ -316,8 +435,8 @@ export function BringDialog({ open, city: presetCity = '', onClose }) {
                 </label>
               ))}
             </fieldset>
-            <Field id="bf-phone" label="Phone" hint="(optional)" error="Please check the number.">
-              <input id="bf-phone" name="phone" type="tel" maxLength={20} autoComplete="tel" inputMode="tel" pattern="[0-9+()\s\-]{7,20}" enterKeyHint="send" />
+            <Field id="bf-phone" label="Phone" hint="(optional)" {...marks['bf-phone']}>
+              <input id="bf-phone" name="phone" type="tel" maxLength={20} autoComplete="tel" inputMode="tel" enterKeyHint="send" />
             </Field>
             {failed ? (
               <p className="bring__failed" role="alert">

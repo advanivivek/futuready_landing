@@ -21,8 +21,7 @@ import { pic, storyPic } from './pics';
   after0 (when the pause ends).
 */
 
-// pictures live in public/ (see pics.js: on the live site they arrive together, in one file)
-const BASE = import.meta.env.BASE_URL;
+// pictures live in public/ (see pics.js: on the live site they arrive in a few files, not one by one)
 const A = storyPic;
 const CREAM = '#efe6d2';
 const INK = '#161a3a';
@@ -977,7 +976,7 @@ export const SCENES = [
           <ShareButton label="Share with friends" className="share--end" />
         </div>
         <footer className="foot" style={{ opacity: seg(s, 0.3, 0.6) }}>
-          <img src={`${BASE}h2s-logo.png`} alt="Hack2skill" width="48" height="18" />
+          <img src={pic('h2s-logo.webp')} alt="Hack2skill" width="48" height="18" />
           <a href={`mailto:${SUPPORT}`}>{SUPPORT}</a>
           <span>{land ? 'Futuready by Hack2skill · ' : ''}© 2026</span>
         </footer>
