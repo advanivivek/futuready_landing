@@ -1,6 +1,7 @@
 import { useId } from 'react';
 import { LEVELS } from '../data';
 import { back, clamp, inout, lerp, out, seg } from './kit';
+import { storyPic } from './pics';
 
 /*
   The Futuready passport, as in the Builders Lab deck: a navy book with a gold foil cover that swings open
@@ -116,7 +117,7 @@ export function Book({ width, x, y, scale = 1, rot = 0, open = 1, opacity = 1, g
       {rubber ? (
         <img
           className="rubber"
-          src={`${import.meta.env.BASE_URL}story/stamp.webp`}
+          src={storyPic('stamp')}
           alt=""
           aria-hidden="true"
           style={{ left: `${slotAt(rubber.i).x * 100}%`, top: `${slotAt(rubber.i).y * 100}%`, opacity: rubber.o, transform: `translate(-50%, ${-100 + rubber.lift * -60}%)` }}

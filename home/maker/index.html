@@ -215,7 +215,7 @@ async function paint() {
     isNew && `<b>Initiative Settings:</b> organisation = <code>${e.campus || 'the campus'}</code>; mode = ${x.virtual ? 'Virtual' : 'In Person'} → Save.`,
     `<b>FAQs:</b> tab 3, into Live Edit → FAQs.`,
     `<b>Registration:</b> Control Panel → Timeline Management → Registration → Settings → End Date &amp; Time${x.virtual ? '' : ` = ${x.dateShort}, ${e.start}`} → Save. Then Communication → Configure → paste tab 4 (Embed HTML) → Update Email Content.`,
-    `<b>Check</b> the <a href="${x.preview}" target="_blank">preview</a> on your phone, then press <b>Publish</b>. Once Hack2skill approves it, the main page lists it by itself at its next daily refresh.`,
+    `<b>Check</b> the <a href="${x.preview}" target="_blank">preview</a> on your phone, then press <b>Publish</b>. Then put it on the train: in the Google Sheet's <b>Cities</b> tab, add a row with the city, the campus and <code>${x.url || 'the page link'}</code>, and tick it. It shows on futuready.hack2skill.com within about 10 minutes.`,
   ].filter(Boolean).map(li => `<li>${li}</li>`).join('');
 }
 

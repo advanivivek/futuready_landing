@@ -1,10 +1,13 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { BRING_FORM_URL, LEVELS, SHARE_TEXT, SITE_URL, SUPPORT } from '../data';
+import { BRING_FORM_URL as FORM_IN_CODE, LEVELS, SHARE_TEXT, SITE_URL, SUPPORT } from '../data';
 import { sound } from './sound';
 import { buzz } from './kit';
+import { storyPic } from './pics';
 
 const BASE = import.meta.env.BASE_URL;
 export const pageUrl = () => SITE_URL || new URL(BASE, location.href).href;
+// the Google Sheet's link: from Vercel's environment variable BRING_FORM_URL (set at build), or from data.js
+const BRING_FORM_URL = import.meta.env.BRING_FORM_URL || FORM_IN_CODE;
 
 /* ---------- sharing ---------- */
 // The phone's own share sheet where there is one (the visitor never leaves the page); otherwise a small
@@ -117,6 +120,9 @@ function Field({ id, label, hint, error, children }) {
 
 export function BringDialog({ open, city: presetCity = '', onClose }) {
   const ref = useRef(null);
+  // its picture loads the first time the form opens, not with the page
+  const [opened, setOpened] = useState(false);
+  if (open && !opened) setOpened(true);
   const form = useRef(null);
   const [step, setStep] = useState(1);
   const [college, setCollege] = useState('');
@@ -237,13 +243,13 @@ export function BringDialog({ open, city: presetCity = '', onClose }) {
         <button aria-label="Close">×</button>
       </form>
       <div className={`bring__coach ${done ? 'is-done' : ''}`} aria-hidden="true">
-        <img src={`${BASE}story/coach.webp`} alt="" />
+        <img src={opened ? storyPic('coach') : undefined} alt="" />
         <span className="bring__board" style={{ fontSize: `min(8.4cqh, ${(124 / (Math.max(8, board.length) * 0.72)).toFixed(2)}cqh)` }}>
           {board}
         </span>
         {done ? (
           <>
-            <img className="bring__stamp" src={`${BASE}story/stamp.webp`} alt="" />
+            <img className="bring__stamp" src={storyPic('stamp')} alt="" />
             <span className="bring__mark">REQUESTED</span>
             <span className="bring__confetti">
               {CONFETTI.map((p, i) => (

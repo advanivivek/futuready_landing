@@ -29,3 +29,5 @@ public/events.json
 public/cities.json
 # personal photos, never published
 public/vivek/
+# the cities saved at every build (scripts/fetch-events.mjs)
+src/cities.baked.json

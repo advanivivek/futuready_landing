@@ -351,3 +351,33 @@ export async function strip(canvas, files) {
   pics.forEach((i, n) => { ctx.drawImage(i, x, 0, ws[n], h); x += ws[n] + gap; });
   return { w: canvas.width, h };
 }
+
+// the main page's link preview (og.jpg, 1200 x 630): what WhatsApp, LinkedIn, X and search results show.
+// Made by scripts/brand.mjs; nothing in it changes per city.
+export async function share(canvas) {
+  const W = 1200, H = 630, fy = 486, pic = tweaks({}, 'share');
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = BLUE;
+  ctx.fillRect(0, 0, W, H);
+  floor(ctx, W, fy, H, 1, 0.8);
+  ctx.textBaseline = 'alphabetic';
+  const lines = [[['Are you ready', PAPER]], [['for the ', PAPER], ['future?', GOLD]]];
+  await part(ctx, pic, 'headline', 'Headline', headBox(ctx, lines, 64, 148, 72, 84), () => lines.forEach((l, j) => words(ctx, l, 64, 148 + j * 84, 72)));
+  // what a student gets, in plain words
+  const notes = ['› Free AI bootcamp for college students', '› Spec writing, AI evals, AI agents', '› An e-passport at the end'];
+  ctx.font = '700 25px "Geist Mono"';
+  ctx.textAlign = 'left';
+  notes.forEach((t, j) => {
+    ctx.fillStyle = 'rgba(255,252,245,.9)';
+    ctx.fillText(t, 66, 316 + j * 40);
+  });
+  ctx.font = '700 25px "Geist Mono"';
+  ctx.fillStyle = GOLD;
+  ctx.fillText('futuready.hack2skill.com', 66, 444);
+  await people(ctx, pic, [['/story/girl-phone.webp', 700, 600, 410], ['/story/boy-laptop.webp', 872, 612, 392], ['/story/bot-wave.webp', 1046, 606, 236]], 1);
+  const lh = 32, { w } = await lockupSize(ctx, lh, true);
+  await part(ctx, pic, 'logo', 'H2S logo', [64, 558 - lh / 2, w, lh], () => lockup(ctx, 64, 558, lh, true));
+  canvas.__parts = pic.parts;
+}

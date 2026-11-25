@@ -1,8 +1,9 @@
 name: Refresh the cities
 
-# Rebuilds the Futuready main page on Vercel every morning, so new Futuready events on Hack2skill
-# show up on the train. Needs one repository secret, VERCEL_DEPLOY_HOOK
-# (Vercel > the project > Settings > Git > Deploy Hooks). Until it is added, this does nothing.
+# Rebuilds the site on Vercel every morning, so the parts made at build (the page's text for search engines, its
+# event data and llms.txt) list the current cities. The train itself is always current (api/cities.js). Needs one
+# repository secret, VERCEL_DEPLOY_HOOK (Vercel > the project > Settings > Git > Deploy Hooks). Until it is added,
+# this does nothing.
 on:
   schedule:
     - cron: '30 0 * * *' # 06:00 in India

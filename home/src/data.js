@@ -8,7 +8,7 @@
 // (so name each Hack2skill page futuready-<city>-<ddmmyyyy>; two-word cities: futuready-navi-mumbai-05012027).
 // Until its day has passed a city shows "Departs" and its carriage opens its page; afterwards "Concluded" (in black and white, at the back of the train).
 // A city with no page yet: just { city: 'Name' } (boarding soon). Once the Google Sheet is connected (BRING_FORM_URL
-// below, START-HERE.md Step 6), the boarding-soon cities come from its "Cities" tab instead: tick to show, untick to hide.
+// below), the boarding-soon cities come from its "Cities" tab instead: tick to show, untick to hide (live in ~10 min).
 export const CITIES = [
   { link: 'https://hack2skill.com/futuready/pune26102026', campus: 'Trinity Academy of Engineering' },
   { link: 'https://hack2skill.com/event/futuready-vadodara-07122026', campus: 'Parul University' },
@@ -18,27 +18,29 @@ export const CITIES = [
   { city: 'Delhi' },
 ];
 
-// Hack2skill's public list of published events. Every build reads it (and a daily rebuild keeps it fresh), so a
-// Futuready page appears on the train as soon as it is published there. The CITIES list above is merged in.
+// Hack2skill's public list of published events. The site's own server reads it (api/cities.js, refreshed every
+// 10 minutes), so a Futuready page listed there appears on the train by itself. The CITIES list above is merged in.
 export const CITIES_FEED = 'https://hack2skill.com/api/v1/innovator/public/event/list?page=1&records=500';
 
 // ---- The last scene: "Didn't find your city? Attend Virtual, or bring it to your campus." ----
 export const VIRTUAL_URL = 'https://hack2skill.com/event/futuready-virtual';
 export const SUPPORT = 'support@hack2skill.com';
 // One Google Sheet for the "Bring it to your campus" requests AND the boarding-soon cities on the train: the web app
-// link of its script (scripts/bring-campus.gs, see START-HERE.md Step 6). Until it is set, a request opens an email
-// to SUPPORT instead, and the boarding-soon cities are the names in CITIES above.
+// link of its script (scripts/bring-campus.gs, see START-HERE.md). The easy way needs no code: paste the link into
+// Vercel as the environment variable BRING_FORM_URL and redeploy. (Or paste it here.) Until it is set, a request
+// opens an email to SUPPORT instead, and the boarding-soon cities are the names in CITIES above.
 export const BRING_FORM_URL = '';
 
-// ---- Sharing ----
-// The site's own address, for share links and previews. Leave '' to use the address it is opened at.
-export const SITE_URL = ''; // the Hack2skill copy is sent with https://hack2skill.com/futuready/ here (ship-h2s.sh)
+// ---- The address and sharing ----
+// The site's one true address: share links, link previews, search engines (canonical, sitemap, structured data)
+// all use it, wherever the page is opened (your Mac, a Vercel preview). Its own domain, so pages sit at the root.
+export const SITE_URL = 'https://futuready.hack2skill.com/';
 export const SHARE_TEXT = 'Found something before everyone else: Futuready, a free campus builder lab by Hack2skill. Are you ready for the future?';
 
 // ---- The TV in the lab ----
 // Its screen plays these pictures in turn. Replace any file in public/tv/ with your own (same name),
-// or change the list. Landscape pictures (16:9 or 4:3) look best.
-export const TV_SCREENS = ['tv/1.jpg', 'tv/2.jpg', 'tv/3.jpg', 'tv/4.jpg'];
+// or change the list. Landscape pictures (16:9 or 4:3), about 800 pixels wide, as WebP (small and sharp).
+export const TV_SCREENS = ['tv/1.webp', 'tv/2.webp', 'tv/3.webp', 'tv/4.webp'];
 
 // Meet your trainer. The photos are cut-outs in public/story (vivek-*.webp); tap him to change the pose.
 // The labels stick to the photo like label-maker tape, in this order.

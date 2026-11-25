@@ -7,7 +7,7 @@
 */
 import { derive, HOSTED, TRAINER, QUOTES } from './sections.js';
 // where the main site lives (its small "Other cities" page is shown on every event page)
-const HOME = 'https://hack2skill.com/futuready/';
+const HOME = 'https://futuready.hack2skill.com/';
 
 const esc = t => String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const H2S = 'https://storage.googleapis.com/vision-hack2skill-production/innovator/USER02555644/';

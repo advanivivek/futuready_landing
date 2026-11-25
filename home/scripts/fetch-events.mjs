@@ -1,33 +1,14 @@
-// Saves the Futuready cities from CITIES_FEED (src/data.js) into public/events.json, so the train is fresh
-// on any host. Runs before every build (npm run build) and on its own with: npm run events
-// With no feed set, it does nothing and the page uses the CITIES list in src/data.js.
-import { rm, writeFile } from 'node:fs/promises';
+// Saves every Futuready city (src/live-cities.js: Hack2skill's list, the Google Sheet, data.js) into
+// src/cities.baked.json, so each build starts with a fresh list: the train draws it at once, and the text version
+// of the page and its search-engine data (vite.config.js) list the same cities. The live list (/api/cities)
+// then keeps the page current between builds. Runs before every build (npm run build), or alone: npm run events
+import { writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { CITIES, CITIES_FEED, VIRTUAL_URL } from '../src/data.js';
-import { fromHack2skill, mergeCities, normalise } from '../src/events-core.js';
+import { allCities } from '../src/live-cities.js';
 
-const out = fileURLToPath(new URL('../public/events.json', import.meta.url));
-// every city (the feed plus the CITIES list), for the "Other cities" strip on each Hack2skill page (public/cities/)
-const all = fileURLToPath(new URL('../public/cities.json', import.meta.url));
-let feed = [];
-if (!CITIES_FEED) {
-  await rm(out, { force: true });
-  console.log('events: no CITIES_FEED set, using the CITIES list in src/data.js');
-} else {
-  try {
-    const res = await fetch(CITIES_FEED, { headers: { accept: 'application/json' }, signal: AbortSignal.timeout(15000) });
-    if (!res.ok) throw new Error(`the feed answered ${res.status}`);
-    const json = await res.json();
-    const cities = Array.isArray(json) ? normalise(json) : Array.isArray(json?.cities) ? normalise(json.cities) : fromHack2skill(json);
-    feed = cities;
-    if (!cities.length) console.log('events: the feed has no cities yet, using the CITIES list in src/data.js');
-    else {
-      await writeFile(out, JSON.stringify(cities, null, 2) + '\n');
-      console.log(`events: ${cities.length} cities -> public/events.json`);
-      cities.forEach(c => console.log(`  ${c.status.padEnd(4)} ${c.city.padEnd(14)} ${c.date}  ${c.url}`));
-    }
-  } catch (e) {
-    console.log(`events: could not read the feed (${e.message}), using what we have`);
-  }
-}
-await writeFile(all, JSON.stringify({ cities: mergeCities(feed, CITIES), virtual: VIRTUAL_URL }) + '\n');
+const out = fileURLToPath(new URL('../src/cities.baked.json', import.meta.url));
+const { cities, virtual, from, notes } = await allCities();
+await writeFile(out, JSON.stringify({ cities, virtual }, null, 2) + '\n');
+console.log(`cities: ${cities.length} saved (Hack2skill list: ${from.hack2skill ?? 'unreachable'}, Google Sheet: ${from.sheet ?? 'unreachable'})`);
+notes.forEach(n => console.log(`  skipped ${n}`));
+cities.forEach(c => console.log(`  ${c.status.padEnd(4)} ${c.city.padEnd(14)} ${(c.date || '').padEnd(12)} ${c.url}`));

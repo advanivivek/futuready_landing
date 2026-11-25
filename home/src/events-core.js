@@ -131,8 +131,16 @@ export function mergeCities(feed, manual, now = Date.now()) {
     const k = (c.url || c.city).toLowerCase();
     return once.has(k) ? false : once.add(k);
   });
+  // a name alone ("boarding soon") steps aside for the same city with a page
+  const paged = new Set(mine.filter(c => c.url).map(c => c.city.toLowerCase()));
+  const mineClean = mine.filter(c => c.url || !paged.has(c.city.toLowerCase()));
   const key = c => (c.url || c.city).toLowerCase();
   const seen = new Set(feed.map(key));
   const cities = new Set(feed.map(c => c.city.toLowerCase()));
-  return sortCities([...feed, ...mine.filter(c => !seen.has(key(c)) && !(c.status === 'soon' && cities.has(c.city.toLowerCase())))]);
+  return sortCities([...feed, ...mineClean.filter(c => !seen.has(key(c)) && !(c.status === 'soon' && !c.url && cities.has(c.city.toLowerCase())))]);
 }
+
+// any feed -> cities: a plain list (links or { city, link, ... }), { cities: [...] } (our own /api/cities), or
+// Hack2skill's event list. Statuses are worked out again here, so a saved list still turns "Concluded" on time.
+export const fromFeed = (json, now = Date.now()) =>
+  Array.isArray(json) ? normalise(json, now) : Array.isArray(json?.cities) ? normalise(json.cities, now) : fromHack2skill(json, 'futuready', now);

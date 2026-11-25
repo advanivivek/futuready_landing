@@ -1,10 +1,12 @@
 <!doctype html>
-<html lang="en">
+<html lang="en-IN">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Futuready by Hack2skill</title>
-    <meta name="description" content="Are you ready for the future? Futuready is a free, interactive campus builder lab by Hack2skill: five levels that spell R.E.A.D.Y., an e-passport at the end, and now touring India." />
+    <title>%TITLE%</title>
+    <meta name="description" content="%DESCRIPTION%" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href="%SITE%" />
     <meta name="theme-color" content="#3463AF" />
     <meta name="color-scheme" content="light" />
     <meta name="format-detection" content="telephone=no" />
@@ -12,18 +14,27 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Futuready" />
-    <meta property="og:title" content="Futuready by Hack2skill" />
-    <meta property="og:description" content="Are you ready for the future? Futuready is a free, interactive campus builder lab by Hack2skill: five levels that spell R.E.A.D.Y., and an e-passport at the end." />
+    <!-- link previews: WhatsApp, LinkedIn, X, Slack, Discord, iMessage -->
+    <meta property="og:site_name" content="Futuready by Hack2skill" />
     <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_IN" />
     <meta property="og:url" content="%SITE%" />
+    <meta property="og:title" content="Futuready by Hack2skill: are you ready for the future?" />
+    <meta property="og:description" content="%DESCRIPTION%" />
     <meta property="og:image" content="%SITE%og.jpg" />
+    <meta property="og:image:secure_url" content="%SITE%og.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Are you ready for the future? Two students and a tin robot, Futuready by Hack2skill" />
+    <meta property="og:image:alt" content="Are you ready for the future? Two students and a tin robot. Futuready by Hack2skill, a free AI bootcamp for college students." />
     <meta name="twitter:card" content="summary_large_image" />
-    <!--canonical-->
-    <!--robots-->
+    <meta name="twitter:site" content="@hack2skill" />
+    <meta name="twitter:title" content="Futuready by Hack2skill: are you ready for the future?" />
+    <meta name="twitter:description" content="%DESCRIPTION%" />
+    <meta name="twitter:image" content="%SITE%og.jpg" />
+    <meta name="twitter:image:alt" content="Are you ready for the future? Two students and a tin robot. Futuready by Hack2skill." />
     <link rel="icon" href="%BASE_URL%favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="%BASE_URL%icon-192.png" type="image/png" sizes="192x192" />
     <link rel="apple-touch-icon" href="%BASE_URL%icon-180.png" />
     <link rel="manifest" href="%BASE_URL%manifest.webmanifest" />
     <link rel="preload" as="font" type="font/woff2" href="%BASE_URL%fonts/unbounded.woff2" crossorigin />
@@ -32,10 +43,34 @@
     <link rel="preload" as="image" href="%BASE_URL%story/girl-phone.webp" fetchpriority="high" />
     <link rel="preload" as="image" href="%BASE_URL%story/boy-laptop.webp" />
     <link rel="preload" as="image" href="%BASE_URL%story/bot-stand.webp" />
+    <!--jsonld-->
+    <script>
+      document.documentElement.classList.add('js');
+    </script>
+    <style>
+      /* The story in words (below). With JavaScript on, the story itself shows it, so this stays out of sight but
+         stays readable for screen readers; without JavaScript it is the page. */
+      .js .about {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+      }
+      html:not(.js) .about {
+        max-width: 42rem;
+        margin: 0 auto;
+        padding: 32px 20px 48px;
+        font: 17px/1.55 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        color: #161a3a;
+      }
+    </style>
   </head>
   <body>
+    <!--about-->
     <div id="root"></div>
-    <noscript>Futuready by Hack2skill. Please turn on JavaScript to explore.</noscript>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

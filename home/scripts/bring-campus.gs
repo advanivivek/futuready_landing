@@ -5,15 +5,16 @@
  * Set up (about 5 minutes; the same steps are in START-HERE.md):
  *  1. Make a new Google Sheet. Extensions, Apps Script. Delete what is there, paste this file, Save.
  *  2. Deploy, New deployment, type "Web app". Execute as: Me. Who has access: Anyone. Deploy, allow access.
- *  3. Copy the web app link (it ends in /exec) into BRING_FORM_URL in home/src/data.js.
+ *  3. Copy the web app link (it ends in /exec) into Vercel: Settings, Environment Variables, BRING_FORM_URL; redeploy.
  *
  * What you get:
  *  - "Requests": one row per request, newest at the bottom, with a filter on every column
  *    (click the small icon in a header to filter by college, city, role and so on).
  *  - "By campus": how many requests each college and city has, most first. It updates by itself.
- *  - "Cities": the cities shown on the main page's train as "boarding soon". Tick "Show on the train" to show
- *    one, untick to hide it, or type a new city in a new row. A city someone asks for is added by itself
- *    (unticked), with how many requests it has, so you can see which ones to switch on.
+ *  - "Cities": the cities on the main page's train. Tick "Show on the train" to show one, untick to hide it, or
+ *    type a new city in a new row. With no page link it is "boarding soon"; paste its Hack2skill page link (and
+ *    the campus) and it becomes a real stop with its date (read from the link). On the site within ~10 minutes.
+ *    A city someone asks for is added by itself (unticked), with how many requests it has.
  * The same email asking for the same college twice is saved once.
  */
 const SHEET = 'Requests';
@@ -29,25 +30,28 @@ function cities_(ss) {
   let sh = ss.getSheetByName(CITIES);
   if (sh) return sh;
   sh = ss.insertSheet(CITIES);
-  sh.getRange(1, 1, 1, 3).setValues([['City', 'Show on the train', 'Requests']])
+  sh.getRange(1, 1, 1, 5).setValues([['City', 'Show on the train', 'Requests', 'Campus', 'Hack2skill page link (when it has one)']])
     .setFontWeight('bold').setFontColor('#ffffff').setBackground('#161a3a');
   sh.setFrozenRows(1);
-  sh.setColumnWidth(1, 200);
-  sh.setColumnWidth(2, 150);
-  sh.setColumnWidth(3, 100);
+  [200, 150, 100, 240, 420].forEach((w, i) => sh.setColumnWidth(i + 1, w));
   sh.getRange('B2:B500').insertCheckboxes();
   if (START_CITIES.length) sh.getRange(2, 1, START_CITIES.length, 2).setValues(START_CITIES.map((c) => [c, true]));
   sh.getRange('C2').setFormula(`=ARRAYFORMULA(IF(A2:A="",,COUNTIF('${SHEET}'!C:C, A2:A)))`);
   return sh;
 }
 
-// the ticked cities, for the train
+// the ticked cities, for the train: { city, campus?, link? }
 function shown_(ss) {
   const sh = cities_(ss);
   if (sh.getLastRow() < 2) return [];
-  return sh.getRange(2, 1, sh.getLastRow() - 1, 2).getValues()
-    .filter((r) => String(r[0]).trim() && r[1] === true)
-    .map((r) => String(r[0]).trim());
+  return sh.getRange(2, 1, sh.getLastRow() - 1, 5).getValues()
+    .filter((r) => (String(r[0]).trim() || String(r[4]).trim()) && r[1] === true)
+    .map((r) => {
+      const c = { city: String(r[0]).trim() };
+      if (String(r[3]).trim()) c.campus = String(r[3]).trim();
+      if (/^https:\/\//.test(String(r[4]).trim())) c.link = String(r[4]).trim();
+      return c;
+    });
 }
 
 // a city someone asked for, added (unticked) if it is not there yet
@@ -97,11 +101,11 @@ function json_(o) {
 
 const key_ = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 
-// The main page asks this for the cities to show; opening the link in a browser shows the same.
+// The site's server asks this for the cities to show (a few times an hour); opening the link shows the same.
 function doGet() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const sh = setup_(ss);
-  return json_({ ok: true, requests: Math.max(0, sh.getLastRow() - 1), cities: shown_(ss) });
+  setup_(ss);
+  return json_({ ok: true, cities: shown_(ss) });
 }
 
 function doPost(e) {

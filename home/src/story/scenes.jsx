@@ -4,6 +4,7 @@ import { sound } from './sound';
 import { diskPath, GUILLOCHE, kleinPath, SOLIDS, solidPath } from './geometry';
 import { LEVELS, SUPPORT, TRAINER, TV_SCREENS, VIRTUAL_URL, VOICES_FULL } from '../data';
 import { ShareButton } from './Extras';
+import { pic, storyPic } from './pics';
 
 /*
   Every scene:
@@ -20,9 +21,9 @@ import { ShareButton } from './Extras';
   after0 (when the pause ends).
 */
 
-// pictures live in public/; BASE_URL makes them work at a domain's root or under a folder (hack2skill.com/futuready/)
+// pictures live in public/ (see pics.js: on the live site they arrive together, in one file)
 const BASE = import.meta.env.BASE_URL;
-const A = n => `${BASE}story/${n}.webp`;
+const A = storyPic;
 const CREAM = '#efe6d2';
 const INK = '#161a3a';
 const BLUE = '#3463af';
@@ -780,7 +781,7 @@ export const SCENES = [
           <Cut src={A('tv')} alt="A vintage TV showing the real Builders Lab screens" x={LAB_TV.x} h={LAB_TV.h} d={LAB_TV.d} dy={(1 - back(seg(s, 0.1, 0.55))) * -60} o={seg(s, 0.1, 0.25)}>
             <div className="tv-screen">
               {TV_SCREENS.map((f, j) => (
-                <img key={f} src={`${BASE}${f}`} alt="" style={{ opacity: j === i ? 1 : 0 }} />
+                <img key={f} src={pic(f)} alt="" style={{ opacity: j === i ? 1 : 0 }} />
               ))}
             </div>
           </Cut>

@@ -6,6 +6,16 @@ import { Book, passportPose, STAMP_AT } from './Passport';
 import { useCities } from '../events';
 import { BringDialog, ShareButton } from './Extras';
 import { TV_SCREENS } from '../data';
+import { loadPictures, pic } from './pics';
+
+// the story's pictures, for warming them up in dev (on the live site they all come in the pack)
+const WARM = [
+  'girl-sit', 'girl-list', 'girl-lens', 'girl-baton', 'girl-walk',
+  'boy-sit', 'boy-plan', 'boy-run', 'boy-wave', 'boy-thumb',
+  'bot-type', 'bot-cage-open', 'bot-cage', 'bot-paper', 'bot-block', 'bot-horn', 'bot-wave',
+  'bug', 'tv', 'blocks', 'desk', 'stamp', 'squad', 'engine', 'coach',
+  'vivek-dance', 'vivek-kick', 'vivek-walk', 'vivek-step', 'vivek-chair', 'vivek-lean',
+];
 
 // how light a colour is (0 dark, 1 light), for the little line at the bottom
 const light = hex => {
@@ -182,7 +192,9 @@ const TSOUND = { slide: 'whoosh', iris: 'swell', tear: 'tear', shrink: 'whoosh',
 function useScreens(unit, smooth, paused) {
   const [u, setU] = useState(0);
   useEffect(() => {
-    let target = scrollY / unit;
+    // (a viewport with no height yet counts as the top, so it never mounts every scene at once)
+    const at = () => (unit > 0 ? scrollY / unit : 0);
+    let target = at();
     let cur = target;
     let raf = 0;
     let t0 = 0;
@@ -201,7 +213,7 @@ function useScreens(unit, smooth, paused) {
     const on = () => {
       // while a form is open the phone may scroll the page to show the keyboard: the story ignores it
       if (paused.current) return;
-      target = scrollY / unit;
+      target = at();
       if (!raf) raf = requestAnimationFrame(tick);
     };
     on();
@@ -516,30 +528,29 @@ export default function Story() {
     };
   }, [unit]);
 
-  // warm the cache with every picture once the first scene is up
+  // once the first scene is up, fetch every other picture (one file, see pics.js) and decode each ahead, a few at a
+  // time, so no picture decodes in the middle of a scroll
   useEffect(() => {
+    let alive = true;
     const t = setTimeout(() => {
-      const base = import.meta.env.BASE_URL;
-      const urls = [
-        ...[
-          'girl-sit', 'girl-list', 'girl-lens', 'girl-baton', 'girl-walk', 'girl-phone',
-          'boy-sit', 'boy-plan', 'boy-run', 'boy-wave', 'boy-laptop', 'boy-thumb',
-          'bot-type', 'bot-cage-open', 'bot-cage', 'bot-paper', 'bot-block', 'bot-horn', 'bot-wave', 'bot-stand',
-          'bug', 'tv', 'blocks', 'desk', 'stamp', 'squad', 'engine', 'coach', 'crowd',
-          'vivek-dance', 'vivek-kick', 'vivek-walk', 'vivek-step', 'vivek-chair', 'vivek-lean',
-        ].map(n => `${base}story/${n}.webp`),
-        ...TV_SCREENS.map(f => `${base}${f}`),
-      ];
-      urls.forEach((src, j) => {
-        // fetch and decode ahead, a few at a time, so no picture decodes in the middle of a scroll
-        setTimeout(() => {
-          const i = new Image();
-          i.src = src;
-          i.decode?.().catch(() => {});
-        }, j * 60);
+      loadPictures().then(paths => {
+        // in dev (no pack) or if the pack failed: warm them one by one, as before
+        // (the crowd is a CSS background, so it always loads on its own)
+        const list = [...(paths.length ? paths : [...WARM.map(n => `story/${n}.webp`), ...TV_SCREENS]), 'story/crowd.webp'];
+        list.forEach((path, j) =>
+          setTimeout(() => {
+            if (!alive) return;
+            const i = new Image();
+            i.src = pic(path);
+            i.decode?.().catch(() => {});
+          }, j * 40)
+        );
       });
     }, 1200);
-    return () => clearTimeout(t);
+    return () => {
+      alive = false;
+      clearTimeout(t);
+    };
   }, []);
 
   const ctx = useMemo(() => ({ W, H, land, jump, cities, reduced, openBring }), [W, H, land, jump, cities, reduced, openBring]);
