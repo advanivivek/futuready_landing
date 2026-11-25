@@ -10,7 +10,9 @@ MSG="${1:-Update Futuready landing page}"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 [ -z "$(git -C "$HERE" status --porcelain home)" ] || { echo "Commit your changes in home/ first."; exit 1; }
 TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
-git clone --quiet --depth 1 "$REPO" "$TMP/out" 2>/dev/null || { mkdir -p "$TMP/out"; git -C "$TMP/out" init --quiet -b main; git -C "$TMP/out" remote add origin "$REPO"; }
+# sign in to GitHub as whichever account `gh` has active (not the Mac's saved personal login)
+GH=(-c credential.helper= -c 'credential.helper=!gh auth git-credential')
+git "${GH[@]}" clone --quiet --depth 1 "$REPO" "$TMP/out" 2>/dev/null || { mkdir -p "$TMP/out"; git -C "$TMP/out" init --quiet -b main; git -C "$TMP/out" remote add origin "$REPO"; }
 # the repository holds exactly the site: clear it, then copy the site in
 find "$TMP/out" -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
 git -C "$HERE" archive HEAD home | tar -x -C "$TMP/out" --strip-components=1 \
@@ -36,5 +38,5 @@ cd "$TMP/out"
 git add -A
 if git diff --cached --quiet; then echo "Nothing new to send."; exit 0; fi
 git -c user.name="Vivek Advani" -c user.email="vivek.advani@hack2skill.com" commit --quiet -m "$MSG"
-git push --quiet origin HEAD:main
+git "${GH[@]}" push --quiet origin HEAD:main
 echo "Sent to $REPO: $MSG"
