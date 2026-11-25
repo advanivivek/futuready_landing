@@ -339,8 +339,8 @@ function Trainer({ s, k }) {
 }
 
 /* ---------- the station board ---------- */
-const coachTag = c => (c.status === 'past' ? 'Concluded' : c.status === 'open' ? 'Open' : 'Soon');
-const stationTag = c => (c.status === 'past' ? `Concluded${c.campus ? ` · ${c.campus}` : ''}` : c.status === 'open' ? 'Registrations open' : 'Boarding soon');
+const coachTag = c => (c.status === 'past' ? '' : c.status === 'open' ? 'Open' : 'Soon');
+const stationTag = c => (c.status === 'past' ? c.campus : c.status === 'open' ? 'Registrations open' : 'Boarding soon');
 const MONTH = /^(\d{1,2})\s+([A-Za-z]{3})/;
 // the board: the day above, the month below (or -- / TBA before a date is set)
 function boardRows(c) {
@@ -867,13 +867,14 @@ export const SCENES = [
     // arrives and waits at the next city (the story holds there: tap to attend), then, as you scroll on,
     // rolls past the other cities and the concluded ones before the next scene
     rest: 2.55,
-    after: 1.5,
+    hold: 1.1,
+    after: 4.6,
     wall: '#a6d8ee',
     floor: '#2f7a4e',
     F: 0.22,
     ink: INK,
     enter: { type: 'wipe', T: 0.8 },
-    cues: [[0.32, 'whistle'], ...Array.from({ length: 8 }, (_, i) => [0.5 + i * 0.19, 'chug']), [2.0, 'ding'], [2.72, 'whistle'], ...Array.from({ length: 6 }, (_, i) => [2.9 + i * 0.19, 'chug'])],
+    cues: [[0.32, 'whistle'], ...Array.from({ length: 8 }, (_, i) => [0.5 + i * 0.19, 'chug']), [2.0, 'ding'], [2.72, 'whistle']],
     cam: s => ({ z: lerp(1.08, 1, out(seg(s, 0, 1.2))), x: 0.5, y: 0.75 }),
     world: (s, k) => {
       const { H, cities } = k;
@@ -898,7 +899,7 @@ export const SCENES = [
               );
               // the concluded cities ride at the back, in black and white, after a little gap
               const style = { height: t.ch, width: t.cw, marginLeft: t.gap + (i === t.firstPast ? t.split : 0) };
-              const cls = `coach${i === t.near ? ' is-near' : ''}${c.status === 'past' ? ' is-past' : ''}${i === t.firstPast ? ' is-first-past' : ''}`;
+              const cls = `coach${i === t.near ? ' is-near' : ''}${c.status === 'past' ? ' is-past' : ''}`;
               // a city with its own page opens it; one still boarding soon asks for Futuready there
               return c.url ? (
                 <a key={c.city + i} className={cls} href={c.url} style={style} aria-label={`Attend in ${c.city}: ${stationTag(c)}${c.date ? `, ${c.date}` : ''}`}>
@@ -918,7 +919,6 @@ export const SCENES = [
     },
     ui: (s, k) => {
       const c = k.cities[trainGeometry(s, k).near] || k.cities[0];
-      const late = seg(s, 2.75, 2.95);
       const hint = seg(s, 0.6, 0.8);
       return (
         <>
@@ -930,9 +930,8 @@ export const SCENES = [
             </div>
           </Lines>
           <Flaps c={c} o={seg(s, 0.35, 0.55)} />
-          <p className="train-hint" aria-hidden={late > 0.5}>
-            <span style={{ opacity: hint * (1 - late) }}>Tap a carriage to attend</span>
-            <span style={{ opacity: late }}>Don’t miss the deadline.</span>
+          <p className="train-hint">
+            <span style={{ opacity: hint }}>Tap a carriage to attend</span>
           </p>
         </>
       );
@@ -1029,13 +1028,30 @@ function trainGeometry(s, { W, H, land, F, cities }) {
   const firstPast = cities.findIndex(c => c.status === 'past');
   const split = firstPast > 0 ? cw * 0.22 : 0;
   const at = i => ew + gap + i * (cw + gap) + (firstPast > 0 && i >= firstPast ? split : 0) + cw / 2;
-  const stop = Math.max(0, cities.findIndex(c => c.status !== 'past'));
-  const stopX = W / 2 - at(stop);
-  const lastX = W / 2 - at(n - 1);
-  // arrive and wait at the next city; then roll on until the last carriage (a concluded city) has come by
+  const xAt = i => W / 2 - at(i);
+  // Arrive and wait at the first city to come (the story holds there). Then, scroll by scroll, stop again at every
+  // other city still to come (each gets a long, slow stretch, so it can be tapped), and finally roll past the
+  // concluded ones at the back. The whole ride fits the scene, however many cities there are.
+  const up = Math.max(1, cities.filter(c => c.status !== 'past').length);
+  const hasPast = up < n;
+  const legs = [];
+  let t = 2.7;
+  const u = Math.min(0.45, 4.2 / ((up - 1) * 3.2 + (hasPast ? 2.5 : 0) || 1));
+  for (let i = 1; i < up; i++) {
+    legs.push([t, t + u, i - 1, i]);
+    t += u * 3.2;
+  }
+  if (hasPast) legs.push([t, t + u * 2.5, up - 1, n - 1]);
   const arrive = inout(seg(s, 0.3, 2.0));
-  const leave = lastX < stopX ? inout(seg(s, 2.7, 3.95)) : 0;
-  const X = leave > 0 ? lerp(stopX, lastX, leave) : lerp(start, stopX, arrive);
+  let X = lerp(start, xAt(0), arrive);
+  let rolling = false;
+  for (const [a, b, from, to] of legs) {
+    if (s >= a) {
+      const p = inout(seg(s, a, b));
+      X = lerp(xAt(from), xAt(to), p);
+      rolling = rolling || (p > 0 && p < 1);
+    }
+  }
   let near = 0;
   let best = Infinity;
   for (let i = 0; i < n; i++) {
@@ -1045,7 +1061,7 @@ function trainGeometry(s, { W, H, land, F, cities }) {
       near = i;
     }
   }
-  const moving = (arrive > 0 && arrive < 1) || (leave > 0 && leave < 1);
+  const moving = (arrive > 0 && arrive < 1) || rolling;
   return { ch, cw, eh, ew, gap, X, near, moving, firstPast, split, shake: moving ? Math.sin(s * 90) : 0, railY: (F - 0.07) * H };
 }
 

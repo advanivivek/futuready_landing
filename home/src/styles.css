@@ -1016,38 +1016,58 @@ button.coach {
   font-weight: 600;
 }
 
-/* the carriage the station board is talking about: lifted, lit in marigold, with a pin above it */
+/* the carriage the station board is talking about: lifted, lit in marigold, with "Tap here" above it */
 .coach.is-near {
   z-index: 1;
   transform: translateY(-7%);
 }
-.coach.is-near img {
+.coach.is-near:not(.is-past) img {
   filter: drop-shadow(0 0 1cqh #f2b230) drop-shadow(0 0 4cqh rgba(242, 178, 48, 0.9));
 }
-.coach.is-near::before {
+.coach.is-near:not(.is-past)::before,
+.coach.is-past::before {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  margin-bottom: 7.5cqh;
+  padding: 2.4cqh 6cqh;
+  border-radius: 999px;
+  translate: -50% 0;
+  font: 700 11cqh/1 var(--mono);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.coach.is-near:not(.is-past)::before {
+  content: 'Tap here';
+  background: #f2b230;
+  color: #161a3a;
+  box-shadow: 0 0.8cqh 0 rgba(22, 26, 58, 0.25);
+}
+/* the little point under "Tap here" */
+.coach.is-near:not(.is-past)::after {
   content: '';
   position: absolute;
   left: 50%;
   bottom: 100%;
-  width: 14cqh;
-  height: 12cqh;
-  margin: 0 0 3cqh -7cqh;
+  width: 9cqh;
+  height: 6cqh;
+  margin: 0 0 2cqh -4.5cqh;
   background: #f2b230;
   clip-path: polygon(0 0, 100% 0, 50% 100%);
-  filter: drop-shadow(0 0.6cqh 0 rgba(22, 26, 58, 0.35));
 }
 @media (prefers-reduced-motion: no-preference) {
-  .coach.is-near::before {
+  .coach.is-near:not(.is-past)::before,
+  .coach.is-near:not(.is-past)::after {
     animation: pin-bob 1.2s ease-in-out infinite alternate;
   }
 }
 @keyframes pin-bob {
   to {
-    translate: 0 -2.5cqh;
+    transform: translateY(-2.5cqh);
   }
 }
 
-/* concluded: black and white, a little faded, at the back of the train */
+/* concluded: black and white, a little faded, at the back of the train, with "Concluded" above each one */
 .coach.is-past img {
   filter: grayscale(1) contrast(0.92) brightness(1.06);
   opacity: 0.85;
@@ -1055,19 +1075,13 @@ button.coach {
 .coach.is-past .coach__board {
   color: #4a4a4a;
 }
-.coach.is-first-past::after {
+.coach.is-past::before {
   content: 'Concluded';
-  position: absolute;
-  left: 0;
-  bottom: 100%;
-  margin-bottom: 2cqh;
-  padding: 1cqh 3.2cqh;
-  border-radius: 999px;
   background: #3b3b3b;
   color: #fff;
-  font: 600 7cqh var(--mono);
-  letter-spacing: 0.08em;
+  font-size: 7cqh;
   text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 /* ---------- the passport (as in the deck) ---------- */

@@ -1,12 +1,15 @@
 #!/bin/bash
-# Sends the Futuready main page to Hack2skill's repository as ONE clean commit:
-# only the site (home/, without the page maker or the Hack2skill page files), no history, a short message.
+# Sends the Futuready main page to Hack2skill's repository as ONE clean pull request (one commit on top of their
+# main): only the site (home/, without the page maker or the Hack2skill page files), no history, a short message.
+# Running it again replaces that pull request's commit (or opens a new pull request once the last one is merged).
 #   ./ship-h2s.sh                      -> "Update Futuready landing page"
 #   ./ship-h2s.sh "Add Pune to the train"
 # Needs: everything committed here, and `gh auth switch --user vivek-h2s` (the account with access).
 set -euo pipefail
 REPO="${H2S_REPO:-https://github.com/h2sVision/futuready.git}"
 MSG="${1:-Update Futuready landing page}"
+BRANCH="${H2S_BRANCH:-futuready-site}"
+SLUG="$(echo "$REPO" | sed -E 's#.*github.com[/:]##; s#\.git$##')"
 HERE="$(cd "$(dirname "$0")" && pwd)"
 [ -z "$(git -C "$HERE" status --porcelain home)" ] || { echo "Commit your changes in home/ first."; exit 1; }
 TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
@@ -35,8 +38,13 @@ Two pages: `/futuready/` and `/futuready/cities/` (the "Other cities" strip show
 On hack2skill.com the page reads Hack2skill's public event list live, so new cities appear by themselves.
 MD
 cd "$TMP/out"
+git checkout --quiet -B "$BRANCH"
 git add -A
 if git diff --cached --quiet; then echo "Nothing new to send."; exit 0; fi
 git -c user.name="Vivek Advani" -c user.email="vivek.advani@hack2skill.com" commit --quiet -m "$MSG"
-git "${GH[@]}" push --quiet origin HEAD:main
-echo "Sent to $REPO: $MSG"
+git "${GH[@]}" push --quiet --force origin "HEAD:refs/heads/$BRANCH"
+if gh pr view "$BRANCH" -R "$SLUG" --json state -q .state 2>/dev/null | grep -q OPEN; then
+  echo "Updated the open pull request: $(gh pr view "$BRANCH" -R "$SLUG" --json url -q .url)"
+else
+  gh pr create -R "$SLUG" --base main --head "$BRANCH" --title "$MSG" --body "The Futuready landing page, served at https://hack2skill.com/futuready/. Build: npm ci && npm run build, then serve dist/ at /futuready/ (see README)."
+fi

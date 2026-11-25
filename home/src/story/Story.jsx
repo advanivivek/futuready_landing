@@ -432,6 +432,11 @@ export default function Story() {
   }, [stamps]);
 
   useEffect(() => sound.mood(idx), [idx]);
+  // the wheel turns heavier at the station, so people slow down long enough to pick a city
+  useEffect(() => {
+    const vs = window.__lenis?.virtualScroll?.options;
+    if (vs) vs.wheelMultiplier = SCENES[idx].id === 'train' ? 0.4 : 0.8;
+  }, [idx]);
 
   const lastU = useRef(u);
   useEffect(() => {

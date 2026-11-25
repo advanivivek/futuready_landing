@@ -80,8 +80,9 @@ export function normalise(list, now = Date.now()) {
       const city = c.city || fromUrl.city;
       if (!city) return null;
       const end = c.end || fromUrl.end || '';
-      // a city with its own page is open until its day has passed; a name alone is "boarding soon"
-      const status = c.status || (end ? statusOf({ start: c.start, end }, now) : link ? 'open' : 'soon');
+      // worked out now, in the visitor's browser, from the dates: a city turns "Concluded" by itself the day after
+      // its event, even if the list was saved days ago. A city with a page and no dates is open; a name alone is soon.
+      const status = end || c.start ? statusOf({ start: c.start, end }, now) : c.status || (link ? 'open' : 'soon');
       return {
         city: String(city).trim(),
         campus: c.campus ? String(c.campus).trim() : '',

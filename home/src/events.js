@@ -13,8 +13,8 @@ export const fromFeed = json => (Array.isArray(json) ? normalise(json) : Array.i
 
 /*
   The cities on the train, freshest first:
-  1. events.json, saved from CITIES_FEED when the site was built (works on any host);
-  2. CITIES_FEED itself, live, if that server allows it (CORS);
+  1. CITIES_FEED itself, live, where that server allows it (on hack2skill.com itself);
+  2. events.json, saved from CITIES_FEED when the site was built (works on any host);
   3. the list in data.js.
   The page draws straight away with (3) and swaps in fresher data when it arrives.
 */
@@ -23,7 +23,9 @@ export function useCities() {
   useEffect(() => {
     if (!CITIES_FEED) return;
     let alive = true;
-    const sources = [() => getJSON(`${import.meta.env.BASE_URL}events.json`), () => getJSON(CITIES_FEED)];
+    // live first: on hack2skill.com the list is readable straight away (anywhere else it fails at once and the copy
+    // saved at build is used)
+    const sources = [() => getJSON(CITIES_FEED), () => getJSON(`${import.meta.env.BASE_URL}events.json`)];
     (async () => {
       for (const load of sources) {
         try {
