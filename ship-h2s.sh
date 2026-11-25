@@ -22,7 +22,13 @@ find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
 git -C "$HERE" archive HEAD home | tar -x -C . --strip-components=1 \
   --exclude=home/maker --exclude=home/initiative --exclude=home/scripts/art \
   --exclude=home/scripts/shots.mjs --exclude=home/scripts/brand.mjs --exclude=home/scripts/bring-campus.gs
-git -C "$HERE" archive HEAD .github | tar -x -C .
+# the daily-refresh workflow, if gh may add workflows (once: gh auth refresh -h github.com -s workflow)
+if gh api -i user 2>/dev/null | grep -i '^x-oauth-scopes:' | grep -q workflow; then
+  git -C "$HERE" archive HEAD .github | tar -x -C .
+else
+  git ls-files --error-unmatch .github >/dev/null 2>&1 && git checkout --quiet HEAD -- .github 2>/dev/null || true
+  echo "(Leaving out the daily-refresh workflow: gh needs the workflow permission, see START-HERE.md Step 6.)"
+fi
 cat > README.md <<'MD'
 # Futuready
 
