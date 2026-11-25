@@ -30,7 +30,7 @@ export const TRAINER = {
 
 export const LEVELS = [
   ['R', 'Learn the art of spec writing.', 'AI does literally what you say.', '#f2a7b8'],
-  ['E', 'Learn to evaluate how Anthropic engineers do.', 'If it looks right, is it really right?', '#9ed6c0'],
+  ['E', 'Learn to evaluate like Anthropic engineers.', 'If it looks right, is it really right?', '#9ed6c0'],
   ['A', 'Learn to architect scalable AI systems.', 'Anyone can stack blocks.', '#f2b230'],
   ['D', 'Learn to direct a team of AI agents.', 'Nobody codes alone anymore.', '#c3b5f2'],
 ];
@@ -107,9 +107,9 @@ export function sections(e, hosted = HOSTED) {
     `<tr>${cell(wall, p(s(k, 40, 800), true))}${cell(PAPER, p(s(what, 19, 800)) + p(s(hook, 16, 0, BLUE)))}</tr>`).join('');
   const learn =
     `<table><tbody><tr>${cell(CREAM, p(s('Five levels. Clear one, earn a stamp.', 17, 800)), 2)}</tr>${levels}` +
-    `<tr>${cell(BLUE, p(s('Y', 40, 800, GOLD), true))}${cell(BLUE, p(s('And the last level ', 19, 800, PAPER) + s('is you.', 19, 800, GOLD)) + p(s('The unique part that nobody can steal.', 16, 0, CREAM)))}</tr>` +
+    `<tr>${cell(BLUE, p(s('Y', 40, 800, GOLD), true))}${cell(BLUE, p(s('Build your own edge: the part of you ', 19, 800, PAPER) + s('AI can’t copy.', 19, 800, GOLD)) + p(s('The last level is you.', 16, 0, CREAM)))}</tr>` +
     `<tr>${cell(CREAM, `<p><img src="${hosted.passport}" alt="An open Futuready passport with all five stamps" width="200" height="154"></p>`)}` +
-    `${cell(CREAM, p(s('Clear all five, and you take home your ', 19, 800) + s('e-passport.', 19, 800, BLUE)) + p(s('Signed, stamped, yours to show off.', 15)))}</tr>` +
+    `${cell(CREAM, p(s('Clear all five, and you take home your ', 19, 800) + s('e-passport.', 19, 800, BLUE)) + p(s('Signed, stamped proof of your new skills, ready to share on LinkedIn.', 15)))}</tr>` +
     `</tbody></table>` + END;
 
   const rows = (e.schedule || []).filter(r => r.time || r.title).map(r =>

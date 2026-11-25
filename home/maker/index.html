@@ -49,6 +49,8 @@ code{background:var(--cream);padding:1px 6px;border-radius:6px}
 .sel{position:absolute;display:none;border:2px dashed var(--gold);border-radius:6px;pointer-events:none;box-shadow:0 0 0 1px rgba(22,26,58,.5)}
 .tweak{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:13px}.tweak .what{font-weight:700;min-width:150px}
 .tweak label{display:flex;gap:6px;align-items:center}.tweak input[type=range]{width:150px;padding:0}.tweak .btn{padding:6px 12px;font-size:13px}
+iframe.look{width:100%;border:1px dashed var(--line);border-radius:10px;height:600px;max-height:none}
+.mode{margin-bottom:4px}
 .faq{display:grid;grid-template-columns:1fr auto;gap:6px;align-items:start;border-top:1px solid var(--line);padding-top:8px}
 </style>
 </head>
@@ -113,6 +115,7 @@ code{background:var(--cream);padding:1px 6px;border-radius:6px}
 
 <script type="module">
 import { derive, sections, faqs, email } from './sections.js';
+import { htmlSections } from './html.js';
 import { ready, cover, thumb, strip } from './art.js';
 import { PRESETS } from './presets.js';
 
@@ -172,9 +175,16 @@ async function paint() {
   await cover($('#cSquare'), e, false);
   await thumb($('#cThumb'), e);
   showSel();
-  const secs = sections(e);
-  $('#text').innerHTML = secs.map((s, i) => `<div class="card"><h3>${i + 1}. ${s.title} <small>→ ${s.where}</small></h3><div class="btns"><button class="btn y" data-copy="${i}">Copy HTML</button>${(s.parts || []).map(([label], j) => `<button class="btn" data-rich="${i}:${j}">Copy ${label}</button>`).join('')}<button class="btn ghost" data-look="${i}">Show / hide a rough look</button></div><div class="look" hidden>${s.html}</div></div>`).join('') +
-    `<div class="card"><h3>How to paste</h3><small>Open the section in Live Edit → <b>Insert → Source Code</b> → paste → <b>Embed</b> → <b>Save</b>. It replaces what was there.</small></div>`;
+  // Embed HTML (the current way) or the Lexical backup
+  const lexical = store.get('fr-maker-mode') === 'lexical';
+  const secs = lexical ? sections(e) : htmlSections(e);
+  // an HTML block is previewed in its own little page, at about the width of a Hack2skill page column
+  const look = s => (lexical ? `<div class="look" hidden>${s.html}</div>` : `<iframe class="look look--html" hidden title="Preview" srcdoc="${('<body style=\'margin:0;padding:16px;background:#fff\'><div style=\'max-width:820px;margin:auto\'>' + s.html + '</div></body>').replace(/&/g, '&amp;').replace(/"/g, '&quot;')}"></iframe>`);
+  $('#text').innerHTML = `<div class="seg mode"><button type="button" data-mode="html" class="${lexical ? '' : 'on'}">Embed HTML (current)</button><button type="button" data-mode="lexical" class="${lexical ? 'on' : ''}">Lexical (backup)</button></div>` +
+    secs.map((s, i) => `<div class="card"><h3>${i + 1}. ${s.title} <small>→ ${s.where}</small></h3><div class="btns"><button class="btn y" data-copy="${i}">Copy HTML</button>${(s.parts || []).map(([label], j) => `<button class="btn" data-rich="${i}:${j}">Copy ${label}</button>`).join('')}<button class="btn ghost" data-look="${i}">Show / hide a preview</button></div>${look(s)}</div>`).join('') +
+    (lexical
+      ? `<div class="card"><h3>How to paste (Lexical backup)</h3><small>Open the section in Live Edit → <b>Insert → Source Code</b> → paste → <b>Embed</b> → <b>Save</b>. It replaces what was there.</small></div>`
+      : `<div class="card"><h3>How to paste</h3><small>Open the section in Live Edit → <b>Select Editor: Embed HTML</b> → select all in the box → paste → <b>Save</b>. It replaces what was there.</small></div>`);
   $('#text').onclick = ev => {
     const c = ev.target.dataset.copy, l = ev.target.dataset.look, r = ev.target.dataset.rich;
     if (c !== undefined) copy(secs[c].html, `${secs[c].title}: copied`);
@@ -183,7 +193,8 @@ async function paint() {
       const [a, b] = r.split(':'), [label, html] = secs[a].parts[b];
       navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([html], { type: 'text/html' }), 'text/plain': new Blob([label], { type: 'text/plain' }) })]).then(() => toast(`${label}: copied`));
     }
-    if (l !== undefined) { const box = ev.target.closest('.card').querySelector('.look'); box.hidden = !box.hidden; }
+    if (l !== undefined) { const box = ev.target.closest('.card').querySelector('.look'); box.hidden = !box.hidden; if (!box.hidden && box.tagName === 'IFRAME') { const fit = () => { try { box.style.height = box.contentDocument.documentElement.scrollHeight + 'px'; } catch {} }; box.onload = fit; setTimeout(fit, 300); } }
+    if (ev.target.dataset.mode) { store.set('fr-maker-mode', ev.target.dataset.mode); paint(); }
   };
   const q = faqs(e);
   $('#faqList').innerHTML = '<h3>Live Edit → FAQs. One question at a time.</h3>' + q.map(([a, b], i) => `<div class="faq"><div><b>${a}</b><br>${b}</div><div class="btns"><button class="btn ghost" data-q="${i}">Q</button><button class="btn" data-a="${i}">A</button></div></div>`).join('');
